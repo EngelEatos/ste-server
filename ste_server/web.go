@@ -49,7 +49,7 @@ func viewHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func renderTemplate(w http.ResponseWriter, tmpl string, p *Page) {
-    t, _ := template.ParseFiles(tmpl + ".html")
+    t, _ := template.ParseFiles("templates/" + tmpl + ".html")
     t.Execute(w, p)
 }func saveHandler(w http.ResponseWriter, r *http.Request) {
     title := r.URL.Path[len("/save/"):]
