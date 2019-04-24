@@ -1,0 +1,17 @@
+{
+    "pageurl" : "https://www.wuxiaworld.com",
+    "url": "{}/novel/{}",
+    "urlRegex": [
+        "https://www.wuxiaworld.com/novel/(.+?)$"
+    ],
+    "names": ["wuxia", "wuxiaworld"],
+    "selectors": {
+        "title": ".section-content  h4",
+        "cover": "img.media-object",
+        "chapter": "ul.list-chapters li.chapter-item a",
+        "chapterTitle": ".panel-default .caption h4",
+        "chapterBody": ".panel-default .fr-view"
+    },
+    "killTags": [],
+    "removeTags": []
+}

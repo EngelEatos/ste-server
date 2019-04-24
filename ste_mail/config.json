@@ -1,0 +1,5 @@
+{
+    "SMTP_server": "",
+    "SMTP_port": 25,
+    "sender": ""
+}
