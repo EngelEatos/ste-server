@@ -13,8 +13,8 @@ type Page struct {
 }
 
 func main() {
-    http.HandleFunc("/view/", viewHandler)
-    http.HandleFunc("/edit/", editHandler)
+    http.HandleFunc("/queues/", queuesHandler)
+    http.HandleFunc("/request/", requestHandler)
     http.HandleFunc("/save/", saveHandler)
     log.Fatal(http.ListenAndServe(":8080", nil))
 }
@@ -28,6 +28,19 @@ func editHandler(w http.ResponseWriter, r *http.Request) {
     renderTemplate(w, "edit", p)
 }
 
+func requestHandler(w http.ResponseWriter, r *http.Request) {
+    renderTemplate(w, "request", nil)
+}
+
+func queuesHandler(w http.ResponseWriter, r *http.Request) {
+    renderTemplate(w, "queues", nil)
+}
+
+func submitHandler(w http.ResponseWriter, r *http.Request) {
+    url := r.FormValue("url")
+    title := r.FormValue("title")
+    
+}
 func loadPage(title string) (*Page, error) {
     filename := title + ".txt"
     body, err := ioutil.ReadFile(filename)
