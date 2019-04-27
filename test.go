@@ -1,11 +1,11 @@
 package main
 
 import (
-	"net/rpc"
-	"log"
 	"fmt"
+	"log"
+	"net/rpc"
 	// "time"
-	"./ste_server"
+	"ste/ste_server"
 )
 
 func main() {
