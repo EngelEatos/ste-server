@@ -1,17 +1,17 @@
 package server
 
 import (
+	"context"
+	"encoding/json"
+	"fmt"
 	"html/template"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"ste/models"
-	"context"
-	"fmt"
-	"github.com/pkg/errors"
-	"os"
-	"github.com/gorilla/mux"
 	"strconv"
+
+	"github.com/gorilla/mux"
+	"github.com/volatiletech/sqlboiler/queries/qm"
 )
 
 func newRouter() *mux.Router {
@@ -25,6 +25,8 @@ func newRouter() *mux.Router {
 	r.PathPrefix("/assets/").Handler(staticFileHandler).Methods("GET")
 	return r
 }
+
+// Webstart - start server
 func Webstart() {
 	r := newRouter()
 	log.Fatal(http.ListenAndServe(":8080", r))
@@ -47,9 +49,9 @@ func requestHandler(w http.ResponseWriter, r *http.Request) {
 	t.Execute(w, sources)
 }
 
-type Queues struct {
-	ChapterQueue []models.ChapterQueue
-	NovelQueue []models.NovelQueue
+type queues struct {
+	ChapterQueue []*models.ChapterQueue
+	NovelQueue   []*models.NovelQueue
 }
 
 func queuesHandler(w http.ResponseWriter, r *http.Request) {
@@ -57,14 +59,14 @@ func queuesHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatal("couldnt connect to db")
 	}
-	chapterQueue, err := models.ChapterQueues(OrderBy("finishedAt NULLS FIRST"), Limit(100)).All(context.Background(), db)
-	novelQueue, err := models.NovelQueues(OrderBy("finishedAt NULLS FIRST"), Limit(100)).All(context.Background(), db)
-	queues := Queues{ChapterQueue: chapterQueue, NovelQueue: novelQueue}
-	t, _ := template.Parsefiles("server/templates/queues.gohtml")
+	chapterQueue, err := models.ChapterQueues(qm.OrderBy("finishedAt NULLS FIRST"), qm.Limit(100)).All(context.Background(), db)
+	novelQueue, err := models.NovelQueues(qm.OrderBy("finishedAt NULLS FIRST"), qm.Limit(100)).All(context.Background(), db)
+	queues := queues{ChapterQueue: chapterQueue, NovelQueue: novelQueue}
+	t, _ := template.ParseFiles("server/templates/queues.gohtml")
 	t.Execute(w, queues)
 }
 
-func searchHandler(w http.ResponseWriter, r *http.Requests) {
+func searchHandler(w http.ResponseWriter, r *http.Request) {
 	db, err := Connect()
 	if err != nil {
 		log.Fatal("couldnt connect to db")
@@ -73,9 +75,9 @@ func searchHandler(w http.ResponseWriter, r *http.Requests) {
 	if searchterm == `%%` {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusCreated)
-		json.NewEncoder(w).Encode(Request{})
+		json.NewEncoder(w).Encode(request{})
 	} else {
-		novels, err := models.Novels(Where("title like ?", searchterm), Or("description like ?", searchterm), Or("novel_id_str like ?", searchterm), Limit(5)).All(context.Background(), db)
+		novels, err := models.Novels(qm.Where("title like ?", searchterm), qm.Or("description like ?", searchterm), qm.Or("novel_id_str like ?", searchterm), qm.Limit(5)).All(context.Background(), db)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -85,10 +87,10 @@ func searchHandler(w http.ResponseWriter, r *http.Requests) {
 	}
 }
 
-type Request struct {
-	Url string
+type request struct {
+	URL   string
 	Title string
-	Src int
+	Src   int
 }
 
 func submitHandler(w http.ResponseWriter, r *http.Request) {
@@ -97,11 +99,11 @@ func submitHandler(w http.ResponseWriter, r *http.Request) {
 	src := r.FormValue("src")
 	fmt.Println(url, title, src)
 	t, _ := template.ParseFiles("server/templates/submit.gohtml")
-	src_int, err := strconv.ParseInt(src, 10, 0)
+	srcInt, err := strconv.ParseInt(src, 10, 0)
 	if err != nil {
 		log.Fatal(err)
 	}
-	req := Request{Url: url, Title: title, Src: int(src_int)}
+	req := request{URL: url, Title: title, Src: int(srcInt)}
 	t.Execute(w, &req)
 	// check if valid else contact admin
 	// insert new novel in db
