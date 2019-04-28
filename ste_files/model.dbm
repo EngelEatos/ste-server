@@ -3,7 +3,7 @@
 CAUTION: Do not modify this file unless you know what you are doing.
          Unexpected results may occur if the code is changed deliberately.
 -->
-<dbmodel pgmodeler-ver="0.9.2-alpha1" last-position="0,0" last-zoom="1" max-obj-count="19"
+<dbmodel pgmodeler-ver="0.9.2-alpha1" last-position="0,84" last-zoom="1" max-obj-count="19"
 	 default-owner="postgres">
 <database name="ste" is-template="false" allow-conns="true">
 </database>
@@ -192,7 +192,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	</constraint>
 </table>
 
-<table name="novel" layer="0" collapse-mode="2" max-obj-count="16">
+<table name="novel" layer="0" collapse-mode="2" max-obj-count="18">
 	<schema name="ste"/>
 	<role name="postgres"/>
 	<position x="680" y="480"/>
@@ -236,6 +236,9 @@ CAUTION: Do not modify this file unless you know what you are doing.
 		<type name="integer" length="0"/>
 	</column>
 	<column name="updatedAt">
+		<type name="date" length="0"/>
+	</column>
+	<column name="fetchedAt">
 		<type name="date" length="0"/>
 	</column>
 	<constraint name="nu_novel_pk" type="pk-constr" table="ste.novel">

@@ -1,5 +1,6 @@
-package novelupdatesAPI
+package novelupdatesapi
 
+// NovelTypes - type -> int
 var NovelTypes = map[string]int{
 	"chinese":    2441,
 	"korean":     2442,
@@ -11,6 +12,8 @@ var NovelTypes = map[string]int{
 	"malaysian":  9184,
 	"web":        2444,
 }
+
+// Languages - name -> int
 var Languages = map[string]int{
 	"chinese":    495,
 	"japanese":   496,
@@ -21,6 +24,8 @@ var Languages = map[string]int{
 	"indonesian": 9179,
 	"malaysian":  9183,
 }
+
+// Genres - genre -> int
 var Genres = map[string]int{
 	"action":        8,
 	"horror":        343,
@@ -60,6 +65,8 @@ var Genres = map[string]int{
 	"school_life":   6,
 	"sports":        1357,
 }
+
+//Tags - constant map for tags -> int
 var Tags = map[string]int{
 	"abandoned_child":                       1299,
 	"ability_steal":                         4859,
@@ -1339,6 +1346,8 @@ var Tags = map[string]int{
 	"zombie_apocalypse":                     459,
 	"zombies":                               350,
 }
+
+// Urlargs ...
 var Urlargs = map[string]string{
 	"org":   "", // Language
 	"nt":    "", // Novel Type
