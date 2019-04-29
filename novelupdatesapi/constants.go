@@ -2,15 +2,15 @@ package novelupdatesapi
 
 // NovelTypes - type -> int
 var NovelTypes = map[string]int{
-	"chinese":    2441,
-	"korean":     2442,
-	"thai":       9955,
-	"filipino":   9182,
-	"light":      2443,
-	"vietnamese": 9178,
-	"indonesian": 9180,
-	"malaysian":  9184,
-	"web":        2444,
+	"chinese":     2441,
+	"korean":      2442,
+	"thai":        9955,
+	"filipino":    9182,
+	"light-novel": 2443,
+	"vietnamese":  9178,
+	"indonesian":  9180,
+	"malaysian":   9184,
+	"web-novel":   2444,
 }
 
 // Languages - name -> int
