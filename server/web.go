@@ -19,7 +19,8 @@ func newRouter() *mux.Router {
 	r.HandleFunc("/request", requestHandler).Methods("GET")
 	r.HandleFunc("/submit", submitHandler).Methods("POST")
 	r.HandleFunc("/queues", queuesHandler).Methods("GET")
-
+	r.HandleFunc("/search/", searchHandler).Methods("GET")
+	r.HandleFunc("/api/", apiHandler).Methods("POST")
 	staticFileDirectory := http.Dir("./server/assets/")
 	staticFileHandler := http.StripPrefix("/assets/", http.FileServer(staticFileDirectory))
 	r.PathPrefix("/assets/").Handler(staticFileHandler).Methods("GET")
@@ -30,6 +31,10 @@ func newRouter() *mux.Router {
 func Webstart() {
 	r := newRouter()
 	log.Fatal(http.ListenAndServe(":8080", r))
+}
+
+func apiHandler(w http.ResponseWriter, r *http.Request) {
+
 }
 
 func requestHandler(w http.ResponseWriter, r *http.Request) {

@@ -15,20 +15,18 @@ CREATE SCHEMA ste;
 ALTER SCHEMA ste OWNER TO postgres;
 -- ddl-end --
 
--- object: ste.chapter | type: TABLE --
--- DROP TABLE IF EXISTS ste.chapter CASCADE;
-CREATE TABLE ste.chapter (
-	id integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT BY 1 MINVALUE 0 MAXVALUE 2147483647 START WITH 1 CACHE 1 ),
-	title text,
-	url text,
-	idx integer,
-	downloaded bool,
-	path text,
-	CONSTRAINT chapters_pk PRIMARY KEY (id)
-
-);
+-- object: ste.ste_seq | type: SEQUENCE --
+-- DROP SEQUENCE IF EXISTS ste.ste_seq CASCADE;
+CREATE SEQUENCE ste.ste_seq
+	INCREMENT BY 1
+	MINVALUE 0
+	MAXVALUE 2147483647
+	START WITH 1
+	CACHE 1
+	NO CYCLE
+	OWNED BY NONE;
 -- ddl-end --
-ALTER TABLE ste.chapter OWNER TO postgres;
+ALTER SEQUENCE ste.ste_seq OWNER TO postgres;
 -- ddl-end --
 
 -- object: ste.author_of_novel | type: TABLE --
@@ -58,7 +56,7 @@ ALTER TABLE ste.chapter_of_novel OWNER TO postgres;
 -- object: ste.source | type: TABLE --
 -- DROP TABLE IF EXISTS ste.source CASCADE;
 CREATE TABLE ste.source (
-	id integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT BY 1 MINVALUE 0 MAXVALUE 2147483647 START WITH 1 CACHE 1 ),
+	id serial NOT NULL,
 	url text,
 	name text,
 	CONSTRAINT sources_pk PRIMARY KEY (id)
@@ -102,7 +100,7 @@ ALTER TABLE ste.novel_queue OWNER TO postgres;
 -- object: ste.author | type: TABLE --
 -- DROP TABLE IF EXISTS ste.author CASCADE;
 CREATE TABLE ste.author (
-	id integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT BY 1 MINVALUE 0 MAXVALUE 2147483647 START WITH 1 CACHE 1 ),
+	id serial NOT NULL,
 	name text,
 	url text,
 	CONSTRAINT author_pk PRIMARY KEY (id)
@@ -127,7 +125,7 @@ ALTER TABLE ste.genre_of_novel OWNER TO postgres;
 -- object: ste.genre | type: TABLE --
 -- DROP TABLE IF EXISTS ste.genre CASCADE;
 CREATE TABLE ste.genre (
-	id integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT BY 1 MINVALUE 0 MAXVALUE 2147483647 START WITH 1 CACHE 1 ),
+	id integer NOT NULL,
 	name text,
 	url text,
 	CONSTRAINT nu_genres_pk PRIMARY KEY (id)
@@ -153,8 +151,8 @@ ALTER TABLE ste.tag OWNER TO postgres;
 -- object: ste.novel | type: TABLE --
 -- DROP TABLE IF EXISTS ste.novel CASCADE;
 CREATE TABLE ste.novel (
-	id integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT BY 1 MINVALUE 0 MAXVALUE 2147483647 START WITH 1 CACHE 1 ),
-	title text,
+	id serial NOT NULL,
+	title text NOT NULL,
 	chaptercount integer,
 	novel_id_str text,
 	type integer,
@@ -167,6 +165,7 @@ CREATE TABLE ste.novel (
 	cover_id integer,
 	source_id integer NOT NULL,
 	"updatedAt" date,
+	"fetchedAt" date,
 	CONSTRAINT nu_novel_pk PRIMARY KEY (id)
 
 );
@@ -189,7 +188,7 @@ ALTER TABLE ste.tag_of_novel OWNER TO postgres;
 -- object: ste.cover | type: TABLE --
 -- DROP TABLE IF EXISTS ste.cover CASCADE;
 CREATE TABLE ste.cover (
-	id integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT BY 1 MINVALUE 0 MAXVALUE 2147483647 START WITH 1 CACHE 1 ),
+	id serial NOT NULL,
 	url text NOT NULL,
 	downloaded bool DEFAULT false,
 	path text,
@@ -223,6 +222,22 @@ CREATE TABLE ste.recommendation (
 );
 -- ddl-end --
 ALTER TABLE ste.recommendation OWNER TO postgres;
+-- ddl-end --
+
+-- object: ste.chapter | type: TABLE --
+-- DROP TABLE IF EXISTS ste.chapter CASCADE;
+CREATE TABLE ste.chapter (
+	id integer NOT NULL DEFAULT nextval('ste.ste_seq'::regclass),
+	title text,
+	url text,
+	idx integer,
+	downloaded bool,
+	path text,
+	CONSTRAINT chapters_pk PRIMARY KEY (id)
+
+);
+-- ddl-end --
+ALTER TABLE ste.chapter OWNER TO postgres;
 -- ddl-end --
 
 -- object: "FK_author_of_novel_author" | type: CONSTRAINT --

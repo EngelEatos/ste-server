@@ -1,5 +1,17 @@
 package novelupdatesapi
 
+// BooleanType - string -> bool
+var BooleanTypes = map[string]bool{
+	"yes": true,
+	"no":  false,
+}
+
+// StatusTypes - string -> int
+var StatusTypes = map[string]int{
+	"ongoing":   0,
+	"completed": 1,
+}
+
 // NovelTypes - type -> int
 var NovelTypes = map[string]int{
 	"chinese":     2441,
