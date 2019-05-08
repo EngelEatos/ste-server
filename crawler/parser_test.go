@@ -1,4 +1,4 @@
-package ste_crawler
+package crawler
 
 type testcase struct {
 	p Parser

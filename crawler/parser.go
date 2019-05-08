@@ -1,37 +1,47 @@
-package ste_crawler
+package crawler
 
 import (
+	"fmt"
 	"log"
-	"goquery"
+	"net/http"
 	"os"
 	"path/filepath"
-	"fmt"
+	"regexp"
+	"ste-server/crawler/lib"
+	"strconv"
+
+	"github.com/PuerkitoBio/goquery"
 )
 
+// Parser - class parser
 type Parser struct {
-	configs []CrawlerConfig
+	configs []lib.CrawlerConfig
 }
 
+// ParseObj - class for Parser
 type ParseObj struct {
-	url string
-	selectors Selector
-	doc *goquery.Document
+	url       string
+	selectors lib.Selector
+	doc       *goquery.Document
 }
 
+// ParseResult - struct for parse result
 type ParseResult struct {
 	ChapterMap map[int]string
 	NovelTitle string
-	CoverUrl string
+	CoverURL   string
 }
 
+// New - Create new parser struct
 func New() Parser {
 	configs := LoadCrawlers()
 	return Parser{configs}
 }
 
+// Parse - url
 func (p Parser) Parse(url string) ParseResult {
-	config := getConfig(url)
-	if !config {
+	config, err := p.getConfig(url)
+	if err != nil {
 		log.Fatalf("no suitable conifg for url: %s", url)
 	}
 	doc := getSource(url)
@@ -53,72 +63,78 @@ func (p Parser) Parse(url string) ParseResult {
 	return ParseResult{chapterMap, novelTitle, cover}
 }
 
-func (p Parser) getConfig(url string) CrawlerConfig {
-	for _,config := range p.configs {
+func (p Parser) getConfig(url string) (lib.CrawlerConfig, error) {
+	for _, config := range p.configs {
 		if config.Match(url) {
-			return config
+			return config, nil
 		}
 	}
-	return nil
+	return lib.CrawlerConfig{}, fmt.Errorf("no matching config found for %s", url)
 }
 
-func New(url string, config CrawlerConfig) {
-	return ParseObj(url, config)
+// NewParseObj - create new ParseObj
+func NewParseObj(url string, selector lib.Selector, doc *goquery.Document) ParseObj {
+	return ParseObj{url, selector, doc}
 }
 
-func parseInt(s string) int {
-	
-	return i
-}
-func (p ParseObj) GetChapter() map[int]string{
+// GetChapter - getChapter
+func (p ParseObj) GetChapter() map[int]string {
 	current := 0
 	result := make(map[int]string)
 	p.doc.Find(p.selectors.Chapter).Each(func(index int, html *goquery.Selection) {
 		text := html.Text()
-		url, ok = html.Attr("href")
+		url, ok := html.Attr("href")
 		if !ok {
 			log.Printf("no url found for %d\n", current)
 			url = ""
 		}
 		exp := regexp.MustCompile(`(\d+)`)
-		match := exp.FindStringSubmatch(exp)
+		match := exp.FindStringSubmatch(text)
 		idx := -1
-		if match {
-			i, err := strconv.Atoi(s)
+		if match != nil {
+			i, err := strconv.Atoi(match[1])
 			if err != nil {
 				log.Fatal(err)
 			}
 			idx = i
 		} else {
 			idx = current
-			current += 1
+			current++
 		}
 		result[idx] = url
 	})
 	return result
 }
 
-func (p ParseObject) GetCover() string {
+// GetCover - select cover url from doc
+func (p ParseObj) GetCover() string {
 	c := p.doc.Find(p.selectors.Cover).First()
 	url, ok := c.Attr("href")
 	if !ok {
 		// err
-		fmt.Fatalf("no cover found")
+		log.Fatal("no cover found")
 	}
 	return url
 }
 
+// GetTitle - select title from doc
 func (p ParseObj) GetTitle() string {
 	c := p.doc.Find(p.selectors.Title).First()
 	return c.Text()
 }
 
+// GetChapterTitle - extract chapter title from chapter page
 func (p ParseObj) GetChapterTitle() string {
 	return p.doc.Find(p.selectors.ChapterTitle).First().Text()
 }
 
+// GetChapterBody - extract Chapter body from chapter page
 func (p ParseObj) GetChapterBody() string {
-	return p.doc.Find(p.selectors.ChapterBody).First()
+	sl, err := p.doc.Find(p.selectors.ChapterBody).First().Html()
+	if err != nil {
+		log.Fatal(err)
+	}
+	return sl
 }
 
 func getSource(url string) *goquery.Document {
@@ -138,9 +154,10 @@ func getSource(url string) *goquery.Document {
 	return doc
 }
 
+// LoadCrawlers from plugins folder
 func LoadCrawlers() []lib.CrawlerConfig {
 	var configs []lib.CrawlerConfig
-	err := filepath.Walk("./plugins", func (path string, info os.FileInfo, err error) error {
+	err := filepath.Walk("./plugins", func(path string, info os.FileInfo, err error) error {
 		if info.IsDir() {
 			return nil
 		}
