@@ -1,9 +1,11 @@
 package lib
 
 import (
-	"fmt"
+	"log"
 	"io/ioutil"
 	"encoding/json"
+	"regexp"
+	"fmt"
 )
 
 type Selector struct {
@@ -49,27 +51,20 @@ func (c CrawlerConfig) Print() {
 	fmt.Println(string(cjson))
 }
 
+func (c CrawlerConfig) Match(url string) bool {
+	for _, regex := range c.UrlRegex {
+		match, err := regexp.MatchString(regex, url)
+		if err != nil {
+			log.Fatal(err)
+		}
+		if match {
+			return true
+		}
+	}
+	return false
+}
+
 type Config struct {
 	Delay bool
 	UserAgent string
 }
-
-type Crawler struct {
-	novelID string
-	pageurl string
-	selector map[string]string
-}
-
-func New(novelID string, pageurl string, selector map[string]string) Crawler {
-	c := Crawler{novelID, pageurl, selector}
-	return c
-}
-
-func (c Crawler) start() {
-	c.update(map[string]string{})
-}
-
-func (c Crawler) update(current map[string]string) {
-
-}
-
