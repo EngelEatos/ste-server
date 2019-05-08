@@ -15,7 +15,6 @@ var baseurl = "https://www.novelupdates.com/series/"
 
 // Novel - struct
 type Novel struct {
-	ID                  int
 	Title               string
 	Chaptercount        int
 	NovelIDSTR          string
@@ -34,12 +33,12 @@ type Novel struct {
 }
 
 func getBool(s string) bool {
-	switch strings.ToLower(s) {
-	case "yes":
+	s = strings.ToLower(s)
+	if s == "yes" {
 		return true
-	case "no":
+	} else if s == "no" {
 		return false
-	default:
+	} else {
 		log.Fatalf("wrong string %s - no bool\n", s)
 		return false
 	}
@@ -54,7 +53,9 @@ func parseStatus(status string) map[string]int {
 	}
 }
 
-func stripSpace(s string) string {
+func strip(s string) string {
+	reg := regexp.MustCompile(`\r?\n`)
+	s = reg.ReplaceAllString(s, "")
 	return strings.Join(strings.Fields(s), "")
 }
 
@@ -104,25 +105,23 @@ func getRecommendations(doc *goquery.Document) map[string]string {
 }
 
 func getType(doc *goquery.Document) int {
-	href, ok := doc.Find("a.genre.type").First().Attr("href")
-	if !ok {
-		log.Fatal("no href attribute on a.genre.type")
-	}
-	ntype := href[len("https://www.novelupdates.com/ntype/") : len(href)-1]
-	return getInt(ntype, Genres)
+	ntype := strings.ReplaceAll(strings.ToLower(doc.Find("a.genre.type").First().Text()), " ", "-")
+	return getInt(ntype, NovelTypes)
 }
 
 func getInt(key string, dict map[string]int) int {
 	if val, ok := dict[key]; ok {
 		return val
 	}
+	log.Fatalf("%s not in %v\n", key, dict)
 	return -1
 }
 
 func getIntArray(array []string, dict map[string]int) []int {
 	var result []int
 	for _, key := range array {
-		if val, ok := dict[key]; ok {
+		cleanKey := strings.ReplaceAll(strings.ToLower(key), " ", "_")
+		if val, ok := dict[cleanKey]; ok {
 			result = append(result, val)
 		} else {
 			log.Fatalf("%s not in %v\n", key, dict)
@@ -130,6 +129,7 @@ func getIntArray(array []string, dict map[string]int) []int {
 	}
 	return result
 }
+
 func getLanguage(doc *goquery.Document) int {
 	href, ok := doc.Find("div#showlang > a.genre.lang").First().Attr("href")
 	if !ok {
@@ -149,10 +149,10 @@ func ParseNovel(novelID string) Novel {
 	tags := getIntArray(getElementsSlice("div#showtags > a.genre", doc), Tags)
 	lang := getLanguage(doc)
 	authors := getElementsSlice("div#showauthors > a.genre", doc)
-	year := stripSpace(doc.Find("div#edityear").Text())
+	year := parseInt(strip(doc.Find("div#edityear").Text()))
 	status := parseStatus(doc.Find("div#editstatus").Text())
-	licensed := doc.Find("div#showlicensed").Text()
-	completelyTranslated := stripSpace(doc.Find("div#showtranslated").Text())
+	licensed := getBool(strip(doc.Find("div#showlicensed").Text()))
+	completelyTranslated := getBool(strip(doc.Find("div#showtranslated").Text()))
 	description := doc.Find("div#editdescription").Text()
 	recommendations := getRecommendations(doc)
 	return Novel{
@@ -162,10 +162,10 @@ func ParseNovel(novelID string) Novel {
 		Type:                ntype,
 		Description:         description,
 		LanguageID:          lang,
-		Year:                parseInt(year),
+		Year:                year,
 		Status:              status["status"],
-		Licensed:            getBool(licensed),
-		CompletlyTranslated: getBool(completelyTranslated),
+		Licensed:            licensed,
+		CompletlyTranslated: completelyTranslated,
 		UpdatedAt:           time.Now(),
 		Recommendations:     recommendations,
 		Genres:              genres,

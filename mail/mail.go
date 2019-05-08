@@ -1,4 +1,4 @@
-package ste_mail
+package mail
 
 import (
 	"fmt"

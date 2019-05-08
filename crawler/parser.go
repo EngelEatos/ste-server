@@ -7,7 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
-	"ste-server/crawler/lib"
+	"ste/crawler/lib"
 	"strconv"
 
 	"github.com/PuerkitoBio/goquery"
@@ -88,7 +88,7 @@ func (p ParseObj) GetChapter() map[int]string {
 			log.Printf("no url found for %d\n", current)
 			url = ""
 		}
-		exp := regexp.MustCompile(`(\d+)`)
+		exp := regexp.MustCompile(`.hapter\s+(\d+)`)
 		match := exp.FindStringSubmatch(text)
 		idx := -1
 		if match != nil {
@@ -97,11 +97,14 @@ func (p ParseObj) GetChapter() map[int]string {
 				log.Fatal(err)
 			}
 			idx = i
-		} else {
-			idx = current
-			current++
 		}
-		result[idx] = url
+		if _, ok := result[idx]; ok || match == nil {
+			result[current] = url
+			current++
+		} else {
+			current = idx + 1
+			result[idx] = url
+		}
 	})
 	return result
 }
@@ -109,7 +112,7 @@ func (p ParseObj) GetChapter() map[int]string {
 // GetCover - select cover url from doc
 func (p ParseObj) GetCover() string {
 	c := p.doc.Find(p.selectors.Cover).First()
-	url, ok := c.Attr("href")
+	url, ok := c.Attr("src")
 	if !ok {
 		// err
 		log.Fatal("no cover found")
