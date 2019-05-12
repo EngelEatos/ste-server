@@ -8,3 +8,8 @@ func TestParseSQLFile(t *testing.T) {
 		t.Errorf("expected %d, got %d", 50, len(queries))
 	}
 }
+
+func TestStart(t *testing.T) {
+	Start()
+
+}

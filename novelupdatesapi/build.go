@@ -1,10 +1,24 @@
 package novelupdatesapi
 
 import (
+	"context"
+	"database/sql"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"strings"
+
+	// . "github.com/volatiletech/sqlboiler/queries/qm"
+	_ "github.com/lib/pq"
+	"github.com/volatiletech/sqlboiler/queries"
+)
+
+const (
+	host     = "localhost"
+	port     = 5432
+	user     = "chaos"
+	password = "pandora"
+	dbname   = "ste"
 )
 
 // ParseSQLFile - asdkljf
@@ -31,24 +45,29 @@ func ParseSQLFile(path string) []string {
 		}
 
 	}
-	fmt.Println(result)
 	return result
 }
 
-func createTables() {
-	queriesQ := ParseSQLFile("")
-	// db, err := server.Connect()
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
+func createTables(db *sql.DB) {
+	queriesQ := ParseSQLFile("ste_files/schema-ste.sql")
 	for idx, query := range queriesQ {
 		log.Printf("%d - %s", idx, query)
-		// queries.Raw(db, query)
-
+		err := queries.Raw(query, db, context.Background())
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 
 }
 
-func start() {
-
+// Start - ...
+func Start() {
+	// connect to database
+	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s sslmode=disable", host, port, user)
+	fmt.Println(psqlInfo)
+	db, err := sql.Open("postgres", psqlInfo)
+	if err != nil {
+		log.Fatal(err)
+	}
+	createTables(db)
 }
