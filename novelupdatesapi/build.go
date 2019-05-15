@@ -17,7 +17,7 @@ const (
 	host     = "localhost"
 	port     = 5432
 	user     = "chaos"
-	password = "pandora"
+	password = ""
 	dbname   = "ste"
 )
 
@@ -69,5 +69,10 @@ func Start() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	createTables(db)
+	// create tables
+ 	createTables(db)
+	// insert constants
+	
+	
 }
+

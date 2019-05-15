@@ -7,8 +7,10 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
+	"fmt"
+	"io/ioutil"
 	"github.com/PuerkitoBio/goquery"
+	"net/url"
 )
 
 var baseurl = "https://www.novelupdates.com/series/"
@@ -177,4 +179,32 @@ func ParseNovel(novelID string) Novel {
 // GetChapter by novelID
 func GetChapter(novelID string) string {
 	return ""
+}
+
+func getPage(idx int) (*goquery.Document, int, error) {
+	url := fmt.Sprintf("https://www.novelupdates.com/novelslisting/?st=%d", idx)
+	source := getSource(url)
+	return source, 0, nil
+}
+
+// LiveSearch ...
+func LiveSearch(searchTerm string) string {
+	response, err := http.PostForm("https://www.novelupdates.com/wp-admin/admin-ajax.php", url.Values{
+		"action": {"nd_ajaxsearchmain"},
+		"strType": {"desktop"},
+		"strOne": {searchTerm},
+	})
+	
+	if err != nil {
+	  log.Fatal(err)
+	}
+	
+	defer response.Body.Close()
+	body, err := ioutil.ReadAll(response.Body)
+	
+	if err != nil {
+	  //handle read response error
+	  log.Fatal(err)
+	}
+	return string(body)
 }
