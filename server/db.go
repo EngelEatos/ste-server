@@ -14,7 +14,7 @@ const (
 	host     = "localhost"
 	port     = 5432
 	user     = "postgres"
-	password = ""
+	password = "pandora"
 	dbname   = "ste"
 )
 
@@ -23,7 +23,7 @@ var conn *sql.DB
 
 // Connect to db
 func Connect() (*sql.DB, error) {
-	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s dbname=%s sslmode=disable", host, port, user, dbname)
+	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
 	fmt.Println(psqlInfo)
 	db, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
@@ -45,3 +45,6 @@ func Connect() (*sql.DB, error) {
 func IsConnected() bool {
 	return connected
 }
+
+// TODO: insertNovel
+// TODO: insertCover

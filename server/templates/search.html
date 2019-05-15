@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, inital-scale=1">
     <link rel="stylesheet" href="../assets/css/bootstrap.min.css">
     <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css" integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" crossorigin="anonymous">
     <script src="../assets/js/jquery-3.3.1.min.js"></script>
     <script src="../assets/js/popper.min.js"></script>
     <script src="../assets/js/bootstrap.min.js"></script>
@@ -35,9 +36,6 @@
                     <a class="nav-link" href="home.html">Home <span class="sr-only">(current)</span></a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="request.html">Request</a>
-                </li>
-                <li class="nav-item">
                     <a class="nav-link" href="queues.html">Queues</a>
                 </li>
             </ul>
@@ -51,14 +49,17 @@
             <span class="nu_menu_search" style="display: inline;">
                 <form id="search_nu_novel" action="https://www.novelupdates.com/">
                     <span class="w-search-input-h">
-                        <input id="searchme-rl newmenu" class="form-control form-control-lg" autocomplete="off"
-                            onkeyup="showSearch(this.value)" type="text" value="" name="s"
-                            placeholder="Search Novels...">
-                        <input type="hidden" name="post_type" value="seriesplans">
+                        <div class="input-group mb-3">
+                            <input id="searchme-rl newmenu" class="form-control form-control-lg" autocomplete="off"
+                                onkeyup="showSearch(this.value)" type="text" value="" name="s"
+                                placeholder="Search Novels...">
+                            <input type="hidden" name="post_type" value="seriesplans">
 
-                        <div class="w-search-submit">
-                            <span class="search_menu_right"><i class="fa fa-search btn"
-                                    onclick="search_btn_click();"></i></span>
+                            <div class="input-group-append">
+                                <!-- <span class="search_menu_right"><i class="fa fa-search btn"
+                                        onclick="search_btn_click();"></i></span> -->
+                                <button class="btn btn-outline-secondary" onclick="search_btn_click();" type="button"><i class="fas fa-search"></i></button>
+                            </div>
                         </div>
 
                     </span>

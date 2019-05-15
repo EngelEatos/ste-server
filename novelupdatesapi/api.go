@@ -1,17 +1,20 @@
 package novelupdatesapi
 
 import (
+	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
+	"net/url"
 	"regexp"
 	"strconv"
 	"strings"
 	"time"
-	"fmt"
-	"io/ioutil"
+
 	"github.com/PuerkitoBio/goquery"
-	"net/url"
 )
+
+// TODO: Errorhandling, dont die if smth fail
 
 var baseurl = "https://www.novelupdates.com/series/"
 
@@ -32,6 +35,7 @@ type Novel struct {
 	UpdatedAt           time.Time
 	Recommendations     map[string]string
 	Authors             []string
+	CoverURL            string
 }
 
 func getBool(s string) bool {
@@ -141,6 +145,17 @@ func getLanguage(doc *goquery.Document) int {
 	return getInt(lang, Languages)
 }
 
+func getCover(doc *goquery.Document) string {
+	coverURL, ok := doc.Find("div.seriesimg > img").First().Attr("src")
+	if !ok {
+		log.Fatal("no src attribute on div.seriesimg > img")
+	}
+	return coverURL
+
+}
+
+// TODO: Errorhandling
+
 // ParseNovel - parse site , arg novelID
 func ParseNovel(novelID string) Novel {
 	url := baseurl + novelID
@@ -157,6 +172,8 @@ func ParseNovel(novelID string) Novel {
 	completelyTranslated := getBool(strip(doc.Find("div#showtranslated").Text()))
 	description := doc.Find("div#editdescription").Text()
 	recommendations := getRecommendations(doc)
+	coverURL := getCover(doc)
+
 	return Novel{
 		Title:               title,
 		Chaptercount:        status["chapterCount"],
@@ -173,38 +190,44 @@ func ParseNovel(novelID string) Novel {
 		Genres:              genres,
 		Tags:                tags,
 		Authors:             authors,
+		CoverURL:            coverURL,
 	}
 }
+
+// TODO: GetChapter
 
 // GetChapter by novelID
 func GetChapter(novelID string) string {
 	return ""
 }
 
+// TODO: finish
 func getPage(idx int) (*goquery.Document, int, error) {
 	url := fmt.Sprintf("https://www.novelupdates.com/novelslisting/?st=%d", idx)
 	source := getSource(url)
 	return source, 0, nil
 }
 
+// TODO: Errorhandling
+
 // LiveSearch ...
 func LiveSearch(searchTerm string) string {
 	response, err := http.PostForm("https://www.novelupdates.com/wp-admin/admin-ajax.php", url.Values{
-		"action": {"nd_ajaxsearchmain"},
+		"action":  {"nd_ajaxsearchmain"},
 		"strType": {"desktop"},
-		"strOne": {searchTerm},
+		"strOne":  {searchTerm},
 	})
-	
+
 	if err != nil {
-	  log.Fatal(err)
+		log.Fatal(err)
 	}
-	
+
 	defer response.Body.Close()
 	body, err := ioutil.ReadAll(response.Body)
-	
+
 	if err != nil {
-	  //handle read response error
-	  log.Fatal(err)
+		//handle read response error
+		log.Fatal(err)
 	}
 	return string(body)
 }

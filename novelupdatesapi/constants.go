@@ -792,7 +792,7 @@ var Tags = map[string]int{
 	"transmigration":                       3046,
 	"transplanted_memories":                4323,
 	"transported_into_a_game_world":        7663,
-	"transported_into_another_world":       15008,
+	"transported_to_another_world":         15008,
 	"transported_modern_structure":         6559,
 	"trap":                                 1279,
 	"tribal_society":                       5825,

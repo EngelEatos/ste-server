@@ -1,17 +1,18 @@
 package mail
 
 import (
+	"encoding/json"
 	"fmt"
-	"net/smtp"
+	"io/ioutil"
 	"log"
-	""
+	"net/smtp"
 )
-type mailconfig struct {
-	SMTP_server string
-	SMTP_port int
-	sender string
-}
 
+type mailconfig struct {
+	SMTPServer string
+	SMTPPort   int
+	sender     string
+}
 
 func readFile(path string) []byte {
 	dat, err := ioutil.ReadFile(path)
@@ -25,9 +26,9 @@ func send(recpient string, body string) {
 	var config mailconfig
 	data := readFile("config.json")
 	if err := json.Unmarshal(data, &config); err != nil {
-        log.Fatal(err)
-    }
-	c, err := smtp.Dial(fmt.Sprintf("%s:%d", config.SMTP_server, config.SMTP_port))
+		log.Fatal(err)
+	}
+	c, err := smtp.Dial(fmt.Sprintf("%s:%d", config.SMTPServer, config.SMTPPort))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -39,7 +40,7 @@ func send(recpient string, body string) {
 	if err := c.Rcpt(recpient); err != nil {
 		log.Fatal(err)
 	}
-	wc, err = c.Data()
+	wc, err := c.Data()
 	if err != nil {
 		log.Fatal(err)
 	}
