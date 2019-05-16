@@ -167,11 +167,11 @@ func getCover(doc *goquery.Document) string {
 }
 
 // ParseNovel - parse site , arg novelID
-func ParseNovel(novelID string) (Novel, error) {
+func ParseNovel(novelID string) (*Novel, error) {
 	url := baseurl + novelID
 	doc, err := getSource(url)
 	if err != nil {
-		return Novel{}, err
+		return nil, err
 	}
 	title := doc.Find(".seriestitlenu").First().Text()
 	ntype, err := getType(doc)
@@ -205,7 +205,7 @@ func ParseNovel(novelID string) (Novel, error) {
 	recommendations := getRecommendations(doc)
 	coverURL := getCover(doc)
 
-	return Novel{
+	return &Novel{
 		Title:               title,
 		Chaptercount:        chapterCount,
 		NovelIDSTR:          novelID,

@@ -18,11 +18,14 @@ const (
 	dbname   = "ste"
 )
 
-var connected = false
-var conn *sql.DB
+// DBM Database Manager
+type DBM struct {
+	IsConnected bool
+	conn        *sql.DB
+}
 
 // Connect to db
-func Connect() (*sql.DB, error) {
+func (dbm *DBM) Connect() (*sql.DB, error) {
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
 	fmt.Println(psqlInfo)
 	db, err := sql.Open("postgres", psqlInfo)
@@ -37,14 +40,12 @@ func Connect() (*sql.DB, error) {
 		return db, err
 	}
 	log.Printf("connected to %s:%d\n", host, port)
-	connected = true
+	dbm.IsConnected = true
+	dbm.conn = db
 	return db, nil
 }
 
-// IsConnected return connected boolean
-func IsConnected() bool {
-	return connected
-}
-
 // TODO: insertNovel
+func (dbm *DBM) InsertNovel()
+
 // TODO: insertCover
