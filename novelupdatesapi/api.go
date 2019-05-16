@@ -1,6 +1,7 @@
 package novelupdatesapi
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -38,25 +39,36 @@ type Novel struct {
 	CoverURL            string
 }
 
-func getBool(s string) bool {
+// Chapter - struct
+type Chapter struct {
+	ReleaseDate time.Time
+	Group       string
+	Chapter     string
+}
+
+func getBool(s string) (bool, error) {
 	s = strings.ToLower(s)
 	if s == "yes" {
-		return true
+		return true, nil
 	} else if s == "no" {
-		return false
+		return false, nil
 	} else {
-		log.Fatalf("wrong string %s - no bool\n", s)
-		return false
+		return false, fmt.Errorf("wrong string %s - no bool", s)
 	}
 }
 
-func parseStatus(status string) map[string]int {
+func parseStatus(status string) (int, int, error) {
 	exp := regexp.MustCompile(`(?P<chapterCount>\d{1,5})(?:|\+)\sChapters\s\((?P<status>.+?)\)`)
 	match := exp.FindStringSubmatch(status)
-	return map[string]int{
-		"chapterCount": parseInt(match[1]),
-		"status":       getInt(strings.ToLower(match[2]), StatusTypes),
+	chapterCount, err := parseInt(match[1])
+	if err != nil {
+		return -1, -1, err
 	}
+	stat, err := getInt(strings.ToLower(match[2]), StatusTypes)
+	if err != nil {
+		return -1, -1, err
+	}
+	return chapterCount, stat, nil
 }
 
 func strip(s string) string {
@@ -65,29 +77,29 @@ func strip(s string) string {
 	return strings.Join(strings.Fields(s), "")
 }
 
-func parseInt(s string) int {
+func parseInt(s string) (int, error) {
 	i, err := strconv.Atoi(s)
 	if err != nil {
-		log.Fatal(err)
+		return -1, err
 	}
-	return i
+	return i, nil
 }
 
-func getSource(url string) *goquery.Document {
+func getSource(url string) (*goquery.Document, error) {
 	res, err := http.Get(url)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	defer res.Body.Close()
 	if res.StatusCode != 200 {
-		log.Fatalf("status code error: %d %s", res.StatusCode, res.Status)
+		return nil, fmt.Errorf("status code error: %d %s", res.StatusCode, res.Status)
 	}
 
 	doc, err := goquery.NewDocumentFromReader(res.Body)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
-	return doc
+	return doc, nil
 }
 
 func getElementsSlice(selector string, doc *goquery.Document) []string {
@@ -101,26 +113,25 @@ func getElementsSlice(selector string, doc *goquery.Document) []string {
 func getRecommendations(doc *goquery.Document) map[string]string {
 	recommendation := make(map[string]string)
 	doc.Find("div.wpb_wrapper > a.genre").Each(func(index int, rechtml *goquery.Selection) {
-		href, ok := rechtml.Attr("href")
-		if !ok {
-			href = ""
-		}
-		recommendation[rechtml.Text()] = href
+		recommendation[rechtml.Text()] = rechtml.AttrOr("href", "")
 	})
 	return recommendation
 }
 
-func getType(doc *goquery.Document) int {
+func getType(doc *goquery.Document) (int, error) {
 	ntype := strings.ReplaceAll(strings.ToLower(doc.Find("a.genre.type").First().Text()), " ", "-")
-	return getInt(ntype, NovelTypes)
+	rvalue, err := getInt(ntype, NovelTypes)
+	if err != nil {
+		return -1, err
+	}
+	return rvalue, nil
 }
 
-func getInt(key string, dict map[string]int) int {
+func getInt(key string, dict map[string]int) (int, error) {
 	if val, ok := dict[key]; ok {
-		return val
+		return val, nil
 	}
-	log.Fatalf("%s not in %v\n", key, dict)
-	return -1
+	return -1, fmt.Errorf("%s not in %v", key, dict)
 }
 
 func getIntArray(array []string, dict map[string]int) []int {
@@ -130,59 +141,79 @@ func getIntArray(array []string, dict map[string]int) []int {
 		if val, ok := dict[cleanKey]; ok {
 			result = append(result, val)
 		} else {
-			log.Fatalf("%s not in %v\n", key, dict)
+			log.Printf("%s not in %v\n", key, dict)
 		}
 	}
 	return result
 }
 
-func getLanguage(doc *goquery.Document) int {
-	href, ok := doc.Find("div#showlang > a.genre.lang").First().Attr("href")
-	if !ok {
-		log.Fatal("no href attribute on a.genre.lang")
+func getLanguage(doc *goquery.Document) (int, error) {
+	href := doc.Find("div#showlang > a.genre.lang").First().AttrOr("href", "")
+	if href == "" {
+		return -1, errors.New("href of a.grenre.lang empty")
 	}
 	lang := href[len("https://www.novelupdates.com/language/") : len(href)-1]
-	return getInt(lang, Languages)
+	langid, err := getInt(lang, Languages)
+	if err != nil {
+		return -1, err
+	}
+	return langid, nil
 }
 
 func getCover(doc *goquery.Document) string {
-	coverURL, ok := doc.Find("div.seriesimg > img").First().Attr("src")
-	if !ok {
-		log.Fatal("no src attribute on div.seriesimg > img")
-	}
+	coverURL := doc.Find("div.seriesimg > img").First().AttrOr("src", "")
 	return coverURL
 
 }
 
-// TODO: Errorhandling
-
 // ParseNovel - parse site , arg novelID
-func ParseNovel(novelID string) Novel {
+func ParseNovel(novelID string) (Novel, error) {
 	url := baseurl + novelID
-	doc := getSource(url)
+	doc, err := getSource(url)
+	if err != nil {
+		return Novel{}, err
+	}
 	title := doc.Find(".seriestitlenu").First().Text()
-	ntype := getType(doc)
+	ntype, err := getType(doc)
+	if err != nil {
+		log.Printf("failed to get type of novel %s: %s\n", title, err)
+	}
 	genres := getIntArray(getElementsSlice("div#seriesgenre > a.genre", doc), Genres)
 	tags := getIntArray(getElementsSlice("div#showtags > a.genre", doc), Tags)
-	lang := getLanguage(doc)
+	lang, err := getLanguage(doc)
+	if err != nil {
+		log.Printf("failed get langId for novel %s: %s\n", title, err)
+	}
 	authors := getElementsSlice("div#showauthors > a.genre", doc)
-	year := parseInt(strip(doc.Find("div#edityear").Text()))
-	status := parseStatus(doc.Find("div#editstatus").Text())
-	licensed := getBool(strip(doc.Find("div#showlicensed").Text()))
-	completelyTranslated := getBool(strip(doc.Find("div#showtranslated").Text()))
+	year, err := parseInt(strip(doc.Find("div#edityear").Text()))
+	if err != nil {
+		log.Printf("failed to get year of novel %s: %s\n", title, err)
+	}
+	chapterCount, status, err := parseStatus(doc.Find("div#editstatus").Text())
+	if err != nil {
+		log.Printf("failed to parse status for %s: %s\n", title, err)
+	}
+	licensed, err := getBool(strip(doc.Find("div#showlicensed").Text()))
+	if err != nil {
+		log.Printf("failed to parse bool for %s: %s", title, err)
+	}
+	completelyTranslated, err := getBool(strip(doc.Find("div#showtranslated").Text()))
+	if err != nil {
+		log.Printf("failed to parse bool for %s: %s", title, err)
+	}
 	description := doc.Find("div#editdescription").Text()
 	recommendations := getRecommendations(doc)
 	coverURL := getCover(doc)
 
 	return Novel{
 		Title:               title,
-		Chaptercount:        status["chapterCount"],
+		Chaptercount:        chapterCount,
 		NovelIDSTR:          novelID,
 		Type:                ntype,
 		Description:         description,
 		LanguageID:          lang,
 		Year:                year,
-		Status:              status["status"],
+		Status:              status,
 		Licensed:            licensed,
 		CompletlyTranslated: completelyTranslated,
 		UpdatedAt:           time.Now(),
@@ -191,27 +222,60 @@ func ParseNovel(novelID string) Novel {
 		Tags:                tags,
 		Authors:             authors,
 		CoverURL:            coverURL,
-	}
+	}, nil
 }
 
 // TODO: GetChapter
 
 // GetChapter by novelID
-func GetChapter(novelID string) string {
-	return ""
+func GetChapter(novelID string, idx int) ([]Chapter, error) {
+	doc, err := getSource(baseurl + novelID + "/pg?=" + string(idx))
+	if err != nil {
+		return nil, err
+	}
+	var result []Chapter
+	doc.Find("table#myTable > tbody > tr").Each(func(idx int, row *goquery.Selection) {
+		cols := row.Find("td")
+		date := cols.First()
+		t, err := time.Parse("01-02-06", date.Text())
+		if err != nil {
+			log.Println("failed to parse date")
+		}
+		t = time.Now()
+
+		group := date.Next().AttrOr("href", "")
+		chapter := date.Next().Next().AttrOr("href", "")
+		result = append(result, Chapter{t, group, chapter})
+	})
+	return result, nil
+}
+
+func getNextPage(doc *goquery.Document) (string, error) {
+	np := doc.Find("a.next_pages")
+	if np.Length() > 0 {
+		return np.First().AttrOr("href", ""), nil
+	}
+	return "", errors.New("next page not found")
 }
 
 // TODO: finish
-func getPage(idx int) (*goquery.Document, int, error) {
+
+// GetPage - by idx
+func GetPage(idx int) (*goquery.Document, bool, error) {
 	url := fmt.Sprintf("https://www.novelupdates.com/novelslisting/?st=%d", idx)
-	source := getSource(url)
-	return source, 0, nil
+	doc, err := getSource(url)
+	if err != nil {
+		return nil, false, err
+	}
+	_, err = getNextPage(doc)
+	if err != nil {
+		return doc, false, nil
+	}
+	return doc, true, nil
 }
 
-// TODO: Errorhandling
-
-// LiveSearch ...
-func LiveSearch(searchTerm string) string {
+// LiveSearch - post searchtearm to novelupdatesapi livesearch
+func LiveSearch(searchTerm string) (string, error) {
 	response, err := http.PostForm("https://www.novelupdates.com/wp-admin/admin-ajax.php", url.Values{
 		"action":  {"nd_ajaxsearchmain"},
 		"strType": {"desktop"},
@@ -219,15 +283,14 @@ func LiveSearch(searchTerm string) string {
 	})
 
 	if err != nil {
-		log.Fatal(err)
+		return "", err
 	}
 
 	defer response.Body.Close()
-	body, err := ioutil.ReadAll(response.Body)
 
+	body, err := ioutil.ReadAll(response.Body)
 	if err != nil {
-		//handle read response error
-		log.Fatal(err)
+		return "", err
 	}
-	return string(body)
+	return string(body), nil
 }

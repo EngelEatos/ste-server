@@ -15,8 +15,9 @@ func TestGetBool(t *testing.T) {
 		"yEs": true,
 	}
 	for o, result := range cases {
-		if getBool(o) != result {
-			t.Errorf("expected %t, but got %t", result, getBool(o))
+		b, _ := getBool(o)
+		if b != result {
+			t.Errorf("expected %t, but got %t", result, b)
 		}
 	}
 }
@@ -43,8 +44,9 @@ func TestParseInt(t *testing.T) {
 		"2222": 2222,
 	}
 	for o, result := range cases {
-		if parseInt(o) != result {
-			t.Errorf("expected %d, but got %d", result, parseInt(o))
+		i, _ := parseInt(o)
+		if i != result {
+			t.Errorf("expected %d, but got %d", result, i)
 		}
 	}
 }
@@ -63,7 +65,10 @@ func TestParseNovel(t *testing.T) {
 	CompletlyTranslated := false
 	Recommendations := map[string]string{"A Cheeky Kendo God": "https://www.novelupdates.com/series/a-cheeky-kendo-god/", "I am the Monarch": "https://www.novelupdates.com/series/i-am-the-monarch/", "Reverend Insanity": "https://www.novelupdates.com/series/reverend-insanity/", "The Second Coming of Avarice": "https://www.novelupdates.com/series/the-second-coming-of-avarice/", "Transcending the Nine Heavens": "https://www.novelupdates.com/series/transcending-the-nine-heavens/", "Zhanxian": "https://www.novelupdates.com/series/zhanxian/"}
 	Authors := []string{"Huangfu Qi", "皇甫奇"}
-	novel := ParseNovel("the-human-emperor")
+	novel, err := ParseNovel("the-human-emperor")
+	if err != nil {
+		t.Error(err)
+	}
 	if title != novel.Title {
 		t.Errorf("expected %s, got %s", title, novel.Title)
 	}
