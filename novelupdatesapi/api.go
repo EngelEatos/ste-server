@@ -251,27 +251,34 @@ func GetChapter(novelID string, idx int) ([]Chapter, error) {
 }
 
 func getNextPage(doc *goquery.Document) (string, error) {
-	np := doc.Find("a.next_pages")
+	np := doc.Find("a.next_page")
 	if np.Length() > 0 {
 		return np.First().AttrOr("href", ""), nil
 	}
 	return "", errors.New("next page not found")
 }
 
-// TODO: finish
+// TODO: GetLatestSeries()
+// func GetLatestSeries() {
+// 	idx := 1
+// 	url := "https://www.novelupdates.com/latest-series/?st=1&pg=" + string(idx)
 
-// GetPage - by idx
-func GetPage(idx int) (*goquery.Document, bool, error) {
+// }
+
+// GetNovelsByPage - by idx
+func GetNovelsByPage(idx int) (*goquery.Document, bool, error) {
+	result := make(map[string]string)
 	url := fmt.Sprintf("https://www.novelupdates.com/novelslisting/?st=%d", idx)
 	doc, err := getSource(url)
 	if err != nil {
 		return nil, false, err
 	}
+	doc.Find("table#myTable > tbody > tr").Each(func(idx int, row *goquery.Selection) {
+		col := row.Find("td:nth-child(3) > a")
+		result[col.Text()] = col.AttrOr("href", "")
+	})
 	_, err = getNextPage(doc)
-	if err != nil {
-		return doc, false, nil
-	}
-	return doc, true, nil
+	return doc, err != nil, nil
 }
 
 // LiveSearch - post searchtearm to novelupdatesapi livesearch

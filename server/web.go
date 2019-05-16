@@ -51,7 +51,10 @@ func seriesHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Println("novel doesnt exists in db")
 		// parse now
-		pNovel := nuapi.ParseNovel(novelid)
+		pNovel, err := nuapi.ParseNovel(novelid)
+		if err != nil {
+			log.Fatal(err)
+		}
 		// insert cover
 
 		iCover := models.Cover{URL: pNovel.CoverURL, Downloaded: null.BoolFrom(false), Path: null.StringFrom("")}
@@ -69,7 +72,7 @@ func seriesHandler(w http.ResponseWriter, r *http.Request) {
 			CompletlyTranslated: null.BoolFrom(pNovel.CompletlyTranslated),
 			CoverID:             null.IntFrom(iCover.ID),
 		}
-		err := novel.Insert(ctx, db, boil.Infer())
+		err = novel.Insert(ctx, db, boil.Infer())
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -85,7 +88,11 @@ func seriesHandler(w http.ResponseWriter, r *http.Request) {
 
 func nuHandler(w http.ResponseWriter, r *http.Request) {
 	searchTerm := r.FormValue("searchTerm")
-	result := strings.ReplaceAll(nuapi.LiveSearch(searchTerm), "https://www.novelupdates.com/", "../")
+	result, err := nuapi.LiveSearch(searchTerm)
+	if err != nil {
+		log.Fatal(err)
+	}
+	result = strings.ReplaceAll(result, "https://www.novelupdates.com/", "../")
 	fmt.Fprintf(w, result[:len(result)-1])
 }
 

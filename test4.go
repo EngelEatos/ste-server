@@ -1,8 +1,10 @@
 package main
 
 import (
+	"log"
 	nuapi "ste/novelupdatesapi"
 )
+
 func main() {
-	nuapi.GetPage(1)
+	log.Println(nuapi.GetNovelsByPage(1))
 }
