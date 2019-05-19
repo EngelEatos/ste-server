@@ -225,10 +225,37 @@ func ParseNovel(novelID string) (*Novel, error) {
 	}, nil
 }
 
-// TODO: GetChapter
+func getMaxPage(novelID string) (int, error) {
+	doc, err := getSource(baseurl + novelID)
+	if err != nil {
+		return -1, err
+	}
+	pagination := doc.Find(".digg_pagination > a:nth-last-child(2)")
+	if pagination.Length() > 0 {
+		return -1, errors.New("pagination not found")
+	}
+	return parseInt(pagination.First().Text())
+}
 
-// GetChapter by novelID
-func GetChapter(novelID string, idx int) ([]Chapter, error) {
+// GetAllChapter - GetAllChapter by novelID
+func GetAllChapter(novelID string) ([]Chapter, error) {
+	var result []Chapter
+	lastPage, err := getMaxPage(novelID)
+	if err != nil {
+		return result, err
+	}
+	for i := 1; i <= lastPage; i++ {
+		chapter, err := getChapter(novelID, i)
+		if err != nil {
+			return result, err
+		}
+		result = append(result, chapter...)
+	}
+	return result, nil
+}
+
+// GetChapter by novelID, idx
+func getChapter(novelID string, idx int) ([]Chapter, error) {
 	doc, err := getSource(baseurl + novelID + "/pg?=" + string(idx))
 	if err != nil {
 		return nil, err
@@ -258,27 +285,54 @@ func getNextPage(doc *goquery.Document) (string, error) {
 	return "", errors.New("next page not found")
 }
 
-// TODO: GetLatestSeries()
-// func GetLatestSeries() {
-// 	idx := 1
-// 	url := "https://www.novelupdates.com/latest-series/?st=1&pg=" + string(idx)
+// GetLatestSeries -
+func GetLatestSeries() {
+	// idx := 1
+	// url := "https://www.novelupdates.com/latest-series/?st=1&pg=" + string(idx)
+	// TODO: implement
+}
 
-// }
+func getNovelListing(doc *goquery.Document) map[string]string {
+	novels := make(map[string]string)
+	doc.Find("table#myTable > tbody > tr").Each(func(idx int, row *goquery.Selection) {
+		col := row.Find("td:nth-child(3) > a")
+		novels[col.Text()] = col.AttrOr("href", "")
+	})
+	return novels
+}
+
+// GetSeriesRanking - count
+func GetSeriesRanking(count int) (map[string]string, error) {
+	if count < 25 {
+		return nil, errors.New("count has to be >= 1")
+	}
+	pages := (count + 25 - 1) / 25
+	log.Printf("check %d/%d = %d\n", count, 25, pages)
+	series := make(map[string]string)
+	for i := 1; i <= pages; i++ {
+		url := "https://www.novelupdates.com/series-ranking/?rank=popmonth&pg=" + string(i)
+		doc, err := getSource(url)
+		if err != nil {
+			return series, err
+		}
+		novels := getNovelListing(doc)
+		for k, v := range novels {
+			series[k] = v
+		}
+	}
+	return series, nil
+}
 
 // GetNovelsByPage - by idx
-func GetNovelsByPage(idx int) (*goquery.Document, bool, error) {
-	result := make(map[string]string)
+func GetNovelsByPage(idx int) (map[string]string, bool, error) {
 	url := fmt.Sprintf("https://www.novelupdates.com/novelslisting/?st=%d", idx)
 	doc, err := getSource(url)
 	if err != nil {
 		return nil, false, err
 	}
-	doc.Find("table#myTable > tbody > tr").Each(func(idx int, row *goquery.Selection) {
-		col := row.Find("td:nth-child(3) > a")
-		result[col.Text()] = col.AttrOr("href", "")
-	})
+	result := getNovelListing(doc)
 	_, err = getNextPage(doc)
-	return doc, err != nil, nil
+	return result, err != nil, nil
 }
 
 // LiveSearch - post searchtearm to novelupdatesapi livesearch
