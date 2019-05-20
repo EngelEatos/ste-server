@@ -896,7 +896,7 @@ func testLanguagesSelect(t *testing.T) {
 }
 
 var (
-	languageDBTypes = map[string]string{`ID`: `integer`, `Name`: `text`, `URL`: `text`}
+	languageDBTypes = map[string]string{`ID`: `integer`, `Name`: `text`}
 	_               = bytes.MinRead
 )
 

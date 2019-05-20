@@ -22,88 +22,83 @@ import (
 	"github.com/volatiletech/sqlboiler/strmangle"
 )
 
-// Source is an object representing the database table.
-type Source struct {
+// NovelType is an object representing the database table.
+type NovelType struct {
 	ID   int         `boil:"id" json:"id" toml:"id" yaml:"id"`
-	URL  null.String `boil:"url" json:"url,omitempty" toml:"url" yaml:"url,omitempty"`
 	Name null.String `boil:"name" json:"name,omitempty" toml:"name" yaml:"name,omitempty"`
 
-	R *sourceR `boil:"-" json:"-" toml:"-" yaml:"-"`
-	L sourceL  `boil:"-" json:"-" toml:"-" yaml:"-"`
+	R *novelTypeR `boil:"-" json:"-" toml:"-" yaml:"-"`
+	L novelTypeL  `boil:"-" json:"-" toml:"-" yaml:"-"`
 }
 
-var SourceColumns = struct {
+var NovelTypeColumns = struct {
 	ID   string
-	URL  string
 	Name string
 }{
 	ID:   "id",
-	URL:  "url",
 	Name: "name",
 }
 
 // Generated where
 
-var SourceWhere = struct {
+var NovelTypeWhere = struct {
 	ID   whereHelperint
-	URL  whereHelpernull_String
 	Name whereHelpernull_String
 }{
 	ID:   whereHelperint{field: `id`},
-	URL:  whereHelpernull_String{field: `url`},
 	Name: whereHelpernull_String{field: `name`},
 }
 
-// SourceRels is where relationship names are stored.
-var SourceRels = struct {
-	Novels string
+// NovelTypeRels is where relationship names are stored.
+var NovelTypeRels = struct {
+	NtypeNovels string
 }{
-	Novels: "Novels",
+	NtypeNovels: "NtypeNovels",
 }
 
-// sourceR is where relationships are stored.
-type sourceR struct {
-	Novels NovelSlice
+// novelTypeR is where relationships are stored.
+type novelTypeR struct {
+	NtypeNovels NovelSlice
 }
 
 // NewStruct creates a new relationship struct
-func (*sourceR) NewStruct() *sourceR {
-	return &sourceR{}
+func (*novelTypeR) NewStruct() *novelTypeR {
+	return &novelTypeR{}
 }
 
-// sourceL is where Load methods for each relationship are stored.
-type sourceL struct{}
+// novelTypeL is where Load methods for each relationship are stored.
+type novelTypeL struct{}
 
 var (
-	sourceColumns               = []string{"id", "url", "name"}
-	sourceColumnsWithoutDefault = []string{"url", "name"}
-	sourceColumnsWithDefault    = []string{"id"}
-	sourcePrimaryKeyColumns     = []string{"id"}
+	novelTypeColumns               = []string{"id", "name"}
+	novelTypeColumnsWithoutDefault = []string{"id", "name"}
+	novelTypeColumnsWithDefault    = []string{}
+	novelTypePrimaryKeyColumns     = []string{"id"}
 )
 
 type (
-	// SourceSlice is an alias for a slice of pointers to Source.
-	// This should generally be used opposed to []Source.
-	SourceSlice []*Source
-	// SourceHook is the signature for custom Source hook methods
-	SourceHook func(context.Context, boil.ContextExecutor, *Source) error
+	// NovelTypeSlice is an alias for a slice of pointers to NovelType.
+	// This should generally be used opposed to []NovelType.
+	NovelTypeSlice []*NovelType
+	// NovelTypeHook is the signature for custom NovelType hook methods
+	NovelTypeHook func(context.Context, boil.ContextExecutor, *NovelType) error
 
-	sourceQuery struct {
+	novelTypeQuery struct {
 		*queries.Query
 	}
 )
 
 // Cache for insert, update and upsert
 var (
-	sourceType                 = reflect.TypeOf(&Source{})
-	sourceMapping              = queries.MakeStructMapping(sourceType)
-	sourcePrimaryKeyMapping, _ = queries.BindMapping(sourceType, sourceMapping, sourcePrimaryKeyColumns)
-	sourceInsertCacheMut       sync.RWMutex
-	sourceInsertCache          = make(map[string]insertCache)
-	sourceUpdateCacheMut       sync.RWMutex
-	sourceUpdateCache          = make(map[string]updateCache)
-	sourceUpsertCacheMut       sync.RWMutex
-	sourceUpsertCache          = make(map[string]insertCache)
+	novelTypeType                 = reflect.TypeOf(&NovelType{})
+	novelTypeMapping              = queries.MakeStructMapping(novelTypeType)
+	novelTypePrimaryKeyMapping, _ = queries.BindMapping(novelTypeType, novelTypeMapping, novelTypePrimaryKeyColumns)
+	novelTypeInsertCacheMut       sync.RWMutex
+	novelTypeInsertCache          = make(map[string]insertCache)
+	novelTypeUpdateCacheMut       sync.RWMutex
+	novelTypeUpdateCache          = make(map[string]updateCache)
+	novelTypeUpsertCacheMut       sync.RWMutex
+	novelTypeUpsertCache          = make(map[string]insertCache)
 )
 
 var (
@@ -114,24 +109,24 @@ var (
 	_ = qmhelper.Where
 )
 
-var sourceBeforeInsertHooks []SourceHook
-var sourceBeforeUpdateHooks []SourceHook
-var sourceBeforeDeleteHooks []SourceHook
-var sourceBeforeUpsertHooks []SourceHook
+var novelTypeBeforeInsertHooks []NovelTypeHook
+var novelTypeBeforeUpdateHooks []NovelTypeHook
+var novelTypeBeforeDeleteHooks []NovelTypeHook
+var novelTypeBeforeUpsertHooks []NovelTypeHook
 
-var sourceAfterInsertHooks []SourceHook
-var sourceAfterSelectHooks []SourceHook
-var sourceAfterUpdateHooks []SourceHook
-var sourceAfterDeleteHooks []SourceHook
-var sourceAfterUpsertHooks []SourceHook
+var novelTypeAfterInsertHooks []NovelTypeHook
+var novelTypeAfterSelectHooks []NovelTypeHook
+var novelTypeAfterUpdateHooks []NovelTypeHook
+var novelTypeAfterDeleteHooks []NovelTypeHook
+var novelTypeAfterUpsertHooks []NovelTypeHook
 
 // doBeforeInsertHooks executes all "before insert" hooks.
-func (o *Source) doBeforeInsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *NovelType) doBeforeInsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range sourceBeforeInsertHooks {
+	for _, hook := range novelTypeBeforeInsertHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -141,12 +136,12 @@ func (o *Source) doBeforeInsertHooks(ctx context.Context, exec boil.ContextExecu
 }
 
 // doBeforeUpdateHooks executes all "before Update" hooks.
-func (o *Source) doBeforeUpdateHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *NovelType) doBeforeUpdateHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range sourceBeforeUpdateHooks {
+	for _, hook := range novelTypeBeforeUpdateHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -156,12 +151,12 @@ func (o *Source) doBeforeUpdateHooks(ctx context.Context, exec boil.ContextExecu
 }
 
 // doBeforeDeleteHooks executes all "before Delete" hooks.
-func (o *Source) doBeforeDeleteHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *NovelType) doBeforeDeleteHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range sourceBeforeDeleteHooks {
+	for _, hook := range novelTypeBeforeDeleteHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -171,12 +166,12 @@ func (o *Source) doBeforeDeleteHooks(ctx context.Context, exec boil.ContextExecu
 }
 
 // doBeforeUpsertHooks executes all "before Upsert" hooks.
-func (o *Source) doBeforeUpsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *NovelType) doBeforeUpsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range sourceBeforeUpsertHooks {
+	for _, hook := range novelTypeBeforeUpsertHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -186,12 +181,12 @@ func (o *Source) doBeforeUpsertHooks(ctx context.Context, exec boil.ContextExecu
 }
 
 // doAfterInsertHooks executes all "after Insert" hooks.
-func (o *Source) doAfterInsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *NovelType) doAfterInsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range sourceAfterInsertHooks {
+	for _, hook := range novelTypeAfterInsertHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -201,12 +196,12 @@ func (o *Source) doAfterInsertHooks(ctx context.Context, exec boil.ContextExecut
 }
 
 // doAfterSelectHooks executes all "after Select" hooks.
-func (o *Source) doAfterSelectHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *NovelType) doAfterSelectHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range sourceAfterSelectHooks {
+	for _, hook := range novelTypeAfterSelectHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -216,12 +211,12 @@ func (o *Source) doAfterSelectHooks(ctx context.Context, exec boil.ContextExecut
 }
 
 // doAfterUpdateHooks executes all "after Update" hooks.
-func (o *Source) doAfterUpdateHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *NovelType) doAfterUpdateHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range sourceAfterUpdateHooks {
+	for _, hook := range novelTypeAfterUpdateHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -231,12 +226,12 @@ func (o *Source) doAfterUpdateHooks(ctx context.Context, exec boil.ContextExecut
 }
 
 // doAfterDeleteHooks executes all "after Delete" hooks.
-func (o *Source) doAfterDeleteHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *NovelType) doAfterDeleteHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range sourceAfterDeleteHooks {
+	for _, hook := range novelTypeAfterDeleteHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -246,12 +241,12 @@ func (o *Source) doAfterDeleteHooks(ctx context.Context, exec boil.ContextExecut
 }
 
 // doAfterUpsertHooks executes all "after Upsert" hooks.
-func (o *Source) doAfterUpsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *NovelType) doAfterUpsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range sourceAfterUpsertHooks {
+	for _, hook := range novelTypeAfterUpsertHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -260,33 +255,33 @@ func (o *Source) doAfterUpsertHooks(ctx context.Context, exec boil.ContextExecut
 	return nil
 }
 
-// AddSourceHook registers your hook function for all future operations.
-func AddSourceHook(hookPoint boil.HookPoint, sourceHook SourceHook) {
+// AddNovelTypeHook registers your hook function for all future operations.
+func AddNovelTypeHook(hookPoint boil.HookPoint, novelTypeHook NovelTypeHook) {
 	switch hookPoint {
 	case boil.BeforeInsertHook:
-		sourceBeforeInsertHooks = append(sourceBeforeInsertHooks, sourceHook)
+		novelTypeBeforeInsertHooks = append(novelTypeBeforeInsertHooks, novelTypeHook)
 	case boil.BeforeUpdateHook:
-		sourceBeforeUpdateHooks = append(sourceBeforeUpdateHooks, sourceHook)
+		novelTypeBeforeUpdateHooks = append(novelTypeBeforeUpdateHooks, novelTypeHook)
 	case boil.BeforeDeleteHook:
-		sourceBeforeDeleteHooks = append(sourceBeforeDeleteHooks, sourceHook)
+		novelTypeBeforeDeleteHooks = append(novelTypeBeforeDeleteHooks, novelTypeHook)
 	case boil.BeforeUpsertHook:
-		sourceBeforeUpsertHooks = append(sourceBeforeUpsertHooks, sourceHook)
+		novelTypeBeforeUpsertHooks = append(novelTypeBeforeUpsertHooks, novelTypeHook)
 	case boil.AfterInsertHook:
-		sourceAfterInsertHooks = append(sourceAfterInsertHooks, sourceHook)
+		novelTypeAfterInsertHooks = append(novelTypeAfterInsertHooks, novelTypeHook)
 	case boil.AfterSelectHook:
-		sourceAfterSelectHooks = append(sourceAfterSelectHooks, sourceHook)
+		novelTypeAfterSelectHooks = append(novelTypeAfterSelectHooks, novelTypeHook)
 	case boil.AfterUpdateHook:
-		sourceAfterUpdateHooks = append(sourceAfterUpdateHooks, sourceHook)
+		novelTypeAfterUpdateHooks = append(novelTypeAfterUpdateHooks, novelTypeHook)
 	case boil.AfterDeleteHook:
-		sourceAfterDeleteHooks = append(sourceAfterDeleteHooks, sourceHook)
+		novelTypeAfterDeleteHooks = append(novelTypeAfterDeleteHooks, novelTypeHook)
 	case boil.AfterUpsertHook:
-		sourceAfterUpsertHooks = append(sourceAfterUpsertHooks, sourceHook)
+		novelTypeAfterUpsertHooks = append(novelTypeAfterUpsertHooks, novelTypeHook)
 	}
 }
 
-// One returns a single source record from the query.
-func (q sourceQuery) One(ctx context.Context, exec boil.ContextExecutor) (*Source, error) {
-	o := &Source{}
+// One returns a single novelType record from the query.
+func (q novelTypeQuery) One(ctx context.Context, exec boil.ContextExecutor) (*NovelType, error) {
+	o := &NovelType{}
 
 	queries.SetLimit(q.Query, 1)
 
@@ -295,7 +290,7 @@ func (q sourceQuery) One(ctx context.Context, exec boil.ContextExecutor) (*Sourc
 		if errors.Cause(err) == sql.ErrNoRows {
 			return nil, sql.ErrNoRows
 		}
-		return nil, errors.Wrap(err, "models: failed to execute a one query for source")
+		return nil, errors.Wrap(err, "models: failed to execute a one query for novel_type")
 	}
 
 	if err := o.doAfterSelectHooks(ctx, exec); err != nil {
@@ -305,16 +300,16 @@ func (q sourceQuery) One(ctx context.Context, exec boil.ContextExecutor) (*Sourc
 	return o, nil
 }
 
-// All returns all Source records from the query.
-func (q sourceQuery) All(ctx context.Context, exec boil.ContextExecutor) (SourceSlice, error) {
-	var o []*Source
+// All returns all NovelType records from the query.
+func (q novelTypeQuery) All(ctx context.Context, exec boil.ContextExecutor) (NovelTypeSlice, error) {
+	var o []*NovelType
 
 	err := q.Bind(ctx, exec, &o)
 	if err != nil {
-		return nil, errors.Wrap(err, "models: failed to assign all query results to Source slice")
+		return nil, errors.Wrap(err, "models: failed to assign all query results to NovelType slice")
 	}
 
-	if len(sourceAfterSelectHooks) != 0 {
+	if len(novelTypeAfterSelectHooks) != 0 {
 		for _, obj := range o {
 			if err := obj.doAfterSelectHooks(ctx, exec); err != nil {
 				return o, err
@@ -325,8 +320,8 @@ func (q sourceQuery) All(ctx context.Context, exec boil.ContextExecutor) (Source
 	return o, nil
 }
 
-// Count returns the count of all Source records in the query.
-func (q sourceQuery) Count(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+// Count returns the count of all NovelType records in the query.
+func (q novelTypeQuery) Count(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
 	var count int64
 
 	queries.SetSelect(q.Query, nil)
@@ -334,14 +329,14 @@ func (q sourceQuery) Count(ctx context.Context, exec boil.ContextExecutor) (int6
 
 	err := q.Query.QueryRowContext(ctx, exec).Scan(&count)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: failed to count source rows")
+		return 0, errors.Wrap(err, "models: failed to count novel_type rows")
 	}
 
 	return count, nil
 }
 
 // Exists checks if the row exists in the table.
-func (q sourceQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (bool, error) {
+func (q novelTypeQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (bool, error) {
 	var count int64
 
 	queries.SetSelect(q.Query, nil)
@@ -350,21 +345,21 @@ func (q sourceQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (boo
 
 	err := q.Query.QueryRowContext(ctx, exec).Scan(&count)
 	if err != nil {
-		return false, errors.Wrap(err, "models: failed to check if source exists")
+		return false, errors.Wrap(err, "models: failed to check if novel_type exists")
 	}
 
 	return count > 0, nil
 }
 
-// Novels retrieves all the novel's Novels with an executor.
-func (o *Source) Novels(mods ...qm.QueryMod) novelQuery {
+// NtypeNovels retrieves all the novel's Novels with an executor via ntype_id column.
+func (o *NovelType) NtypeNovels(mods ...qm.QueryMod) novelQuery {
 	var queryMods []qm.QueryMod
 	if len(mods) != 0 {
 		queryMods = append(queryMods, mods...)
 	}
 
 	queryMods = append(queryMods,
-		qm.Where("\"ste\".\"novel\".\"source_id\"=?", o.ID),
+		qm.Where("\"ste\".\"novel\".\"ntype_id\"=?", o.ID),
 	)
 
 	query := Novels(queryMods...)
@@ -377,29 +372,29 @@ func (o *Source) Novels(mods ...qm.QueryMod) novelQuery {
 	return query
 }
 
-// LoadNovels allows an eager lookup of values, cached into the
+// LoadNtypeNovels allows an eager lookup of values, cached into the
 // loaded structs of the objects. This is for a 1-M or N-M relationship.
-func (sourceL) LoadNovels(ctx context.Context, e boil.ContextExecutor, singular bool, maybeSource interface{}, mods queries.Applicator) error {
-	var slice []*Source
-	var object *Source
+func (novelTypeL) LoadNtypeNovels(ctx context.Context, e boil.ContextExecutor, singular bool, maybeNovelType interface{}, mods queries.Applicator) error {
+	var slice []*NovelType
+	var object *NovelType
 
 	if singular {
-		object = maybeSource.(*Source)
+		object = maybeNovelType.(*NovelType)
 	} else {
-		slice = *maybeSource.(*[]*Source)
+		slice = *maybeNovelType.(*[]*NovelType)
 	}
 
 	args := make([]interface{}, 0, 1)
 	if singular {
 		if object.R == nil {
-			object.R = &sourceR{}
+			object.R = &novelTypeR{}
 		}
 		args = append(args, object.ID)
 	} else {
 	Outer:
 		for _, obj := range slice {
 			if obj.R == nil {
-				obj.R = &sourceR{}
+				obj.R = &novelTypeR{}
 			}
 
 			for _, a := range args {
@@ -416,7 +411,7 @@ func (sourceL) LoadNovels(ctx context.Context, e boil.ContextExecutor, singular 
 		return nil
 	}
 
-	query := NewQuery(qm.From(`ste.novel`), qm.WhereIn(`source_id in ?`, args...))
+	query := NewQuery(qm.From(`ste.novel`), qm.WhereIn(`ntype_id in ?`, args...))
 	if mods != nil {
 		mods.Apply(query)
 	}
@@ -446,24 +441,24 @@ func (sourceL) LoadNovels(ctx context.Context, e boil.ContextExecutor, singular 
 		}
 	}
 	if singular {
-		object.R.Novels = resultSlice
+		object.R.NtypeNovels = resultSlice
 		for _, foreign := range resultSlice {
 			if foreign.R == nil {
 				foreign.R = &novelR{}
 			}
-			foreign.R.Source = object
+			foreign.R.Ntype = object
 		}
 		return nil
 	}
 
 	for _, foreign := range resultSlice {
 		for _, local := range slice {
-			if queries.Equal(local.ID, foreign.SourceID) {
-				local.R.Novels = append(local.R.Novels, foreign)
+			if queries.Equal(local.ID, foreign.NtypeID) {
+				local.R.NtypeNovels = append(local.R.NtypeNovels, foreign)
 				if foreign.R == nil {
 					foreign.R = &novelR{}
 				}
-				foreign.R.Source = local
+				foreign.R.Ntype = local
 				break
 			}
 		}
@@ -472,22 +467,22 @@ func (sourceL) LoadNovels(ctx context.Context, e boil.ContextExecutor, singular 
 	return nil
 }
 
-// AddNovels adds the given related objects to the existing relationships
-// of the source, optionally inserting them as new records.
-// Appends related to o.R.Novels.
-// Sets related.R.Source appropriately.
-func (o *Source) AddNovels(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Novel) error {
+// AddNtypeNovels adds the given related objects to the existing relationships
+// of the novel_type, optionally inserting them as new records.
+// Appends related to o.R.NtypeNovels.
+// Sets related.R.Ntype appropriately.
+func (o *NovelType) AddNtypeNovels(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Novel) error {
 	var err error
 	for _, rel := range related {
 		if insert {
-			queries.Assign(&rel.SourceID, o.ID)
+			queries.Assign(&rel.NtypeID, o.ID)
 			if err = rel.Insert(ctx, exec, boil.Infer()); err != nil {
 				return errors.Wrap(err, "failed to insert into foreign table")
 			}
 		} else {
 			updateQuery := fmt.Sprintf(
 				"UPDATE \"ste\".\"novel\" SET %s WHERE %s",
-				strmangle.SetParamNames("\"", "\"", 1, []string{"source_id"}),
+				strmangle.SetParamNames("\"", "\"", 1, []string{"ntype_id"}),
 				strmangle.WhereClause("\"", "\"", 2, novelPrimaryKeyColumns),
 			)
 			values := []interface{}{o.ID, rel.ID}
@@ -501,38 +496,38 @@ func (o *Source) AddNovels(ctx context.Context, exec boil.ContextExecutor, inser
 				return errors.Wrap(err, "failed to update foreign table")
 			}
 
-			queries.Assign(&rel.SourceID, o.ID)
+			queries.Assign(&rel.NtypeID, o.ID)
 		}
 	}
 
 	if o.R == nil {
-		o.R = &sourceR{
-			Novels: related,
+		o.R = &novelTypeR{
+			NtypeNovels: related,
 		}
 	} else {
-		o.R.Novels = append(o.R.Novels, related...)
+		o.R.NtypeNovels = append(o.R.NtypeNovels, related...)
 	}
 
 	for _, rel := range related {
 		if rel.R == nil {
 			rel.R = &novelR{
-				Source: o,
+				Ntype: o,
 			}
 		} else {
-			rel.R.Source = o
+			rel.R.Ntype = o
 		}
 	}
 	return nil
 }
 
-// SetNovels removes all previously related items of the
-// source replacing them completely with the passed
+// SetNtypeNovels removes all previously related items of the
+// novel_type replacing them completely with the passed
 // in related items, optionally inserting them as new records.
-// Sets o.R.Source's Novels accordingly.
-// Replaces o.R.Novels with related.
-// Sets related.R.Source's Novels accordingly.
-func (o *Source) SetNovels(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Novel) error {
-	query := "update \"ste\".\"novel\" set \"source_id\" = null where \"source_id\" = $1"
+// Sets o.R.Ntype's NtypeNovels accordingly.
+// Replaces o.R.NtypeNovels with related.
+// Sets related.R.Ntype's NtypeNovels accordingly.
+func (o *NovelType) SetNtypeNovels(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Novel) error {
+	query := "update \"ste\".\"novel\" set \"ntype_id\" = null where \"ntype_id\" = $1"
 	values := []interface{}{o.ID}
 	if boil.DebugMode {
 		fmt.Fprintln(boil.DebugWriter, query)
@@ -545,31 +540,31 @@ func (o *Source) SetNovels(ctx context.Context, exec boil.ContextExecutor, inser
 	}
 
 	if o.R != nil {
-		for _, rel := range o.R.Novels {
-			queries.SetScanner(&rel.SourceID, nil)
+		for _, rel := range o.R.NtypeNovels {
+			queries.SetScanner(&rel.NtypeID, nil)
 			if rel.R == nil {
 				continue
 			}
 
-			rel.R.Source = nil
+			rel.R.Ntype = nil
 		}
 
-		o.R.Novels = nil
+		o.R.NtypeNovels = nil
 	}
-	return o.AddNovels(ctx, exec, insert, related...)
+	return o.AddNtypeNovels(ctx, exec, insert, related...)
 }
 
-// RemoveNovels relationships from objects passed in.
-// Removes related items from R.Novels (uses pointer comparison, removal does not keep order)
-// Sets related.R.Source.
-func (o *Source) RemoveNovels(ctx context.Context, exec boil.ContextExecutor, related ...*Novel) error {
+// RemoveNtypeNovels relationships from objects passed in.
+// Removes related items from R.NtypeNovels (uses pointer comparison, removal does not keep order)
+// Sets related.R.Ntype.
+func (o *NovelType) RemoveNtypeNovels(ctx context.Context, exec boil.ContextExecutor, related ...*Novel) error {
 	var err error
 	for _, rel := range related {
-		queries.SetScanner(&rel.SourceID, nil)
+		queries.SetScanner(&rel.NtypeID, nil)
 		if rel.R != nil {
-			rel.R.Source = nil
+			rel.R.Ntype = nil
 		}
-		if _, err = rel.Update(ctx, exec, boil.Whitelist("source_id")); err != nil {
+		if _, err = rel.Update(ctx, exec, boil.Whitelist("ntype_id")); err != nil {
 			return err
 		}
 	}
@@ -578,16 +573,16 @@ func (o *Source) RemoveNovels(ctx context.Context, exec boil.ContextExecutor, re
 	}
 
 	for _, rel := range related {
-		for i, ri := range o.R.Novels {
+		for i, ri := range o.R.NtypeNovels {
 			if rel != ri {
 				continue
 			}
 
-			ln := len(o.R.Novels)
+			ln := len(o.R.NtypeNovels)
 			if ln > 1 && i < ln-1 {
-				o.R.Novels[i] = o.R.Novels[ln-1]
+				o.R.NtypeNovels[i] = o.R.NtypeNovels[ln-1]
 			}
-			o.R.Novels = o.R.Novels[:ln-1]
+			o.R.NtypeNovels = o.R.NtypeNovels[:ln-1]
 			break
 		}
 	}
@@ -595,43 +590,43 @@ func (o *Source) RemoveNovels(ctx context.Context, exec boil.ContextExecutor, re
 	return nil
 }
 
-// Sources retrieves all the records using an executor.
-func Sources(mods ...qm.QueryMod) sourceQuery {
-	mods = append(mods, qm.From("\"ste\".\"source\""))
-	return sourceQuery{NewQuery(mods...)}
+// NovelTypes retrieves all the records using an executor.
+func NovelTypes(mods ...qm.QueryMod) novelTypeQuery {
+	mods = append(mods, qm.From("\"ste\".\"novel_type\""))
+	return novelTypeQuery{NewQuery(mods...)}
 }
 
-// FindSource retrieves a single record by ID with an executor.
+// FindNovelType retrieves a single record by ID with an executor.
 // If selectCols is empty Find will return all columns.
-func FindSource(ctx context.Context, exec boil.ContextExecutor, iD int, selectCols ...string) (*Source, error) {
-	sourceObj := &Source{}
+func FindNovelType(ctx context.Context, exec boil.ContextExecutor, iD int, selectCols ...string) (*NovelType, error) {
+	novelTypeObj := &NovelType{}
 
 	sel := "*"
 	if len(selectCols) > 0 {
 		sel = strings.Join(strmangle.IdentQuoteSlice(dialect.LQ, dialect.RQ, selectCols), ",")
 	}
 	query := fmt.Sprintf(
-		"select %s from \"ste\".\"source\" where \"id\"=$1", sel,
+		"select %s from \"ste\".\"novel_type\" where \"id\"=$1", sel,
 	)
 
 	q := queries.Raw(query, iD)
 
-	err := q.Bind(ctx, exec, sourceObj)
+	err := q.Bind(ctx, exec, novelTypeObj)
 	if err != nil {
 		if errors.Cause(err) == sql.ErrNoRows {
 			return nil, sql.ErrNoRows
 		}
-		return nil, errors.Wrap(err, "models: unable to select from source")
+		return nil, errors.Wrap(err, "models: unable to select from novel_type")
 	}
 
-	return sourceObj, nil
+	return novelTypeObj, nil
 }
 
 // Insert a single record using an executor.
 // See boil.Columns.InsertColumnSet documentation to understand column list inference for inserts.
-func (o *Source) Insert(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) error {
+func (o *NovelType) Insert(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) error {
 	if o == nil {
-		return errors.New("models: no source provided for insertion")
+		return errors.New("models: no novel_type provided for insertion")
 	}
 
 	var err error
@@ -640,33 +635,33 @@ func (o *Source) Insert(ctx context.Context, exec boil.ContextExecutor, columns 
 		return err
 	}
 
-	nzDefaults := queries.NonZeroDefaultSet(sourceColumnsWithDefault, o)
+	nzDefaults := queries.NonZeroDefaultSet(novelTypeColumnsWithDefault, o)
 
 	key := makeCacheKey(columns, nzDefaults)
-	sourceInsertCacheMut.RLock()
-	cache, cached := sourceInsertCache[key]
-	sourceInsertCacheMut.RUnlock()
+	novelTypeInsertCacheMut.RLock()
+	cache, cached := novelTypeInsertCache[key]
+	novelTypeInsertCacheMut.RUnlock()
 
 	if !cached {
 		wl, returnColumns := columns.InsertColumnSet(
-			sourceColumns,
-			sourceColumnsWithDefault,
-			sourceColumnsWithoutDefault,
+			novelTypeColumns,
+			novelTypeColumnsWithDefault,
+			novelTypeColumnsWithoutDefault,
 			nzDefaults,
 		)
 
-		cache.valueMapping, err = queries.BindMapping(sourceType, sourceMapping, wl)
+		cache.valueMapping, err = queries.BindMapping(novelTypeType, novelTypeMapping, wl)
 		if err != nil {
 			return err
 		}
-		cache.retMapping, err = queries.BindMapping(sourceType, sourceMapping, returnColumns)
+		cache.retMapping, err = queries.BindMapping(novelTypeType, novelTypeMapping, returnColumns)
 		if err != nil {
 			return err
 		}
 		if len(wl) != 0 {
-			cache.query = fmt.Sprintf("INSERT INTO \"ste\".\"source\" (\"%s\") %%sVALUES (%s)%%s", strings.Join(wl, "\",\""), strmangle.Placeholders(dialect.UseIndexPlaceholders, len(wl), 1, 1))
+			cache.query = fmt.Sprintf("INSERT INTO \"ste\".\"novel_type\" (\"%s\") %%sVALUES (%s)%%s", strings.Join(wl, "\",\""), strmangle.Placeholders(dialect.UseIndexPlaceholders, len(wl), 1, 1))
 		} else {
-			cache.query = "INSERT INTO \"ste\".\"source\" %sDEFAULT VALUES%s"
+			cache.query = "INSERT INTO \"ste\".\"novel_type\" %sDEFAULT VALUES%s"
 		}
 
 		var queryOutput, queryReturning string
@@ -693,49 +688,49 @@ func (o *Source) Insert(ctx context.Context, exec boil.ContextExecutor, columns 
 	}
 
 	if err != nil {
-		return errors.Wrap(err, "models: unable to insert into source")
+		return errors.Wrap(err, "models: unable to insert into novel_type")
 	}
 
 	if !cached {
-		sourceInsertCacheMut.Lock()
-		sourceInsertCache[key] = cache
-		sourceInsertCacheMut.Unlock()
+		novelTypeInsertCacheMut.Lock()
+		novelTypeInsertCache[key] = cache
+		novelTypeInsertCacheMut.Unlock()
 	}
 
 	return o.doAfterInsertHooks(ctx, exec)
 }
 
-// Update uses an executor to update the Source.
+// Update uses an executor to update the NovelType.
 // See boil.Columns.UpdateColumnSet documentation to understand column list inference for updates.
 // Update does not automatically update the record in case of default values. Use .Reload() to refresh the records.
-func (o *Source) Update(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) (int64, error) {
+func (o *NovelType) Update(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) (int64, error) {
 	var err error
 	if err = o.doBeforeUpdateHooks(ctx, exec); err != nil {
 		return 0, err
 	}
 	key := makeCacheKey(columns, nil)
-	sourceUpdateCacheMut.RLock()
-	cache, cached := sourceUpdateCache[key]
-	sourceUpdateCacheMut.RUnlock()
+	novelTypeUpdateCacheMut.RLock()
+	cache, cached := novelTypeUpdateCache[key]
+	novelTypeUpdateCacheMut.RUnlock()
 
 	if !cached {
 		wl := columns.UpdateColumnSet(
-			sourceColumns,
-			sourcePrimaryKeyColumns,
+			novelTypeColumns,
+			novelTypePrimaryKeyColumns,
 		)
 
 		if !columns.IsWhitelist() {
 			wl = strmangle.SetComplement(wl, []string{"created_at"})
 		}
 		if len(wl) == 0 {
-			return 0, errors.New("models: unable to update source, could not build whitelist")
+			return 0, errors.New("models: unable to update novel_type, could not build whitelist")
 		}
 
-		cache.query = fmt.Sprintf("UPDATE \"ste\".\"source\" SET %s WHERE %s",
+		cache.query = fmt.Sprintf("UPDATE \"ste\".\"novel_type\" SET %s WHERE %s",
 			strmangle.SetParamNames("\"", "\"", 1, wl),
-			strmangle.WhereClause("\"", "\"", len(wl)+1, sourcePrimaryKeyColumns),
+			strmangle.WhereClause("\"", "\"", len(wl)+1, novelTypePrimaryKeyColumns),
 		)
-		cache.valueMapping, err = queries.BindMapping(sourceType, sourceMapping, append(wl, sourcePrimaryKeyColumns...))
+		cache.valueMapping, err = queries.BindMapping(novelTypeType, novelTypeMapping, append(wl, novelTypePrimaryKeyColumns...))
 		if err != nil {
 			return 0, err
 		}
@@ -751,42 +746,42 @@ func (o *Source) Update(ctx context.Context, exec boil.ContextExecutor, columns 
 	var result sql.Result
 	result, err = exec.ExecContext(ctx, cache.query, values...)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to update source row")
+		return 0, errors.Wrap(err, "models: unable to update novel_type row")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "models: failed to get rows affected by update for source")
+		return 0, errors.Wrap(err, "models: failed to get rows affected by update for novel_type")
 	}
 
 	if !cached {
-		sourceUpdateCacheMut.Lock()
-		sourceUpdateCache[key] = cache
-		sourceUpdateCacheMut.Unlock()
+		novelTypeUpdateCacheMut.Lock()
+		novelTypeUpdateCache[key] = cache
+		novelTypeUpdateCacheMut.Unlock()
 	}
 
 	return rowsAff, o.doAfterUpdateHooks(ctx, exec)
 }
 
 // UpdateAll updates all rows with the specified column values.
-func (q sourceQuery) UpdateAll(ctx context.Context, exec boil.ContextExecutor, cols M) (int64, error) {
+func (q novelTypeQuery) UpdateAll(ctx context.Context, exec boil.ContextExecutor, cols M) (int64, error) {
 	queries.SetUpdate(q.Query, cols)
 
 	result, err := q.Query.ExecContext(ctx, exec)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to update all for source")
+		return 0, errors.Wrap(err, "models: unable to update all for novel_type")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to retrieve rows affected for source")
+		return 0, errors.Wrap(err, "models: unable to retrieve rows affected for novel_type")
 	}
 
 	return rowsAff, nil
 }
 
 // UpdateAll updates all rows with the specified column values, using an executor.
-func (o SourceSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, cols M) (int64, error) {
+func (o NovelTypeSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, cols M) (int64, error) {
 	ln := int64(len(o))
 	if ln == 0 {
 		return 0, nil
@@ -808,13 +803,13 @@ func (o SourceSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, c
 
 	// Append all of the primary key values for each column
 	for _, obj := range o {
-		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), sourcePrimaryKeyMapping)
+		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), novelTypePrimaryKeyMapping)
 		args = append(args, pkeyArgs...)
 	}
 
-	sql := fmt.Sprintf("UPDATE \"ste\".\"source\" SET %s WHERE %s",
+	sql := fmt.Sprintf("UPDATE \"ste\".\"novel_type\" SET %s WHERE %s",
 		strmangle.SetParamNames("\"", "\"", 1, colNames),
-		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), len(colNames)+1, sourcePrimaryKeyColumns, len(o)))
+		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), len(colNames)+1, novelTypePrimaryKeyColumns, len(o)))
 
 	if boil.DebugMode {
 		fmt.Fprintln(boil.DebugWriter, sql)
@@ -823,28 +818,28 @@ func (o SourceSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, c
 
 	result, err := exec.ExecContext(ctx, sql, args...)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to update all in source slice")
+		return 0, errors.Wrap(err, "models: unable to update all in novelType slice")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to retrieve rows affected all in update all source")
+		return 0, errors.Wrap(err, "models: unable to retrieve rows affected all in update all novelType")
 	}
 	return rowsAff, nil
 }
 
 // Upsert attempts an insert using an executor, and does an update or ignore on conflict.
 // See boil.Columns documentation for how to properly use updateColumns and insertColumns.
-func (o *Source) Upsert(ctx context.Context, exec boil.ContextExecutor, updateOnConflict bool, conflictColumns []string, updateColumns, insertColumns boil.Columns) error {
+func (o *NovelType) Upsert(ctx context.Context, exec boil.ContextExecutor, updateOnConflict bool, conflictColumns []string, updateColumns, insertColumns boil.Columns) error {
 	if o == nil {
-		return errors.New("models: no source provided for upsert")
+		return errors.New("models: no novel_type provided for upsert")
 	}
 
 	if err := o.doBeforeUpsertHooks(ctx, exec); err != nil {
 		return err
 	}
 
-	nzDefaults := queries.NonZeroDefaultSet(sourceColumnsWithDefault, o)
+	nzDefaults := queries.NonZeroDefaultSet(novelTypeColumnsWithDefault, o)
 
 	// Build cache key in-line uglily - mysql vs psql problems
 	buf := strmangle.GetBuffer()
@@ -874,41 +869,41 @@ func (o *Source) Upsert(ctx context.Context, exec boil.ContextExecutor, updateOn
 	key := buf.String()
 	strmangle.PutBuffer(buf)
 
-	sourceUpsertCacheMut.RLock()
-	cache, cached := sourceUpsertCache[key]
-	sourceUpsertCacheMut.RUnlock()
+	novelTypeUpsertCacheMut.RLock()
+	cache, cached := novelTypeUpsertCache[key]
+	novelTypeUpsertCacheMut.RUnlock()
 
 	var err error
 
 	if !cached {
 		insert, ret := insertColumns.InsertColumnSet(
-			sourceColumns,
-			sourceColumnsWithDefault,
-			sourceColumnsWithoutDefault,
+			novelTypeColumns,
+			novelTypeColumnsWithDefault,
+			novelTypeColumnsWithoutDefault,
 			nzDefaults,
 		)
 		update := updateColumns.UpdateColumnSet(
-			sourceColumns,
-			sourcePrimaryKeyColumns,
+			novelTypeColumns,
+			novelTypePrimaryKeyColumns,
 		)
 
 		if updateOnConflict && len(update) == 0 {
-			return errors.New("models: unable to upsert source, could not build update column list")
+			return errors.New("models: unable to upsert novel_type, could not build update column list")
 		}
 
 		conflict := conflictColumns
 		if len(conflict) == 0 {
-			conflict = make([]string, len(sourcePrimaryKeyColumns))
-			copy(conflict, sourcePrimaryKeyColumns)
+			conflict = make([]string, len(novelTypePrimaryKeyColumns))
+			copy(conflict, novelTypePrimaryKeyColumns)
 		}
-		cache.query = buildUpsertQueryPostgres(dialect, "\"ste\".\"source\"", updateOnConflict, ret, update, conflict, insert)
+		cache.query = buildUpsertQueryPostgres(dialect, "\"ste\".\"novel_type\"", updateOnConflict, ret, update, conflict, insert)
 
-		cache.valueMapping, err = queries.BindMapping(sourceType, sourceMapping, insert)
+		cache.valueMapping, err = queries.BindMapping(novelTypeType, novelTypeMapping, insert)
 		if err != nil {
 			return err
 		}
 		if len(ret) != 0 {
-			cache.retMapping, err = queries.BindMapping(sourceType, sourceMapping, ret)
+			cache.retMapping, err = queries.BindMapping(novelTypeType, novelTypeMapping, ret)
 			if err != nil {
 				return err
 			}
@@ -936,31 +931,31 @@ func (o *Source) Upsert(ctx context.Context, exec boil.ContextExecutor, updateOn
 		_, err = exec.ExecContext(ctx, cache.query, vals...)
 	}
 	if err != nil {
-		return errors.Wrap(err, "models: unable to upsert source")
+		return errors.Wrap(err, "models: unable to upsert novel_type")
 	}
 
 	if !cached {
-		sourceUpsertCacheMut.Lock()
-		sourceUpsertCache[key] = cache
-		sourceUpsertCacheMut.Unlock()
+		novelTypeUpsertCacheMut.Lock()
+		novelTypeUpsertCache[key] = cache
+		novelTypeUpsertCacheMut.Unlock()
 	}
 
 	return o.doAfterUpsertHooks(ctx, exec)
 }
 
-// Delete deletes a single Source record with an executor.
+// Delete deletes a single NovelType record with an executor.
 // Delete will match against the primary key column to find the record to delete.
-func (o *Source) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+func (o *NovelType) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
 	if o == nil {
-		return 0, errors.New("models: no Source provided for delete")
+		return 0, errors.New("models: no NovelType provided for delete")
 	}
 
 	if err := o.doBeforeDeleteHooks(ctx, exec); err != nil {
 		return 0, err
 	}
 
-	args := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), sourcePrimaryKeyMapping)
-	sql := "DELETE FROM \"ste\".\"source\" WHERE \"id\"=$1"
+	args := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), novelTypePrimaryKeyMapping)
+	sql := "DELETE FROM \"ste\".\"novel_type\" WHERE \"id\"=$1"
 
 	if boil.DebugMode {
 		fmt.Fprintln(boil.DebugWriter, sql)
@@ -969,12 +964,12 @@ func (o *Source) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, 
 
 	result, err := exec.ExecContext(ctx, sql, args...)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to delete from source")
+		return 0, errors.Wrap(err, "models: unable to delete from novel_type")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "models: failed to get rows affected by delete for source")
+		return 0, errors.Wrap(err, "models: failed to get rows affected by delete for novel_type")
 	}
 
 	if err := o.doAfterDeleteHooks(ctx, exec); err != nil {
@@ -985,37 +980,37 @@ func (o *Source) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, 
 }
 
 // DeleteAll deletes all matching rows.
-func (q sourceQuery) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+func (q novelTypeQuery) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
 	if q.Query == nil {
-		return 0, errors.New("models: no sourceQuery provided for delete all")
+		return 0, errors.New("models: no novelTypeQuery provided for delete all")
 	}
 
 	queries.SetDelete(q.Query)
 
 	result, err := q.Query.ExecContext(ctx, exec)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to delete all from source")
+		return 0, errors.Wrap(err, "models: unable to delete all from novel_type")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "models: failed to get rows affected by deleteall for source")
+		return 0, errors.Wrap(err, "models: failed to get rows affected by deleteall for novel_type")
 	}
 
 	return rowsAff, nil
 }
 
 // DeleteAll deletes all rows in the slice, using an executor.
-func (o SourceSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+func (o NovelTypeSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
 	if o == nil {
-		return 0, errors.New("models: no Source slice provided for delete all")
+		return 0, errors.New("models: no NovelType slice provided for delete all")
 	}
 
 	if len(o) == 0 {
 		return 0, nil
 	}
 
-	if len(sourceBeforeDeleteHooks) != 0 {
+	if len(novelTypeBeforeDeleteHooks) != 0 {
 		for _, obj := range o {
 			if err := obj.doBeforeDeleteHooks(ctx, exec); err != nil {
 				return 0, err
@@ -1025,12 +1020,12 @@ func (o SourceSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (
 
 	var args []interface{}
 	for _, obj := range o {
-		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), sourcePrimaryKeyMapping)
+		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), novelTypePrimaryKeyMapping)
 		args = append(args, pkeyArgs...)
 	}
 
-	sql := "DELETE FROM \"ste\".\"source\" WHERE " +
-		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 1, sourcePrimaryKeyColumns, len(o))
+	sql := "DELETE FROM \"ste\".\"novel_type\" WHERE " +
+		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 1, novelTypePrimaryKeyColumns, len(o))
 
 	if boil.DebugMode {
 		fmt.Fprintln(boil.DebugWriter, sql)
@@ -1039,15 +1034,15 @@ func (o SourceSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (
 
 	result, err := exec.ExecContext(ctx, sql, args...)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to delete all from source slice")
+		return 0, errors.Wrap(err, "models: unable to delete all from novelType slice")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "models: failed to get rows affected by deleteall for source")
+		return 0, errors.Wrap(err, "models: failed to get rows affected by deleteall for novel_type")
 	}
 
-	if len(sourceAfterDeleteHooks) != 0 {
+	if len(novelTypeAfterDeleteHooks) != 0 {
 		for _, obj := range o {
 			if err := obj.doAfterDeleteHooks(ctx, exec); err != nil {
 				return 0, err
@@ -1060,8 +1055,8 @@ func (o SourceSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (
 
 // Reload refetches the object from the database
 // using the primary keys with an executor.
-func (o *Source) Reload(ctx context.Context, exec boil.ContextExecutor) error {
-	ret, err := FindSource(ctx, exec, o.ID)
+func (o *NovelType) Reload(ctx context.Context, exec boil.ContextExecutor) error {
+	ret, err := FindNovelType(ctx, exec, o.ID)
 	if err != nil {
 		return err
 	}
@@ -1072,26 +1067,26 @@ func (o *Source) Reload(ctx context.Context, exec boil.ContextExecutor) error {
 
 // ReloadAll refetches every row with matching primary key column values
 // and overwrites the original object slice with the newly updated slice.
-func (o *SourceSlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor) error {
+func (o *NovelTypeSlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor) error {
 	if o == nil || len(*o) == 0 {
 		return nil
 	}
 
-	slice := SourceSlice{}
+	slice := NovelTypeSlice{}
 	var args []interface{}
 	for _, obj := range *o {
-		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), sourcePrimaryKeyMapping)
+		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), novelTypePrimaryKeyMapping)
 		args = append(args, pkeyArgs...)
 	}
 
-	sql := "SELECT \"ste\".\"source\".* FROM \"ste\".\"source\" WHERE " +
-		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 1, sourcePrimaryKeyColumns, len(*o))
+	sql := "SELECT \"ste\".\"novel_type\".* FROM \"ste\".\"novel_type\" WHERE " +
+		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 1, novelTypePrimaryKeyColumns, len(*o))
 
 	q := queries.Raw(sql, args...)
 
 	err := q.Bind(ctx, exec, &slice)
 	if err != nil {
-		return errors.Wrap(err, "models: unable to reload all in SourceSlice")
+		return errors.Wrap(err, "models: unable to reload all in NovelTypeSlice")
 	}
 
 	*o = slice
@@ -1099,10 +1094,10 @@ func (o *SourceSlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor) 
 	return nil
 }
 
-// SourceExists checks if the Source row exists.
-func SourceExists(ctx context.Context, exec boil.ContextExecutor, iD int) (bool, error) {
+// NovelTypeExists checks if the NovelType row exists.
+func NovelTypeExists(ctx context.Context, exec boil.ContextExecutor, iD int) (bool, error) {
 	var exists bool
-	sql := "select exists(select 1 from \"ste\".\"source\" where \"id\"=$1 limit 1)"
+	sql := "select exists(select 1 from \"ste\".\"novel_type\" where \"id\"=$1 limit 1)"
 
 	if boil.DebugMode {
 		fmt.Fprintln(boil.DebugWriter, sql)
@@ -1113,7 +1108,7 @@ func SourceExists(ctx context.Context, exec boil.ContextExecutor, iD int) (bool,
 
 	err := row.Scan(&exists)
 	if err != nil {
-		return false, errors.Wrap(err, "models: unable to check if source exists")
+		return false, errors.Wrap(err, "models: unable to check if novel_type exists")
 	}
 
 	return exists, nil

@@ -2732,7 +2732,7 @@ func testNovelToOneSourceUsingSource(t *testing.T) {
 	var foreign Source
 
 	seed := randomize.NewSeed()
-	if err := randomize.Struct(seed, &local, novelDBTypes, false, novelColumnsWithDefault...); err != nil {
+	if err := randomize.Struct(seed, &local, novelDBTypes, true, novelColumnsWithDefault...); err != nil {
 		t.Errorf("Unable to randomize Novel struct: %s", err)
 	}
 	if err := randomize.Struct(seed, &foreign, sourceDBTypes, false, sourceColumnsWithDefault...); err != nil {
@@ -2743,7 +2743,7 @@ func testNovelToOneSourceUsingSource(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	local.SourceID = foreign.ID
+	queries.Assign(&local.SourceID, foreign.ID)
 	if err := local.Insert(ctx, tx, boil.Infer()); err != nil {
 		t.Fatal(err)
 	}
@@ -2753,7 +2753,7 @@ func testNovelToOneSourceUsingSource(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if check.ID != foreign.ID {
+	if !queries.Equal(check.ID, foreign.ID) {
 		t.Errorf("want: %v, got %v", foreign.ID, check.ID)
 	}
 
@@ -2821,6 +2821,57 @@ func testNovelToOneLanguageUsingLanguage(t *testing.T) {
 		t.Fatal(err)
 	}
 	if local.R.Language == nil {
+		t.Error("struct should have been eager loaded")
+	}
+}
+
+func testNovelToOneNovelTypeUsingNtype(t *testing.T) {
+	ctx := context.Background()
+	tx := MustTx(boil.BeginTx(ctx, nil))
+	defer func() { _ = tx.Rollback() }()
+
+	var local Novel
+	var foreign NovelType
+
+	seed := randomize.NewSeed()
+	if err := randomize.Struct(seed, &local, novelDBTypes, true, novelColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Novel struct: %s", err)
+	}
+	if err := randomize.Struct(seed, &foreign, novelTypeDBTypes, false, novelTypeColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize NovelType struct: %s", err)
+	}
+
+	if err := foreign.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	queries.Assign(&local.NtypeID, foreign.ID)
+	if err := local.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	check, err := local.Ntype().One(ctx, tx)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !queries.Equal(check.ID, foreign.ID) {
+		t.Errorf("want: %v, got %v", foreign.ID, check.ID)
+	}
+
+	slice := NovelSlice{&local}
+	if err = local.L.LoadNtype(ctx, tx, false, (*[]*Novel)(&slice), nil); err != nil {
+		t.Fatal(err)
+	}
+	if local.R.Ntype == nil {
+		t.Error("struct should have been eager loaded")
+	}
+
+	local.R.Ntype = nil
+	if err = local.L.LoadNtype(ctx, tx, true, &local, nil); err != nil {
+		t.Fatal(err)
+	}
+	if local.R.Ntype == nil {
 		t.Error("struct should have been eager loaded")
 	}
 }
@@ -2975,7 +3026,7 @@ func testNovelToOneSetOpSourceUsingSource(t *testing.T) {
 		if x.R.Novels[0] != &a {
 			t.Error("failed to append to foreign relationship struct")
 		}
-		if a.SourceID != x.ID {
+		if !queries.Equal(a.SourceID, x.ID) {
 			t.Error("foreign key was wrong value", a.SourceID)
 		}
 
@@ -2986,11 +3037,63 @@ func testNovelToOneSetOpSourceUsingSource(t *testing.T) {
 			t.Fatal("failed to reload", err)
 		}
 
-		if a.SourceID != x.ID {
+		if !queries.Equal(a.SourceID, x.ID) {
 			t.Error("foreign key was wrong value", a.SourceID, x.ID)
 		}
 	}
 }
+
+func testNovelToOneRemoveOpSourceUsingSource(t *testing.T) {
+	var err error
+
+	ctx := context.Background()
+	tx := MustTx(boil.BeginTx(ctx, nil))
+	defer func() { _ = tx.Rollback() }()
+
+	var a Novel
+	var b Source
+
+	seed := randomize.NewSeed()
+	if err = randomize.Struct(seed, &a, novelDBTypes, false, strmangle.SetComplement(novelPrimaryKeyColumns, novelColumnsWithoutDefault)...); err != nil {
+		t.Fatal(err)
+	}
+	if err = randomize.Struct(seed, &b, sourceDBTypes, false, strmangle.SetComplement(sourcePrimaryKeyColumns, sourceColumnsWithoutDefault)...); err != nil {
+		t.Fatal(err)
+	}
+
+	if err = a.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	if err = a.SetSource(ctx, tx, true, &b); err != nil {
+		t.Fatal(err)
+	}
+
+	if err = a.RemoveSource(ctx, tx, &b); err != nil {
+		t.Error("failed to remove relationship")
+	}
+
+	count, err := a.Source().Count(ctx, tx)
+	if err != nil {
+		t.Error(err)
+	}
+	if count != 0 {
+		t.Error("want no relationships remaining")
+	}
+
+	if a.R.Source != nil {
+		t.Error("R struct entry should be nil")
+	}
+
+	if !queries.IsValuerNil(a.SourceID) {
+		t.Error("foreign key value should be nil")
+	}
+
+	if len(b.R.Novels) != 0 {
+		t.Error("failed to remove a from b's relationships")
+	}
+}
+
 func testNovelToOneSetOpLanguageUsingLanguage(t *testing.T) {
 	var err error
 
@@ -3100,6 +3203,115 @@ func testNovelToOneRemoveOpLanguageUsingLanguage(t *testing.T) {
 	}
 }
 
+func testNovelToOneSetOpNovelTypeUsingNtype(t *testing.T) {
+	var err error
+
+	ctx := context.Background()
+	tx := MustTx(boil.BeginTx(ctx, nil))
+	defer func() { _ = tx.Rollback() }()
+
+	var a Novel
+	var b, c NovelType
+
+	seed := randomize.NewSeed()
+	if err = randomize.Struct(seed, &a, novelDBTypes, false, strmangle.SetComplement(novelPrimaryKeyColumns, novelColumnsWithoutDefault)...); err != nil {
+		t.Fatal(err)
+	}
+	if err = randomize.Struct(seed, &b, novelTypeDBTypes, false, strmangle.SetComplement(novelTypePrimaryKeyColumns, novelTypeColumnsWithoutDefault)...); err != nil {
+		t.Fatal(err)
+	}
+	if err = randomize.Struct(seed, &c, novelTypeDBTypes, false, strmangle.SetComplement(novelTypePrimaryKeyColumns, novelTypeColumnsWithoutDefault)...); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := a.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	for i, x := range []*NovelType{&b, &c} {
+		err = a.SetNtype(ctx, tx, i != 0, x)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if a.R.Ntype != x {
+			t.Error("relationship struct not set to correct value")
+		}
+
+		if x.R.NtypeNovels[0] != &a {
+			t.Error("failed to append to foreign relationship struct")
+		}
+		if !queries.Equal(a.NtypeID, x.ID) {
+			t.Error("foreign key was wrong value", a.NtypeID)
+		}
+
+		zero := reflect.Zero(reflect.TypeOf(a.NtypeID))
+		reflect.Indirect(reflect.ValueOf(&a.NtypeID)).Set(zero)
+
+		if err = a.Reload(ctx, tx); err != nil {
+			t.Fatal("failed to reload", err)
+		}
+
+		if !queries.Equal(a.NtypeID, x.ID) {
+			t.Error("foreign key was wrong value", a.NtypeID, x.ID)
+		}
+	}
+}
+
+func testNovelToOneRemoveOpNovelTypeUsingNtype(t *testing.T) {
+	var err error
+
+	ctx := context.Background()
+	tx := MustTx(boil.BeginTx(ctx, nil))
+	defer func() { _ = tx.Rollback() }()
+
+	var a Novel
+	var b NovelType
+
+	seed := randomize.NewSeed()
+	if err = randomize.Struct(seed, &a, novelDBTypes, false, strmangle.SetComplement(novelPrimaryKeyColumns, novelColumnsWithoutDefault)...); err != nil {
+		t.Fatal(err)
+	}
+	if err = randomize.Struct(seed, &b, novelTypeDBTypes, false, strmangle.SetComplement(novelTypePrimaryKeyColumns, novelTypeColumnsWithoutDefault)...); err != nil {
+		t.Fatal(err)
+	}
+
+	if err = a.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	if err = a.SetNtype(ctx, tx, true, &b); err != nil {
+		t.Fatal(err)
+	}
+
+	if err = a.RemoveNtype(ctx, tx, &b); err != nil {
+		t.Error("failed to remove relationship")
+	}
+
+	count, err := a.Ntype().Count(ctx, tx)
+	if err != nil {
+		t.Error(err)
+	}
+	if count != 0 {
+		t.Error("want no relationships remaining")
+	}
+
+	if a.R.Ntype != nil {
+		t.Error("R struct entry should be nil")
+	}
+
+	if !queries.IsValuerNil(a.NtypeID) {
+		t.Error("foreign key value should be nil")
+	}
+
+	if len(b.R.NtypeNovels) != 0 {
+		t.Error("failed to remove a from b's relationships")
+	}
+}
+
 func testNovelsReload(t *testing.T) {
 	t.Parallel()
 
@@ -3174,7 +3386,7 @@ func testNovelsSelect(t *testing.T) {
 }
 
 var (
-	novelDBTypes = map[string]string{`ID`: `integer`, `Title`: `text`, `Chaptercount`: `integer`, `NovelIDSTR`: `text`, `Type`: `integer`, `Description`: `text`, `LanguageID`: `integer`, `Year`: `integer`, `Status`: `integer`, `Licensed`: `boolean`, `CompletlyTranslated`: `boolean`, `CoverID`: `integer`, `SourceID`: `integer`, `UpdatedAt`: `date`}
+	novelDBTypes = map[string]string{`ID`: `integer`, `Title`: `text`, `Chaptercount`: `integer`, `NovelIDSTR`: `text`, `NtypeID`: `integer`, `Description`: `text`, `LanguageID`: `integer`, `Year`: `integer`, `Status`: `integer`, `Licensed`: `boolean`, `CompletlyTranslated`: `boolean`, `CoverID`: `integer`, `SourceID`: `integer`, `UpdatedAt`: `date`, `FetchedAt`: `date`}
 	_            = bytes.MinRead
 )
 

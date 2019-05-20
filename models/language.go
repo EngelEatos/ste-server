@@ -26,7 +26,6 @@ import (
 type Language struct {
 	ID   int         `boil:"id" json:"id" toml:"id" yaml:"id"`
 	Name null.String `boil:"name" json:"name,omitempty" toml:"name" yaml:"name,omitempty"`
-	URL  null.String `boil:"url" json:"url,omitempty" toml:"url" yaml:"url,omitempty"`
 
 	R *languageR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L languageL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -35,11 +34,9 @@ type Language struct {
 var LanguageColumns = struct {
 	ID   string
 	Name string
-	URL  string
 }{
 	ID:   "id",
 	Name: "name",
-	URL:  "url",
 }
 
 // Generated where
@@ -47,11 +44,9 @@ var LanguageColumns = struct {
 var LanguageWhere = struct {
 	ID   whereHelperint
 	Name whereHelpernull_String
-	URL  whereHelpernull_String
 }{
 	ID:   whereHelperint{field: `id`},
 	Name: whereHelpernull_String{field: `name`},
-	URL:  whereHelpernull_String{field: `url`},
 }
 
 // LanguageRels is where relationship names are stored.
@@ -75,8 +70,8 @@ func (*languageR) NewStruct() *languageR {
 type languageL struct{}
 
 var (
-	languageColumns               = []string{"id", "name", "url"}
-	languageColumnsWithoutDefault = []string{"id", "name", "url"}
+	languageColumns               = []string{"id", "name"}
+	languageColumnsWithoutDefault = []string{"id", "name"}
 	languageColumnsWithDefault    = []string{}
 	languagePrimaryKeyColumns     = []string{"id"}
 )

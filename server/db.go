@@ -51,10 +51,10 @@ func (dbm *DBM) Connect() error {
 func (dbm *DBM) InsertNovel(ctx context.Context, novel *nuapi.Novel) (*models.Novel, error) {
 	iCover, err := dbm.InsertCover(ctx, novel)
 	inovel := &models.Novel{
-		Title:               null.StringFrom(novel.Title),
+		Title:               novel.Title,
 		Chaptercount:        null.IntFrom(novel.Chaptercount),
 		NovelIDSTR:          null.StringFrom(novel.NovelIDSTR),
-		Type:                null.IntFrom(novel.Type),
+		NtypeID:             null.IntFrom(novel.Type),
 		Description:         null.StringFrom(novel.Description),
 		LanguageID:          null.IntFrom(novel.LanguageID),
 		Year:                null.IntFrom(novel.Year),
@@ -62,6 +62,7 @@ func (dbm *DBM) InsertNovel(ctx context.Context, novel *nuapi.Novel) (*models.No
 		Licensed:            null.BoolFrom(novel.Licensed),
 		CompletlyTranslated: null.BoolFrom(novel.CompletlyTranslated),
 		CoverID:             null.IntFrom(iCover.ID),
+		SourceID:            null.NewInt(-1, false),
 	}
 	err = inovel.Insert(ctx, dbm.DB, boil.Infer())
 	if err != nil {

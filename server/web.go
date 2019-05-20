@@ -17,6 +17,7 @@ import (
 
 func newRouter() *mux.Router {
 	r := mux.NewRouter()
+	r.HandleFunc("/", searchHandler).Methods("GET")
 	r.HandleFunc("/queues", queuesHandler).Methods("GET")
 	r.HandleFunc("/search/", searchHandler).Methods("GET")
 	r.HandleFunc("/nu", nuHandler).Methods("POST")
@@ -56,7 +57,7 @@ func seriesHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		fmt.Println(novel.Title.String)
+		fmt.Println(novel.Title)
 		t, _ := template.ParseFiles("server/templates/series.html")
 		t.Execute(w, novel)
 	} else {

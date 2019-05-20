@@ -15,6 +15,7 @@ var TableNames = struct {
 	Language       string
 	Novel          string
 	NovelQueue     string
+	NovelType      string
 	Recommendation string
 	Source         string
 	Tag            string
@@ -31,6 +32,7 @@ var TableNames = struct {
 	Language:       "language",
 	Novel:          "novel",
 	NovelQueue:     "novel_queue",
+	NovelType:      "novel_type",
 	Recommendation: "recommendation",
 	Source:         "source",
 	Tag:            "tag",

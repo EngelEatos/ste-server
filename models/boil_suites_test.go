@@ -20,6 +20,7 @@ func TestParent(t *testing.T) {
 	t.Run("Languages", testLanguages)
 	t.Run("Novels", testNovels)
 	t.Run("NovelQueues", testNovelQueues)
+	t.Run("NovelTypes", testNovelTypes)
 	t.Run("Sources", testSources)
 	t.Run("Tags", testTags)
 }
@@ -33,6 +34,7 @@ func TestDelete(t *testing.T) {
 	t.Run("Languages", testLanguagesDelete)
 	t.Run("Novels", testNovelsDelete)
 	t.Run("NovelQueues", testNovelQueuesDelete)
+	t.Run("NovelTypes", testNovelTypesDelete)
 	t.Run("Sources", testSourcesDelete)
 	t.Run("Tags", testTagsDelete)
 }
@@ -46,6 +48,7 @@ func TestQueryDeleteAll(t *testing.T) {
 	t.Run("Languages", testLanguagesQueryDeleteAll)
 	t.Run("Novels", testNovelsQueryDeleteAll)
 	t.Run("NovelQueues", testNovelQueuesQueryDeleteAll)
+	t.Run("NovelTypes", testNovelTypesQueryDeleteAll)
 	t.Run("Sources", testSourcesQueryDeleteAll)
 	t.Run("Tags", testTagsQueryDeleteAll)
 }
@@ -59,6 +62,7 @@ func TestSliceDeleteAll(t *testing.T) {
 	t.Run("Languages", testLanguagesSliceDeleteAll)
 	t.Run("Novels", testNovelsSliceDeleteAll)
 	t.Run("NovelQueues", testNovelQueuesSliceDeleteAll)
+	t.Run("NovelTypes", testNovelTypesSliceDeleteAll)
 	t.Run("Sources", testSourcesSliceDeleteAll)
 	t.Run("Tags", testTagsSliceDeleteAll)
 }
@@ -72,6 +76,7 @@ func TestExists(t *testing.T) {
 	t.Run("Languages", testLanguagesExists)
 	t.Run("Novels", testNovelsExists)
 	t.Run("NovelQueues", testNovelQueuesExists)
+	t.Run("NovelTypes", testNovelTypesExists)
 	t.Run("Sources", testSourcesExists)
 	t.Run("Tags", testTagsExists)
 }
@@ -85,6 +90,7 @@ func TestFind(t *testing.T) {
 	t.Run("Languages", testLanguagesFind)
 	t.Run("Novels", testNovelsFind)
 	t.Run("NovelQueues", testNovelQueuesFind)
+	t.Run("NovelTypes", testNovelTypesFind)
 	t.Run("Sources", testSourcesFind)
 	t.Run("Tags", testTagsFind)
 }
@@ -98,6 +104,7 @@ func TestBind(t *testing.T) {
 	t.Run("Languages", testLanguagesBind)
 	t.Run("Novels", testNovelsBind)
 	t.Run("NovelQueues", testNovelQueuesBind)
+	t.Run("NovelTypes", testNovelTypesBind)
 	t.Run("Sources", testSourcesBind)
 	t.Run("Tags", testTagsBind)
 }
@@ -111,6 +118,7 @@ func TestOne(t *testing.T) {
 	t.Run("Languages", testLanguagesOne)
 	t.Run("Novels", testNovelsOne)
 	t.Run("NovelQueues", testNovelQueuesOne)
+	t.Run("NovelTypes", testNovelTypesOne)
 	t.Run("Sources", testSourcesOne)
 	t.Run("Tags", testTagsOne)
 }
@@ -124,6 +132,7 @@ func TestAll(t *testing.T) {
 	t.Run("Languages", testLanguagesAll)
 	t.Run("Novels", testNovelsAll)
 	t.Run("NovelQueues", testNovelQueuesAll)
+	t.Run("NovelTypes", testNovelTypesAll)
 	t.Run("Sources", testSourcesAll)
 	t.Run("Tags", testTagsAll)
 }
@@ -137,6 +146,7 @@ func TestCount(t *testing.T) {
 	t.Run("Languages", testLanguagesCount)
 	t.Run("Novels", testNovelsCount)
 	t.Run("NovelQueues", testNovelQueuesCount)
+	t.Run("NovelTypes", testNovelTypesCount)
 	t.Run("Sources", testSourcesCount)
 	t.Run("Tags", testTagsCount)
 }
@@ -150,6 +160,7 @@ func TestHooks(t *testing.T) {
 	t.Run("Languages", testLanguagesHooks)
 	t.Run("Novels", testNovelsHooks)
 	t.Run("NovelQueues", testNovelQueuesHooks)
+	t.Run("NovelTypes", testNovelTypesHooks)
 	t.Run("Sources", testSourcesHooks)
 	t.Run("Tags", testTagsHooks)
 }
@@ -171,6 +182,8 @@ func TestInsert(t *testing.T) {
 	t.Run("Novels", testNovelsInsertWhitelist)
 	t.Run("NovelQueues", testNovelQueuesInsert)
 	t.Run("NovelQueues", testNovelQueuesInsertWhitelist)
+	t.Run("NovelTypes", testNovelTypesInsert)
+	t.Run("NovelTypes", testNovelTypesInsertWhitelist)
 	t.Run("Sources", testSourcesInsert)
 	t.Run("Sources", testSourcesInsertWhitelist)
 	t.Run("Tags", testTagsInsert)
@@ -185,6 +198,7 @@ func TestToOne(t *testing.T) {
 	t.Run("NovelToCoverUsingCover", testNovelToOneCoverUsingCover)
 	t.Run("NovelToSourceUsingSource", testNovelToOneSourceUsingSource)
 	t.Run("NovelToLanguageUsingLanguage", testNovelToOneLanguageUsingLanguage)
+	t.Run("NovelToNovelTypeUsingNtype", testNovelToOneNovelTypeUsingNtype)
 	t.Run("NovelQueueToNovelUsingNovel", testNovelQueueToOneNovelUsingNovel)
 }
 
@@ -209,6 +223,7 @@ func TestToMany(t *testing.T) {
 	t.Run("NovelToRecommendedNovelNovels", testNovelToManyRecommendedNovelNovels)
 	t.Run("NovelToNovels", testNovelToManyNovels)
 	t.Run("NovelToTags", testNovelToManyTags)
+	t.Run("NovelTypeToNtypeNovels", testNovelTypeToManyNtypeNovels)
 	t.Run("SourceToNovels", testSourceToManyNovels)
 	t.Run("TagToNovels", testTagToManyNovels)
 }
@@ -221,6 +236,7 @@ func TestToOneSet(t *testing.T) {
 	t.Run("NovelToCoverUsingNovels", testNovelToOneSetOpCoverUsingCover)
 	t.Run("NovelToSourceUsingNovels", testNovelToOneSetOpSourceUsingSource)
 	t.Run("NovelToLanguageUsingNovels", testNovelToOneSetOpLanguageUsingLanguage)
+	t.Run("NovelToNovelTypeUsingNtypeNovels", testNovelToOneSetOpNovelTypeUsingNtype)
 	t.Run("NovelQueueToNovelUsingNovelQueues", testNovelQueueToOneSetOpNovelUsingNovel)
 }
 
@@ -228,7 +244,9 @@ func TestToOneSet(t *testing.T) {
 // or deadlocks can occur.
 func TestToOneRemove(t *testing.T) {
 	t.Run("NovelToCoverUsingNovels", testNovelToOneRemoveOpCoverUsingCover)
+	t.Run("NovelToSourceUsingNovels", testNovelToOneRemoveOpSourceUsingSource)
 	t.Run("NovelToLanguageUsingNovels", testNovelToOneRemoveOpLanguageUsingLanguage)
+	t.Run("NovelToNovelTypeUsingNtypeNovels", testNovelToOneRemoveOpNovelTypeUsingNtype)
 }
 
 // TestOneToOneSet tests cannot be run in parallel
@@ -256,6 +274,7 @@ func TestToManyAdd(t *testing.T) {
 	t.Run("NovelToRecommendedNovelNovels", testNovelToManyAddOpRecommendedNovelNovels)
 	t.Run("NovelToNovels", testNovelToManyAddOpNovels)
 	t.Run("NovelToTags", testNovelToManyAddOpTags)
+	t.Run("NovelTypeToNtypeNovels", testNovelTypeToManyAddOpNtypeNovels)
 	t.Run("SourceToNovels", testSourceToManyAddOpNovels)
 	t.Run("TagToNovels", testTagToManyAddOpNovels)
 }
@@ -274,6 +293,8 @@ func TestToManySet(t *testing.T) {
 	t.Run("NovelToRecommendedNovelNovels", testNovelToManySetOpRecommendedNovelNovels)
 	t.Run("NovelToNovels", testNovelToManySetOpNovels)
 	t.Run("NovelToTags", testNovelToManySetOpTags)
+	t.Run("NovelTypeToNtypeNovels", testNovelTypeToManySetOpNtypeNovels)
+	t.Run("SourceToNovels", testSourceToManySetOpNovels)
 	t.Run("TagToNovels", testTagToManySetOpNovels)
 }
 
@@ -291,6 +312,8 @@ func TestToManyRemove(t *testing.T) {
 	t.Run("NovelToRecommendedNovelNovels", testNovelToManyRemoveOpRecommendedNovelNovels)
 	t.Run("NovelToNovels", testNovelToManyRemoveOpNovels)
 	t.Run("NovelToTags", testNovelToManyRemoveOpTags)
+	t.Run("NovelTypeToNtypeNovels", testNovelTypeToManyRemoveOpNtypeNovels)
+	t.Run("SourceToNovels", testSourceToManyRemoveOpNovels)
 	t.Run("TagToNovels", testTagToManyRemoveOpNovels)
 }
 
@@ -303,6 +326,7 @@ func TestReload(t *testing.T) {
 	t.Run("Languages", testLanguagesReload)
 	t.Run("Novels", testNovelsReload)
 	t.Run("NovelQueues", testNovelQueuesReload)
+	t.Run("NovelTypes", testNovelTypesReload)
 	t.Run("Sources", testSourcesReload)
 	t.Run("Tags", testTagsReload)
 }
@@ -316,6 +340,7 @@ func TestReloadAll(t *testing.T) {
 	t.Run("Languages", testLanguagesReloadAll)
 	t.Run("Novels", testNovelsReloadAll)
 	t.Run("NovelQueues", testNovelQueuesReloadAll)
+	t.Run("NovelTypes", testNovelTypesReloadAll)
 	t.Run("Sources", testSourcesReloadAll)
 	t.Run("Tags", testTagsReloadAll)
 }
@@ -329,6 +354,7 @@ func TestSelect(t *testing.T) {
 	t.Run("Languages", testLanguagesSelect)
 	t.Run("Novels", testNovelsSelect)
 	t.Run("NovelQueues", testNovelQueuesSelect)
+	t.Run("NovelTypes", testNovelTypesSelect)
 	t.Run("Sources", testSourcesSelect)
 	t.Run("Tags", testTagsSelect)
 }
@@ -342,6 +368,7 @@ func TestUpdate(t *testing.T) {
 	t.Run("Languages", testLanguagesUpdate)
 	t.Run("Novels", testNovelsUpdate)
 	t.Run("NovelQueues", testNovelQueuesUpdate)
+	t.Run("NovelTypes", testNovelTypesUpdate)
 	t.Run("Sources", testSourcesUpdate)
 	t.Run("Tags", testTagsUpdate)
 }
@@ -355,6 +382,7 @@ func TestSliceUpdateAll(t *testing.T) {
 	t.Run("Languages", testLanguagesSliceUpdateAll)
 	t.Run("Novels", testNovelsSliceUpdateAll)
 	t.Run("NovelQueues", testNovelQueuesSliceUpdateAll)
+	t.Run("NovelTypes", testNovelTypesSliceUpdateAll)
 	t.Run("Sources", testSourcesSliceUpdateAll)
 	t.Run("Tags", testTagsSliceUpdateAll)
 }

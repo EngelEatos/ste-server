@@ -26,7 +26,6 @@ import (
 type Tag struct {
 	ID   int         `boil:"id" json:"id" toml:"id" yaml:"id"`
 	Name null.String `boil:"name" json:"name,omitempty" toml:"name" yaml:"name,omitempty"`
-	URL  null.String `boil:"url" json:"url,omitempty" toml:"url" yaml:"url,omitempty"`
 
 	R *tagR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L tagL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -35,11 +34,9 @@ type Tag struct {
 var TagColumns = struct {
 	ID   string
 	Name string
-	URL  string
 }{
 	ID:   "id",
 	Name: "name",
-	URL:  "url",
 }
 
 // Generated where
@@ -47,11 +44,9 @@ var TagColumns = struct {
 var TagWhere = struct {
 	ID   whereHelperint
 	Name whereHelpernull_String
-	URL  whereHelpernull_String
 }{
 	ID:   whereHelperint{field: `id`},
 	Name: whereHelpernull_String{field: `name`},
-	URL:  whereHelpernull_String{field: `url`},
 }
 
 // TagRels is where relationship names are stored.
@@ -75,8 +70,8 @@ func (*tagR) NewStruct() *tagR {
 type tagL struct{}
 
 var (
-	tagColumns               = []string{"id", "name", "url"}
-	tagColumnsWithoutDefault = []string{"id", "name", "url"}
+	tagColumns               = []string{"id", "name"}
+	tagColumnsWithoutDefault = []string{"id", "name"}
 	tagColumnsWithDefault    = []string{}
 	tagPrimaryKeyColumns     = []string{"id"}
 )
@@ -439,7 +434,7 @@ func (tagL) LoadNovels(ctx context.Context, e boil.ContextExecutor, singular boo
 		one := new(Novel)
 		var localJoinCol int
 
-		err = results.Scan(&one.ID, &one.Title, &one.Chaptercount, &one.NovelIDSTR, &one.Type, &one.Description, &one.LanguageID, &one.Year, &one.Status, &one.Licensed, &one.CompletlyTranslated, &one.CoverID, &one.SourceID, &one.UpdatedAt, &localJoinCol)
+		err = results.Scan(&one.ID, &one.Title, &one.Chaptercount, &one.NovelIDSTR, &one.NtypeID, &one.Description, &one.LanguageID, &one.Year, &one.Status, &one.Licensed, &one.CompletlyTranslated, &one.CoverID, &one.SourceID, &one.UpdatedAt, &one.FetchedAt, &localJoinCol)
 		if err != nil {
 			return errors.Wrap(err, "failed to scan eager loaded results for novel")
 		}
