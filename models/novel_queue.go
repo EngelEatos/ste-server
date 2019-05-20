@@ -26,10 +26,9 @@ import (
 type NovelQueue struct {
 	NovelID    int         `boil:"novel_id" json:"novel_id" toml:"novel_id" yaml:"novel_id"`
 	URL        null.String `boil:"url" json:"url,omitempty" toml:"url" yaml:"url,omitempty"`
-	SourceId   null.Int    `boil:"sourceId" json:"sourceId,omitempty" toml:"sourceId" yaml:"sourceId,omitempty"`
-	QueuedAt   time.Time   `boil:"queuedAt" json:"queuedAt" toml:"queuedAt" yaml:"queuedAt"`
+	QueuedAt   time.Time   `boil:"queued_at" json:"queued_at" toml:"queued_at" yaml:"queued_at"`
 	Finished   null.Bool   `boil:"finished" json:"finished,omitempty" toml:"finished" yaml:"finished,omitempty"`
-	FinishedAt null.Time   `boil:"finishedAt" json:"finishedAt,omitempty" toml:"finishedAt" yaml:"finishedAt,omitempty"`
+	FinishedAt null.Time   `boil:"finished_at" json:"finished_at,omitempty" toml:"finished_at" yaml:"finished_at,omitempty"`
 
 	R *novelQueueR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L novelQueueL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -38,17 +37,15 @@ type NovelQueue struct {
 var NovelQueueColumns = struct {
 	NovelID    string
 	URL        string
-	SourceId   string
 	QueuedAt   string
 	Finished   string
 	FinishedAt string
 }{
 	NovelID:    "novel_id",
 	URL:        "url",
-	SourceId:   "sourceId",
-	QueuedAt:   "queuedAt",
+	QueuedAt:   "queued_at",
 	Finished:   "finished",
-	FinishedAt: "finishedAt",
+	FinishedAt: "finished_at",
 }
 
 // Generated where
@@ -77,17 +74,15 @@ func (w whereHelpertime_Time) GTE(x time.Time) qm.QueryMod {
 var NovelQueueWhere = struct {
 	NovelID    whereHelperint
 	URL        whereHelpernull_String
-	SourceId   whereHelpernull_Int
 	QueuedAt   whereHelpertime_Time
 	Finished   whereHelpernull_Bool
 	FinishedAt whereHelpernull_Time
 }{
 	NovelID:    whereHelperint{field: `novel_id`},
 	URL:        whereHelpernull_String{field: `url`},
-	SourceId:   whereHelpernull_Int{field: `sourceId`},
-	QueuedAt:   whereHelpertime_Time{field: `queuedAt`},
+	QueuedAt:   whereHelpertime_Time{field: `queued_at`},
 	Finished:   whereHelpernull_Bool{field: `finished`},
-	FinishedAt: whereHelpernull_Time{field: `finishedAt`},
+	FinishedAt: whereHelpernull_Time{field: `finished_at`},
 }
 
 // NovelQueueRels is where relationship names are stored.
@@ -111,10 +106,10 @@ func (*novelQueueR) NewStruct() *novelQueueR {
 type novelQueueL struct{}
 
 var (
-	novelQueueColumns               = []string{"novel_id", "url", "sourceId", "queuedAt", "finished", "finishedAt"}
-	novelQueueColumnsWithoutDefault = []string{"novel_id", "url", "sourceId", "queuedAt", "finishedAt"}
+	novelQueueColumns               = []string{"novel_id", "url", "queued_at", "finished", "finished_at"}
+	novelQueueColumnsWithoutDefault = []string{"novel_id", "url", "queued_at", "finished_at"}
 	novelQueueColumnsWithDefault    = []string{"finished"}
-	novelQueuePrimaryKeyColumns     = []string{"novel_id", "queuedAt"}
+	novelQueuePrimaryKeyColumns     = []string{"novel_id", "queued_at"}
 )
 
 type (
@@ -570,7 +565,7 @@ func FindNovelQueue(ctx context.Context, exec boil.ContextExecutor, novelID int,
 		sel = strings.Join(strmangle.IdentQuoteSlice(dialect.LQ, dialect.RQ, selectCols), ",")
 	}
 	query := fmt.Sprintf(
-		"select %s from \"ste\".\"novel_queue\" where \"novel_id\"=$1 AND \"queuedAt\"=$2", sel,
+		"select %s from \"ste\".\"novel_queue\" where \"novel_id\"=$1 AND \"queued_at\"=$2", sel,
 	)
 
 	q := queries.Raw(query, novelID, queuedAt)
@@ -919,7 +914,7 @@ func (o *NovelQueue) Delete(ctx context.Context, exec boil.ContextExecutor) (int
 	}
 
 	args := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), novelQueuePrimaryKeyMapping)
-	sql := "DELETE FROM \"ste\".\"novel_queue\" WHERE \"novel_id\"=$1 AND \"queuedAt\"=$2"
+	sql := "DELETE FROM \"ste\".\"novel_queue\" WHERE \"novel_id\"=$1 AND \"queued_at\"=$2"
 
 	if boil.DebugMode {
 		fmt.Fprintln(boil.DebugWriter, sql)
@@ -1061,7 +1056,7 @@ func (o *NovelQueueSlice) ReloadAll(ctx context.Context, exec boil.ContextExecut
 // NovelQueueExists checks if the NovelQueue row exists.
 func NovelQueueExists(ctx context.Context, exec boil.ContextExecutor, novelID int, queuedAt time.Time) (bool, error) {
 	var exists bool
-	sql := "select exists(select 1 from \"ste\".\"novel_queue\" where \"novel_id\"=$1 AND \"queuedAt\"=$2 limit 1)"
+	sql := "select exists(select 1 from \"ste\".\"novel_queue\" where \"novel_id\"=$1 AND \"queued_at\"=$2 limit 1)"
 
 	if boil.DebugMode {
 		fmt.Fprintln(boil.DebugWriter, sql)

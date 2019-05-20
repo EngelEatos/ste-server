@@ -10,7 +10,6 @@ import (
 	"ste/models"
 	nuapi "ste/novelupdatesapi"
 
-	_ "github.com/lib/pq"
 	"github.com/volatiletech/null"
 	"github.com/volatiletech/sqlboiler/boil"
 )
@@ -32,7 +31,6 @@ type DBM struct {
 // Connect to db
 func (dbm *DBM) Connect() error {
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
-	fmt.Println(psqlInfo)
 	db, err := sql.Open("postgres", psqlInfo)
 	if err != nil {
 		return err
@@ -41,7 +39,6 @@ func (dbm *DBM) Connect() error {
 	if err != nil {
 		return err
 	}
-	log.Printf("connected to %s:%d\n", host, port)
 	dbm.IsConnected = true
 	dbm.DB = db
 	return nil

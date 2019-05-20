@@ -1,9 +1,10 @@
 package main
 
 import (
-	nu "ste/novelupdatesapi"
 	"fmt"
+	nu "ste/novelupdatesapi"
 )
+
 func main() {
 	fmt.Println(nu.LiveSearch("reincarnation"))
 }

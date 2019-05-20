@@ -26,9 +26,9 @@ import (
 type ChapterQueue struct {
 	NovelID    int       `boil:"novel_id" json:"novel_id" toml:"novel_id" yaml:"novel_id"`
 	ChapterID  int       `boil:"chapter_id" json:"chapter_id" toml:"chapter_id" yaml:"chapter_id"`
-	QueuedAt   null.Time `boil:"queuedAt" json:"queuedAt,omitempty" toml:"queuedAt" yaml:"queuedAt,omitempty"`
+	QueuedAt   null.Time `boil:"queued_at" json:"queued_at,omitempty" toml:"queued_at" yaml:"queued_at,omitempty"`
 	Finished   null.Bool `boil:"finished" json:"finished,omitempty" toml:"finished" yaml:"finished,omitempty"`
-	FinishedAt null.Time `boil:"finishedAt" json:"finishedAt,omitempty" toml:"finishedAt" yaml:"finishedAt,omitempty"`
+	FinishedAt null.Time `boil:"finished_at" json:"finished_at,omitempty" toml:"finished_at" yaml:"finished_at,omitempty"`
 
 	R *chapterQueueR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L chapterQueueL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -43,9 +43,9 @@ var ChapterQueueColumns = struct {
 }{
 	NovelID:    "novel_id",
 	ChapterID:  "chapter_id",
-	QueuedAt:   "queuedAt",
+	QueuedAt:   "queued_at",
 	Finished:   "finished",
-	FinishedAt: "finishedAt",
+	FinishedAt: "finished_at",
 }
 
 // Generated where
@@ -82,9 +82,9 @@ var ChapterQueueWhere = struct {
 }{
 	NovelID:    whereHelperint{field: `novel_id`},
 	ChapterID:  whereHelperint{field: `chapter_id`},
-	QueuedAt:   whereHelpernull_Time{field: `queuedAt`},
+	QueuedAt:   whereHelpernull_Time{field: `queued_at`},
 	Finished:   whereHelpernull_Bool{field: `finished`},
-	FinishedAt: whereHelpernull_Time{field: `finishedAt`},
+	FinishedAt: whereHelpernull_Time{field: `finished_at`},
 }
 
 // ChapterQueueRels is where relationship names are stored.
@@ -111,8 +111,8 @@ func (*chapterQueueR) NewStruct() *chapterQueueR {
 type chapterQueueL struct{}
 
 var (
-	chapterQueueColumns               = []string{"novel_id", "chapter_id", "queuedAt", "finished", "finishedAt"}
-	chapterQueueColumnsWithoutDefault = []string{"novel_id", "chapter_id", "queuedAt", "finishedAt"}
+	chapterQueueColumns               = []string{"novel_id", "chapter_id", "queued_at", "finished", "finished_at"}
+	chapterQueueColumnsWithoutDefault = []string{"novel_id", "chapter_id", "queued_at", "finished_at"}
 	chapterQueueColumnsWithDefault    = []string{"finished"}
 	chapterQueuePrimaryKeyColumns     = []string{"novel_id", "chapter_id"}
 )

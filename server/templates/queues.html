@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, inital-scale=1">
+    <link rel="stylesheet" href="../assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <script src="../assets/js/jquery-3.3.1.min.js"></script>
+    <script src="../assets/js/popper.min.js"></script>
+    <script src="../assets/js/bootstrap.min.js"></script>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
+            aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavDropdown">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="home.html">Home</a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" href="queues.html">Queues</a>
+                </li>
+            </ul>
+        </div>
+
+    </nav>
+    <div class="container">
+        <h1>Queues</h1>
+        <div class="row">
+            <div class="col">
+                <h2 class="text-center">NovelQueue</h2>
+                <table class="table">
+                    <!-- <thead rowspan="4">NovelQueue</thead> -->
+                    <thead>
+                        <th>#</th>
+                        <th>title</th>
+                        <th>queuedAt</th>
+                        <th>finishedAt</th>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            {{range $index,$i := .NovelQueue}}
+                            <td>{{$index}}</td>
+                            <td>{{$i.Novel.Title}}</td>
+                            <td>{{$i.QueuedAt}}</td>
+                            <td>{{if $i.Finished }} {{ $i.FinishedAt }} {{ else }} - {{ end }}</td>
+                            {{end}}
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="col">
+                <h2 class="text-center">ChapterQueue</h2>
+                <table class="table">
+                    <!-- <thead rowspan="5">ChapterQueue</thead> -->
+                    <thead>
+                        <th>#</th>
+                        <th>title</th>
+                        <th>idx</th>
+                        <th>queuedAt</th>
+                        <th>finishedAt</th>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            {{range $idx,$i := .ChapterQueue}}
+                            <td>{{$idx}}</td>
+                            <td>{{$i.Novel.Title}}</td>
+                            <td>{{$i.Chapter.Idx}}</td>
+                            <td>{{$i.QueuedAt}}</td>
+                            <td>{{if $i.Finished }} {{ $i.FinishedAt }} {{ else }} - {{ end }}</td>
+                            {{end}}
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+
+    </div>
+</body>
+
+</html>

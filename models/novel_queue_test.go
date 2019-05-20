@@ -673,7 +673,7 @@ func testNovelQueuesSelect(t *testing.T) {
 }
 
 var (
-	novelQueueDBTypes = map[string]string{`NovelID`: `integer`, `URL`: `text`, `SourceId`: `integer`, `QueuedAt`: `date`, `Finished`: `boolean`, `FinishedAt`: `date`}
+	novelQueueDBTypes = map[string]string{`NovelID`: `integer`, `URL`: `text`, `QueuedAt`: `date`, `Finished`: `boolean`, `FinishedAt`: `date`}
 	_                 = bytes.MinRead
 )
 

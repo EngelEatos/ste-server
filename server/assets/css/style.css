@@ -83,3 +83,15 @@ td {
     grid-column-start: 1;
     grid-column-end: 4;
 }
+
+.col {
+    flex: 50%;
+}
+
+.row {
+    display: flex;
+}
+
+.table th {
+    text-align: center;
+}
