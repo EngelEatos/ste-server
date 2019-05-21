@@ -24,18 +24,6 @@ func fileExists(path string) bool {
 	return false
 }
 
-// func padd(s string, wlen int, pchar string, left bool) string {
-// 	if len(s) >= wlen {
-// 		return s
-// 	}
-// 	c := wlen - len(s)
-// 	padding := strings.Repeat(pchar, c)
-// 	if left {
-// 		return padding + s
-// 	}
-// 	return s + padding
-// }
-
 // func rpadd(s string, wlen int, pchar string) string {
 // 	return padd(s, wlen, pchar, false)
 // }

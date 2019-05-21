@@ -1,13 +1,17 @@
 package novelupdatesapi
 
 import (
+	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
+	"reflect"
 	"regexp"
+	"ste/models"
 	"strconv"
 	"strings"
 	"time"
@@ -33,10 +37,49 @@ type Novel struct {
 	Status              int
 	Licensed            bool
 	CompletlyTranslated bool
-	UpdatedAt           time.Time
+	FetchedAt           time.Time
 	Recommendations     map[string]string
 	Authors             []string
 	CoverURL            string
+}
+
+func (n *Novel) equal(ctx context.Context, novel *models.Novel, db *sql.DB) bool {
+	genres, err := novel.Genres().All(ctx, db)
+	if err != nil {
+
+	}
+	var intGenres []int
+	for _, genre := range genres {
+		intGenres = append(intGenres, genre.ID)
+	}
+	tags, err := novel.Tags().All(ctx, db)
+	var intTags []int
+	for _, tag := range tags {
+		intTags = append(intTags, tag.ID)
+	}
+
+	authors, err := novel.Authors().All(ctx, db)
+	if err != nil {
+
+	}
+	var strAuthors []string
+	for _, author := range authors {
+		strAuthors = append(strAuthors, author.Name.String)
+	}
+	cover, err := novel.Cover().One(ctx, db)
+	if err != nil {
+
+	}
+	ntype, err := novel.Ntype().One(ctx, db)
+	if err != nil {
+
+	}
+	return (n.Title == novel.Title) && (n.Chaptercount == novel.Chaptercount.Int) && (n.NovelIDSTR == novel.NovelIDSTR.String) &&
+		(n.Type == ntype.ID) && (reflect.DeepEqual(novel.Genres, intGenres) && (reflect.DeepEqual(novel.Tags, intTags)) &&
+		(n.Description == novel.Description.String) && (n.LanguageID == novel.LanguageID.Int) && (n.Year == novel.Year.Int) && (n.Status == novel.Status.Int) &&
+		(n.Licensed == novel.Licensed.Bool) && (n.CompletlyTranslated == novel.CompletlyTranslated.Bool) && (reflect.DeepEqual(n.Authors, strAuthors)) &&
+		(n.CoverURL == cover.URL))
+
 }
 
 // Chapter - struct
@@ -44,6 +87,7 @@ type Chapter struct {
 	ReleaseDate time.Time
 	Group       string
 	Chapter     string
+	Idx         int
 }
 
 func getBool(s string) (bool, error) {
@@ -216,7 +260,7 @@ func ParseNovel(novelID string) (*Novel, error) {
 		Status:              status,
 		Licensed:            licensed,
 		CompletlyTranslated: completelyTranslated,
-		UpdatedAt:           time.Now(),
+		FetchedAt:           time.Now(),
 		Recommendations:     recommendations,
 		Genres:              genres,
 		Tags:                tags,
@@ -272,7 +316,8 @@ func getChapter(novelID string, idx int) ([]Chapter, error) {
 
 		group := date.Next().AttrOr("href", "")
 		chapter := date.Next().Next().AttrOr("href", "")
-		result = append(result, Chapter{t, group, chapter})
+		// TODO: pares idx
+		result = append(result, Chapter{t, group, chapter, -1})
 	})
 	return result, nil
 }
