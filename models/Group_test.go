@@ -21,24 +21,24 @@ var (
 	_ = queries.Equal
 )
 
-func testSources(t *testing.T) {
+func testGroups(t *testing.T) {
 	t.Parallel()
 
-	query := Sources()
+	query := Groups()
 
 	if query.Query == nil {
 		t.Error("expected a query, got nothing")
 	}
 }
 
-func testSourcesDelete(t *testing.T) {
+func testGroupsDelete(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &Source{}
-	if err = randomize.Struct(seed, o, sourceDBTypes, true, sourceColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Source struct: %s", err)
+	o := &Group{}
+	if err = randomize.Struct(seed, o, groupDBTypes, true, groupColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Group struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -54,7 +54,7 @@ func testSourcesDelete(t *testing.T) {
 		t.Error("should only have deleted one row, but affected:", rowsAff)
 	}
 
-	count, err := Sources().Count(ctx, tx)
+	count, err := Groups().Count(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -64,14 +64,14 @@ func testSourcesDelete(t *testing.T) {
 	}
 }
 
-func testSourcesQueryDeleteAll(t *testing.T) {
+func testGroupsQueryDeleteAll(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &Source{}
-	if err = randomize.Struct(seed, o, sourceDBTypes, true, sourceColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Source struct: %s", err)
+	o := &Group{}
+	if err = randomize.Struct(seed, o, groupDBTypes, true, groupColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Group struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -81,13 +81,13 @@ func testSourcesQueryDeleteAll(t *testing.T) {
 		t.Error(err)
 	}
 
-	if rowsAff, err := Sources().DeleteAll(ctx, tx); err != nil {
+	if rowsAff, err := Groups().DeleteAll(ctx, tx); err != nil {
 		t.Error(err)
 	} else if rowsAff != 1 {
 		t.Error("should only have deleted one row, but affected:", rowsAff)
 	}
 
-	count, err := Sources().Count(ctx, tx)
+	count, err := Groups().Count(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -97,14 +97,14 @@ func testSourcesQueryDeleteAll(t *testing.T) {
 	}
 }
 
-func testSourcesSliceDeleteAll(t *testing.T) {
+func testGroupsSliceDeleteAll(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &Source{}
-	if err = randomize.Struct(seed, o, sourceDBTypes, true, sourceColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Source struct: %s", err)
+	o := &Group{}
+	if err = randomize.Struct(seed, o, groupDBTypes, true, groupColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Group struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -114,7 +114,7 @@ func testSourcesSliceDeleteAll(t *testing.T) {
 		t.Error(err)
 	}
 
-	slice := SourceSlice{o}
+	slice := GroupSlice{o}
 
 	if rowsAff, err := slice.DeleteAll(ctx, tx); err != nil {
 		t.Error(err)
@@ -122,7 +122,7 @@ func testSourcesSliceDeleteAll(t *testing.T) {
 		t.Error("should only have deleted one row, but affected:", rowsAff)
 	}
 
-	count, err := Sources().Count(ctx, tx)
+	count, err := Groups().Count(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -132,14 +132,14 @@ func testSourcesSliceDeleteAll(t *testing.T) {
 	}
 }
 
-func testSourcesExists(t *testing.T) {
+func testGroupsExists(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &Source{}
-	if err = randomize.Struct(seed, o, sourceDBTypes, true, sourceColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Source struct: %s", err)
+	o := &Group{}
+	if err = randomize.Struct(seed, o, groupDBTypes, true, groupColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Group struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -149,23 +149,23 @@ func testSourcesExists(t *testing.T) {
 		t.Error(err)
 	}
 
-	e, err := SourceExists(ctx, tx, o.ID)
+	e, err := GroupExists(ctx, tx, o.ID)
 	if err != nil {
-		t.Errorf("Unable to check if Source exists: %s", err)
+		t.Errorf("Unable to check if Group exists: %s", err)
 	}
 	if !e {
-		t.Errorf("Expected SourceExists to return true, but got false.")
+		t.Errorf("Expected GroupExists to return true, but got false.")
 	}
 }
 
-func testSourcesFind(t *testing.T) {
+func testGroupsFind(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &Source{}
-	if err = randomize.Struct(seed, o, sourceDBTypes, true, sourceColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Source struct: %s", err)
+	o := &Group{}
+	if err = randomize.Struct(seed, o, groupDBTypes, true, groupColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Group struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -175,24 +175,24 @@ func testSourcesFind(t *testing.T) {
 		t.Error(err)
 	}
 
-	sourceFound, err := FindSource(ctx, tx, o.ID)
+	groupFound, err := FindGroup(ctx, tx, o.ID)
 	if err != nil {
 		t.Error(err)
 	}
 
-	if sourceFound == nil {
+	if groupFound == nil {
 		t.Error("want a record, got nil")
 	}
 }
 
-func testSourcesBind(t *testing.T) {
+func testGroupsBind(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &Source{}
-	if err = randomize.Struct(seed, o, sourceDBTypes, true, sourceColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Source struct: %s", err)
+	o := &Group{}
+	if err = randomize.Struct(seed, o, groupDBTypes, true, groupColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Group struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -202,19 +202,19 @@ func testSourcesBind(t *testing.T) {
 		t.Error(err)
 	}
 
-	if err = Sources().Bind(ctx, tx, o); err != nil {
+	if err = Groups().Bind(ctx, tx, o); err != nil {
 		t.Error(err)
 	}
 }
 
-func testSourcesOne(t *testing.T) {
+func testGroupsOne(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &Source{}
-	if err = randomize.Struct(seed, o, sourceDBTypes, true, sourceColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Source struct: %s", err)
+	o := &Group{}
+	if err = randomize.Struct(seed, o, groupDBTypes, true, groupColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Group struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -224,38 +224,38 @@ func testSourcesOne(t *testing.T) {
 		t.Error(err)
 	}
 
-	if x, err := Sources().One(ctx, tx); err != nil {
+	if x, err := Groups().One(ctx, tx); err != nil {
 		t.Error(err)
 	} else if x == nil {
 		t.Error("expected to get a non nil record")
 	}
 }
 
-func testSourcesAll(t *testing.T) {
+func testGroupsAll(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	sourceOne := &Source{}
-	sourceTwo := &Source{}
-	if err = randomize.Struct(seed, sourceOne, sourceDBTypes, false, sourceColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Source struct: %s", err)
+	groupOne := &Group{}
+	groupTwo := &Group{}
+	if err = randomize.Struct(seed, groupOne, groupDBTypes, false, groupColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Group struct: %s", err)
 	}
-	if err = randomize.Struct(seed, sourceTwo, sourceDBTypes, false, sourceColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Source struct: %s", err)
+	if err = randomize.Struct(seed, groupTwo, groupDBTypes, false, groupColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Group struct: %s", err)
 	}
 
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))
 	defer func() { _ = tx.Rollback() }()
-	if err = sourceOne.Insert(ctx, tx, boil.Infer()); err != nil {
+	if err = groupOne.Insert(ctx, tx, boil.Infer()); err != nil {
 		t.Error(err)
 	}
-	if err = sourceTwo.Insert(ctx, tx, boil.Infer()); err != nil {
+	if err = groupTwo.Insert(ctx, tx, boil.Infer()); err != nil {
 		t.Error(err)
 	}
 
-	slice, err := Sources().All(ctx, tx)
+	slice, err := Groups().All(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -265,31 +265,31 @@ func testSourcesAll(t *testing.T) {
 	}
 }
 
-func testSourcesCount(t *testing.T) {
+func testGroupsCount(t *testing.T) {
 	t.Parallel()
 
 	var err error
 	seed := randomize.NewSeed()
-	sourceOne := &Source{}
-	sourceTwo := &Source{}
-	if err = randomize.Struct(seed, sourceOne, sourceDBTypes, false, sourceColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Source struct: %s", err)
+	groupOne := &Group{}
+	groupTwo := &Group{}
+	if err = randomize.Struct(seed, groupOne, groupDBTypes, false, groupColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Group struct: %s", err)
 	}
-	if err = randomize.Struct(seed, sourceTwo, sourceDBTypes, false, sourceColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Source struct: %s", err)
+	if err = randomize.Struct(seed, groupTwo, groupDBTypes, false, groupColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Group struct: %s", err)
 	}
 
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))
 	defer func() { _ = tx.Rollback() }()
-	if err = sourceOne.Insert(ctx, tx, boil.Infer()); err != nil {
+	if err = groupOne.Insert(ctx, tx, boil.Infer()); err != nil {
 		t.Error(err)
 	}
-	if err = sourceTwo.Insert(ctx, tx, boil.Infer()); err != nil {
+	if err = groupTwo.Insert(ctx, tx, boil.Infer()); err != nil {
 		t.Error(err)
 	}
 
-	count, err := Sources().Count(ctx, tx)
+	count, err := Groups().Count(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -299,155 +299,155 @@ func testSourcesCount(t *testing.T) {
 	}
 }
 
-func sourceBeforeInsertHook(ctx context.Context, e boil.ContextExecutor, o *Source) error {
-	*o = Source{}
+func groupBeforeInsertHook(ctx context.Context, e boil.ContextExecutor, o *Group) error {
+	*o = Group{}
 	return nil
 }
 
-func sourceAfterInsertHook(ctx context.Context, e boil.ContextExecutor, o *Source) error {
-	*o = Source{}
+func groupAfterInsertHook(ctx context.Context, e boil.ContextExecutor, o *Group) error {
+	*o = Group{}
 	return nil
 }
 
-func sourceAfterSelectHook(ctx context.Context, e boil.ContextExecutor, o *Source) error {
-	*o = Source{}
+func groupAfterSelectHook(ctx context.Context, e boil.ContextExecutor, o *Group) error {
+	*o = Group{}
 	return nil
 }
 
-func sourceBeforeUpdateHook(ctx context.Context, e boil.ContextExecutor, o *Source) error {
-	*o = Source{}
+func groupBeforeUpdateHook(ctx context.Context, e boil.ContextExecutor, o *Group) error {
+	*o = Group{}
 	return nil
 }
 
-func sourceAfterUpdateHook(ctx context.Context, e boil.ContextExecutor, o *Source) error {
-	*o = Source{}
+func groupAfterUpdateHook(ctx context.Context, e boil.ContextExecutor, o *Group) error {
+	*o = Group{}
 	return nil
 }
 
-func sourceBeforeDeleteHook(ctx context.Context, e boil.ContextExecutor, o *Source) error {
-	*o = Source{}
+func groupBeforeDeleteHook(ctx context.Context, e boil.ContextExecutor, o *Group) error {
+	*o = Group{}
 	return nil
 }
 
-func sourceAfterDeleteHook(ctx context.Context, e boil.ContextExecutor, o *Source) error {
-	*o = Source{}
+func groupAfterDeleteHook(ctx context.Context, e boil.ContextExecutor, o *Group) error {
+	*o = Group{}
 	return nil
 }
 
-func sourceBeforeUpsertHook(ctx context.Context, e boil.ContextExecutor, o *Source) error {
-	*o = Source{}
+func groupBeforeUpsertHook(ctx context.Context, e boil.ContextExecutor, o *Group) error {
+	*o = Group{}
 	return nil
 }
 
-func sourceAfterUpsertHook(ctx context.Context, e boil.ContextExecutor, o *Source) error {
-	*o = Source{}
+func groupAfterUpsertHook(ctx context.Context, e boil.ContextExecutor, o *Group) error {
+	*o = Group{}
 	return nil
 }
 
-func testSourcesHooks(t *testing.T) {
+func testGroupsHooks(t *testing.T) {
 	t.Parallel()
 
 	var err error
 
 	ctx := context.Background()
-	empty := &Source{}
-	o := &Source{}
+	empty := &Group{}
+	o := &Group{}
 
 	seed := randomize.NewSeed()
-	if err = randomize.Struct(seed, o, sourceDBTypes, false); err != nil {
-		t.Errorf("Unable to randomize Source object: %s", err)
+	if err = randomize.Struct(seed, o, groupDBTypes, false); err != nil {
+		t.Errorf("Unable to randomize Group object: %s", err)
 	}
 
-	AddSourceHook(boil.BeforeInsertHook, sourceBeforeInsertHook)
+	AddGroupHook(boil.BeforeInsertHook, groupBeforeInsertHook)
 	if err = o.doBeforeInsertHooks(ctx, nil); err != nil {
 		t.Errorf("Unable to execute doBeforeInsertHooks: %s", err)
 	}
 	if !reflect.DeepEqual(o, empty) {
 		t.Errorf("Expected BeforeInsertHook function to empty object, but got: %#v", o)
 	}
-	sourceBeforeInsertHooks = []SourceHook{}
+	groupBeforeInsertHooks = []GroupHook{}
 
-	AddSourceHook(boil.AfterInsertHook, sourceAfterInsertHook)
+	AddGroupHook(boil.AfterInsertHook, groupAfterInsertHook)
 	if err = o.doAfterInsertHooks(ctx, nil); err != nil {
 		t.Errorf("Unable to execute doAfterInsertHooks: %s", err)
 	}
 	if !reflect.DeepEqual(o, empty) {
 		t.Errorf("Expected AfterInsertHook function to empty object, but got: %#v", o)
 	}
-	sourceAfterInsertHooks = []SourceHook{}
+	groupAfterInsertHooks = []GroupHook{}
 
-	AddSourceHook(boil.AfterSelectHook, sourceAfterSelectHook)
+	AddGroupHook(boil.AfterSelectHook, groupAfterSelectHook)
 	if err = o.doAfterSelectHooks(ctx, nil); err != nil {
 		t.Errorf("Unable to execute doAfterSelectHooks: %s", err)
 	}
 	if !reflect.DeepEqual(o, empty) {
 		t.Errorf("Expected AfterSelectHook function to empty object, but got: %#v", o)
 	}
-	sourceAfterSelectHooks = []SourceHook{}
+	groupAfterSelectHooks = []GroupHook{}
 
-	AddSourceHook(boil.BeforeUpdateHook, sourceBeforeUpdateHook)
+	AddGroupHook(boil.BeforeUpdateHook, groupBeforeUpdateHook)
 	if err = o.doBeforeUpdateHooks(ctx, nil); err != nil {
 		t.Errorf("Unable to execute doBeforeUpdateHooks: %s", err)
 	}
 	if !reflect.DeepEqual(o, empty) {
 		t.Errorf("Expected BeforeUpdateHook function to empty object, but got: %#v", o)
 	}
-	sourceBeforeUpdateHooks = []SourceHook{}
+	groupBeforeUpdateHooks = []GroupHook{}
 
-	AddSourceHook(boil.AfterUpdateHook, sourceAfterUpdateHook)
+	AddGroupHook(boil.AfterUpdateHook, groupAfterUpdateHook)
 	if err = o.doAfterUpdateHooks(ctx, nil); err != nil {
 		t.Errorf("Unable to execute doAfterUpdateHooks: %s", err)
 	}
 	if !reflect.DeepEqual(o, empty) {
 		t.Errorf("Expected AfterUpdateHook function to empty object, but got: %#v", o)
 	}
-	sourceAfterUpdateHooks = []SourceHook{}
+	groupAfterUpdateHooks = []GroupHook{}
 
-	AddSourceHook(boil.BeforeDeleteHook, sourceBeforeDeleteHook)
+	AddGroupHook(boil.BeforeDeleteHook, groupBeforeDeleteHook)
 	if err = o.doBeforeDeleteHooks(ctx, nil); err != nil {
 		t.Errorf("Unable to execute doBeforeDeleteHooks: %s", err)
 	}
 	if !reflect.DeepEqual(o, empty) {
 		t.Errorf("Expected BeforeDeleteHook function to empty object, but got: %#v", o)
 	}
-	sourceBeforeDeleteHooks = []SourceHook{}
+	groupBeforeDeleteHooks = []GroupHook{}
 
-	AddSourceHook(boil.AfterDeleteHook, sourceAfterDeleteHook)
+	AddGroupHook(boil.AfterDeleteHook, groupAfterDeleteHook)
 	if err = o.doAfterDeleteHooks(ctx, nil); err != nil {
 		t.Errorf("Unable to execute doAfterDeleteHooks: %s", err)
 	}
 	if !reflect.DeepEqual(o, empty) {
 		t.Errorf("Expected AfterDeleteHook function to empty object, but got: %#v", o)
 	}
-	sourceAfterDeleteHooks = []SourceHook{}
+	groupAfterDeleteHooks = []GroupHook{}
 
-	AddSourceHook(boil.BeforeUpsertHook, sourceBeforeUpsertHook)
+	AddGroupHook(boil.BeforeUpsertHook, groupBeforeUpsertHook)
 	if err = o.doBeforeUpsertHooks(ctx, nil); err != nil {
 		t.Errorf("Unable to execute doBeforeUpsertHooks: %s", err)
 	}
 	if !reflect.DeepEqual(o, empty) {
 		t.Errorf("Expected BeforeUpsertHook function to empty object, but got: %#v", o)
 	}
-	sourceBeforeUpsertHooks = []SourceHook{}
+	groupBeforeUpsertHooks = []GroupHook{}
 
-	AddSourceHook(boil.AfterUpsertHook, sourceAfterUpsertHook)
+	AddGroupHook(boil.AfterUpsertHook, groupAfterUpsertHook)
 	if err = o.doAfterUpsertHooks(ctx, nil); err != nil {
 		t.Errorf("Unable to execute doAfterUpsertHooks: %s", err)
 	}
 	if !reflect.DeepEqual(o, empty) {
 		t.Errorf("Expected AfterUpsertHook function to empty object, but got: %#v", o)
 	}
-	sourceAfterUpsertHooks = []SourceHook{}
+	groupAfterUpsertHooks = []GroupHook{}
 }
 
-func testSourcesInsert(t *testing.T) {
+func testGroupsInsert(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &Source{}
-	if err = randomize.Struct(seed, o, sourceDBTypes, true, sourceColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Source struct: %s", err)
+	o := &Group{}
+	if err = randomize.Struct(seed, o, groupDBTypes, true, groupColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Group struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -457,7 +457,7 @@ func testSourcesInsert(t *testing.T) {
 		t.Error(err)
 	}
 
-	count, err := Sources().Count(ctx, tx)
+	count, err := Groups().Count(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -467,24 +467,24 @@ func testSourcesInsert(t *testing.T) {
 	}
 }
 
-func testSourcesInsertWhitelist(t *testing.T) {
+func testGroupsInsertWhitelist(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &Source{}
-	if err = randomize.Struct(seed, o, sourceDBTypes, true); err != nil {
-		t.Errorf("Unable to randomize Source struct: %s", err)
+	o := &Group{}
+	if err = randomize.Struct(seed, o, groupDBTypes, true); err != nil {
+		t.Errorf("Unable to randomize Group struct: %s", err)
 	}
 
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))
 	defer func() { _ = tx.Rollback() }()
-	if err = o.Insert(ctx, tx, boil.Whitelist(sourceColumnsWithoutDefault...)); err != nil {
+	if err = o.Insert(ctx, tx, boil.Whitelist(groupColumnsWithoutDefault...)); err != nil {
 		t.Error(err)
 	}
 
-	count, err := Sources().Count(ctx, tx)
+	count, err := Groups().Count(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -494,18 +494,18 @@ func testSourcesInsertWhitelist(t *testing.T) {
 	}
 }
 
-func testSourceToManyNovels(t *testing.T) {
+func testGroupToManyGroupNovels(t *testing.T) {
 	var err error
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))
 	defer func() { _ = tx.Rollback() }()
 
-	var a Source
+	var a Group
 	var b, c Novel
 
 	seed := randomize.NewSeed()
-	if err = randomize.Struct(seed, &a, sourceDBTypes, true, sourceColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Source struct: %s", err)
+	if err = randomize.Struct(seed, &a, groupDBTypes, true, groupColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Group struct: %s", err)
 	}
 
 	if err := a.Insert(ctx, tx, boil.Infer()); err != nil {
@@ -519,8 +519,8 @@ func testSourceToManyNovels(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	queries.Assign(&b.SourceID, a.ID)
-	queries.Assign(&c.SourceID, a.ID)
+	queries.Assign(&b.GroupID, a.ID)
+	queries.Assign(&c.GroupID, a.ID)
 	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
 		t.Fatal(err)
 	}
@@ -528,17 +528,17 @@ func testSourceToManyNovels(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	check, err := a.Novels().All(ctx, tx)
+	check, err := a.GroupNovels().All(ctx, tx)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	bFound, cFound := false, false
 	for _, v := range check {
-		if queries.Equal(v.SourceID, b.SourceID) {
+		if queries.Equal(v.GroupID, b.GroupID) {
 			bFound = true
 		}
-		if queries.Equal(v.SourceID, c.SourceID) {
+		if queries.Equal(v.GroupID, c.GroupID) {
 			cFound = true
 		}
 	}
@@ -550,19 +550,19 @@ func testSourceToManyNovels(t *testing.T) {
 		t.Error("expected to find c")
 	}
 
-	slice := SourceSlice{&a}
-	if err = a.L.LoadNovels(ctx, tx, false, (*[]*Source)(&slice), nil); err != nil {
+	slice := GroupSlice{&a}
+	if err = a.L.LoadGroupNovels(ctx, tx, false, (*[]*Group)(&slice), nil); err != nil {
 		t.Fatal(err)
 	}
-	if got := len(a.R.Novels); got != 2 {
+	if got := len(a.R.GroupNovels); got != 2 {
 		t.Error("number of eager loaded records wrong, got:", got)
 	}
 
-	a.R.Novels = nil
-	if err = a.L.LoadNovels(ctx, tx, true, &a, nil); err != nil {
+	a.R.GroupNovels = nil
+	if err = a.L.LoadGroupNovels(ctx, tx, true, &a, nil); err != nil {
 		t.Fatal(err)
 	}
-	if got := len(a.R.Novels); got != 2 {
+	if got := len(a.R.GroupNovels); got != 2 {
 		t.Error("number of eager loaded records wrong, got:", got)
 	}
 
@@ -571,18 +571,18 @@ func testSourceToManyNovels(t *testing.T) {
 	}
 }
 
-func testSourceToManyAddOpNovels(t *testing.T) {
+func testGroupToManyAddOpGroupNovels(t *testing.T) {
 	var err error
 
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))
 	defer func() { _ = tx.Rollback() }()
 
-	var a Source
+	var a Group
 	var b, c, d, e Novel
 
 	seed := randomize.NewSeed()
-	if err = randomize.Struct(seed, &a, sourceDBTypes, false, strmangle.SetComplement(sourcePrimaryKeyColumns, sourceColumnsWithoutDefault)...); err != nil {
+	if err = randomize.Struct(seed, &a, groupDBTypes, false, strmangle.SetComplement(groupPrimaryKeyColumns, groupColumnsWithoutDefault)...); err != nil {
 		t.Fatal(err)
 	}
 	foreigners := []*Novel{&b, &c, &d, &e}
@@ -608,7 +608,7 @@ func testSourceToManyAddOpNovels(t *testing.T) {
 	}
 
 	for i, x := range foreignersSplitByInsertion {
-		err = a.AddNovels(ctx, tx, i != 0, x...)
+		err = a.AddGroupNovels(ctx, tx, i != 0, x...)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -616,28 +616,28 @@ func testSourceToManyAddOpNovels(t *testing.T) {
 		first := x[0]
 		second := x[1]
 
-		if !queries.Equal(a.ID, first.SourceID) {
-			t.Error("foreign key was wrong value", a.ID, first.SourceID)
+		if !queries.Equal(a.ID, first.GroupID) {
+			t.Error("foreign key was wrong value", a.ID, first.GroupID)
 		}
-		if !queries.Equal(a.ID, second.SourceID) {
-			t.Error("foreign key was wrong value", a.ID, second.SourceID)
+		if !queries.Equal(a.ID, second.GroupID) {
+			t.Error("foreign key was wrong value", a.ID, second.GroupID)
 		}
 
-		if first.R.Source != &a {
+		if first.R.Group != &a {
 			t.Error("relationship was not added properly to the foreign slice")
 		}
-		if second.R.Source != &a {
+		if second.R.Group != &a {
 			t.Error("relationship was not added properly to the foreign slice")
 		}
 
-		if a.R.Novels[i*2] != first {
+		if a.R.GroupNovels[i*2] != first {
 			t.Error("relationship struct slice not set to correct value")
 		}
-		if a.R.Novels[i*2+1] != second {
+		if a.R.GroupNovels[i*2+1] != second {
 			t.Error("relationship struct slice not set to correct value")
 		}
 
-		count, err := a.Novels().Count(ctx, tx)
+		count, err := a.GroupNovels().Count(ctx, tx)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -647,18 +647,18 @@ func testSourceToManyAddOpNovels(t *testing.T) {
 	}
 }
 
-func testSourceToManySetOpNovels(t *testing.T) {
+func testGroupToManySetOpGroupNovels(t *testing.T) {
 	var err error
 
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))
 	defer func() { _ = tx.Rollback() }()
 
-	var a Source
+	var a Group
 	var b, c, d, e Novel
 
 	seed := randomize.NewSeed()
-	if err = randomize.Struct(seed, &a, sourceDBTypes, false, strmangle.SetComplement(sourcePrimaryKeyColumns, sourceColumnsWithoutDefault)...); err != nil {
+	if err = randomize.Struct(seed, &a, groupDBTypes, false, strmangle.SetComplement(groupPrimaryKeyColumns, groupColumnsWithoutDefault)...); err != nil {
 		t.Fatal(err)
 	}
 	foreigners := []*Novel{&b, &c, &d, &e}
@@ -678,25 +678,12 @@ func testSourceToManySetOpNovels(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = a.SetNovels(ctx, tx, false, &b, &c)
+	err = a.SetGroupNovels(ctx, tx, false, &b, &c)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	count, err := a.Novels().Count(ctx, tx)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if count != 2 {
-		t.Error("count was wrong:", count)
-	}
-
-	err = a.SetNovels(ctx, tx, true, &d, &e)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	count, err = a.Novels().Count(ctx, tx)
+	count, err := a.GroupNovels().Count(ctx, tx)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -704,52 +691,65 @@ func testSourceToManySetOpNovels(t *testing.T) {
 		t.Error("count was wrong:", count)
 	}
 
-	if !queries.IsValuerNil(b.SourceID) {
+	err = a.SetGroupNovels(ctx, tx, true, &d, &e)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	count, err = a.GroupNovels().Count(ctx, tx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if count != 2 {
+		t.Error("count was wrong:", count)
+	}
+
+	if !queries.IsValuerNil(b.GroupID) {
 		t.Error("want b's foreign key value to be nil")
 	}
-	if !queries.IsValuerNil(c.SourceID) {
+	if !queries.IsValuerNil(c.GroupID) {
 		t.Error("want c's foreign key value to be nil")
 	}
-	if !queries.Equal(a.ID, d.SourceID) {
-		t.Error("foreign key was wrong value", a.ID, d.SourceID)
+	if !queries.Equal(a.ID, d.GroupID) {
+		t.Error("foreign key was wrong value", a.ID, d.GroupID)
 	}
-	if !queries.Equal(a.ID, e.SourceID) {
-		t.Error("foreign key was wrong value", a.ID, e.SourceID)
-	}
-
-	if b.R.Source != nil {
-		t.Error("relationship was not removed properly from the foreign struct")
-	}
-	if c.R.Source != nil {
-		t.Error("relationship was not removed properly from the foreign struct")
-	}
-	if d.R.Source != &a {
-		t.Error("relationship was not added properly to the foreign struct")
-	}
-	if e.R.Source != &a {
-		t.Error("relationship was not added properly to the foreign struct")
+	if !queries.Equal(a.ID, e.GroupID) {
+		t.Error("foreign key was wrong value", a.ID, e.GroupID)
 	}
 
-	if a.R.Novels[0] != &d {
+	if b.R.Group != nil {
+		t.Error("relationship was not removed properly from the foreign struct")
+	}
+	if c.R.Group != nil {
+		t.Error("relationship was not removed properly from the foreign struct")
+	}
+	if d.R.Group != &a {
+		t.Error("relationship was not added properly to the foreign struct")
+	}
+	if e.R.Group != &a {
+		t.Error("relationship was not added properly to the foreign struct")
+	}
+
+	if a.R.GroupNovels[0] != &d {
 		t.Error("relationship struct slice not set to correct value")
 	}
-	if a.R.Novels[1] != &e {
+	if a.R.GroupNovels[1] != &e {
 		t.Error("relationship struct slice not set to correct value")
 	}
 }
 
-func testSourceToManyRemoveOpNovels(t *testing.T) {
+func testGroupToManyRemoveOpGroupNovels(t *testing.T) {
 	var err error
 
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))
 	defer func() { _ = tx.Rollback() }()
 
-	var a Source
+	var a Group
 	var b, c, d, e Novel
 
 	seed := randomize.NewSeed()
-	if err = randomize.Struct(seed, &a, sourceDBTypes, false, strmangle.SetComplement(sourcePrimaryKeyColumns, sourceColumnsWithoutDefault)...); err != nil {
+	if err = randomize.Struct(seed, &a, groupDBTypes, false, strmangle.SetComplement(groupPrimaryKeyColumns, groupColumnsWithoutDefault)...); err != nil {
 		t.Fatal(err)
 	}
 	foreigners := []*Novel{&b, &c, &d, &e}
@@ -763,12 +763,12 @@ func testSourceToManyRemoveOpNovels(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = a.AddNovels(ctx, tx, true, foreigners...)
+	err = a.AddGroupNovels(ctx, tx, true, foreigners...)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	count, err := a.Novels().Count(ctx, tx)
+	count, err := a.GroupNovels().Count(ctx, tx)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -776,12 +776,12 @@ func testSourceToManyRemoveOpNovels(t *testing.T) {
 		t.Error("count was wrong:", count)
 	}
 
-	err = a.RemoveNovels(ctx, tx, foreigners[:2]...)
+	err = a.RemoveGroupNovels(ctx, tx, foreigners[:2]...)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	count, err = a.Novels().Count(ctx, tx)
+	count, err = a.GroupNovels().Count(ctx, tx)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -789,47 +789,47 @@ func testSourceToManyRemoveOpNovels(t *testing.T) {
 		t.Error("count was wrong:", count)
 	}
 
-	if !queries.IsValuerNil(b.SourceID) {
+	if !queries.IsValuerNil(b.GroupID) {
 		t.Error("want b's foreign key value to be nil")
 	}
-	if !queries.IsValuerNil(c.SourceID) {
+	if !queries.IsValuerNil(c.GroupID) {
 		t.Error("want c's foreign key value to be nil")
 	}
 
-	if b.R.Source != nil {
+	if b.R.Group != nil {
 		t.Error("relationship was not removed properly from the foreign struct")
 	}
-	if c.R.Source != nil {
+	if c.R.Group != nil {
 		t.Error("relationship was not removed properly from the foreign struct")
 	}
-	if d.R.Source != &a {
+	if d.R.Group != &a {
 		t.Error("relationship to a should have been preserved")
 	}
-	if e.R.Source != &a {
+	if e.R.Group != &a {
 		t.Error("relationship to a should have been preserved")
 	}
 
-	if len(a.R.Novels) != 2 {
+	if len(a.R.GroupNovels) != 2 {
 		t.Error("should have preserved two relationships")
 	}
 
 	// Removal doesn't do a stable deletion for performance so we have to flip the order
-	if a.R.Novels[1] != &d {
+	if a.R.GroupNovels[1] != &d {
 		t.Error("relationship to d should have been preserved")
 	}
-	if a.R.Novels[0] != &e {
+	if a.R.GroupNovels[0] != &e {
 		t.Error("relationship to e should have been preserved")
 	}
 }
 
-func testSourcesReload(t *testing.T) {
+func testGroupsReload(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &Source{}
-	if err = randomize.Struct(seed, o, sourceDBTypes, true, sourceColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Source struct: %s", err)
+	o := &Group{}
+	if err = randomize.Struct(seed, o, groupDBTypes, true, groupColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Group struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -844,14 +844,14 @@ func testSourcesReload(t *testing.T) {
 	}
 }
 
-func testSourcesReloadAll(t *testing.T) {
+func testGroupsReloadAll(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &Source{}
-	if err = randomize.Struct(seed, o, sourceDBTypes, true, sourceColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Source struct: %s", err)
+	o := &Group{}
+	if err = randomize.Struct(seed, o, groupDBTypes, true, groupColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Group struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -861,21 +861,21 @@ func testSourcesReloadAll(t *testing.T) {
 		t.Error(err)
 	}
 
-	slice := SourceSlice{o}
+	slice := GroupSlice{o}
 
 	if err = slice.ReloadAll(ctx, tx); err != nil {
 		t.Error(err)
 	}
 }
 
-func testSourcesSelect(t *testing.T) {
+func testGroupsSelect(t *testing.T) {
 	t.Parallel()
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &Source{}
-	if err = randomize.Struct(seed, o, sourceDBTypes, true, sourceColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Source struct: %s", err)
+	o := &Group{}
+	if err = randomize.Struct(seed, o, groupDBTypes, true, groupColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Group struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -885,7 +885,7 @@ func testSourcesSelect(t *testing.T) {
 		t.Error(err)
 	}
 
-	slice, err := Sources().All(ctx, tx)
+	slice, err := Groups().All(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -896,25 +896,25 @@ func testSourcesSelect(t *testing.T) {
 }
 
 var (
-	sourceDBTypes = map[string]string{`ID`: `integer`, `URL`: `text`, `Name`: `text`}
-	_             = bytes.MinRead
+	groupDBTypes = map[string]string{`ID`: `integer`, `URL`: `text`, `Name`: `text`}
+	_            = bytes.MinRead
 )
 
-func testSourcesUpdate(t *testing.T) {
+func testGroupsUpdate(t *testing.T) {
 	t.Parallel()
 
-	if 0 == len(sourcePrimaryKeyColumns) {
+	if 0 == len(groupPrimaryKeyColumns) {
 		t.Skip("Skipping table with no primary key columns")
 	}
-	if len(sourceColumns) == len(sourcePrimaryKeyColumns) {
+	if len(groupColumns) == len(groupPrimaryKeyColumns) {
 		t.Skip("Skipping table with only primary key columns")
 	}
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &Source{}
-	if err = randomize.Struct(seed, o, sourceDBTypes, true, sourceColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Source struct: %s", err)
+	o := &Group{}
+	if err = randomize.Struct(seed, o, groupDBTypes, true, groupColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Group struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -924,7 +924,7 @@ func testSourcesUpdate(t *testing.T) {
 		t.Error(err)
 	}
 
-	count, err := Sources().Count(ctx, tx)
+	count, err := Groups().Count(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -933,8 +933,8 @@ func testSourcesUpdate(t *testing.T) {
 		t.Error("want one record, got:", count)
 	}
 
-	if err = randomize.Struct(seed, o, sourceDBTypes, true, sourcePrimaryKeyColumns...); err != nil {
-		t.Errorf("Unable to randomize Source struct: %s", err)
+	if err = randomize.Struct(seed, o, groupDBTypes, true, groupPrimaryKeyColumns...); err != nil {
+		t.Errorf("Unable to randomize Group struct: %s", err)
 	}
 
 	if rowsAff, err := o.Update(ctx, tx, boil.Infer()); err != nil {
@@ -944,18 +944,18 @@ func testSourcesUpdate(t *testing.T) {
 	}
 }
 
-func testSourcesSliceUpdateAll(t *testing.T) {
+func testGroupsSliceUpdateAll(t *testing.T) {
 	t.Parallel()
 
-	if len(sourceColumns) == len(sourcePrimaryKeyColumns) {
+	if len(groupColumns) == len(groupPrimaryKeyColumns) {
 		t.Skip("Skipping table with only primary key columns")
 	}
 
 	seed := randomize.NewSeed()
 	var err error
-	o := &Source{}
-	if err = randomize.Struct(seed, o, sourceDBTypes, true, sourceColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Source struct: %s", err)
+	o := &Group{}
+	if err = randomize.Struct(seed, o, groupDBTypes, true, groupColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Group struct: %s", err)
 	}
 
 	ctx := context.Background()
@@ -965,7 +965,7 @@ func testSourcesSliceUpdateAll(t *testing.T) {
 		t.Error(err)
 	}
 
-	count, err := Sources().Count(ctx, tx)
+	count, err := Groups().Count(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -974,18 +974,18 @@ func testSourcesSliceUpdateAll(t *testing.T) {
 		t.Error("want one record, got:", count)
 	}
 
-	if err = randomize.Struct(seed, o, sourceDBTypes, true, sourcePrimaryKeyColumns...); err != nil {
-		t.Errorf("Unable to randomize Source struct: %s", err)
+	if err = randomize.Struct(seed, o, groupDBTypes, true, groupPrimaryKeyColumns...); err != nil {
+		t.Errorf("Unable to randomize Group struct: %s", err)
 	}
 
 	// Remove Primary keys and unique columns from what we plan to update
 	var fields []string
-	if strmangle.StringSliceMatch(sourceColumns, sourcePrimaryKeyColumns) {
-		fields = sourceColumns
+	if strmangle.StringSliceMatch(groupColumns, groupPrimaryKeyColumns) {
+		fields = groupColumns
 	} else {
 		fields = strmangle.SetComplement(
-			sourceColumns,
-			sourcePrimaryKeyColumns,
+			groupColumns,
+			groupPrimaryKeyColumns,
 		)
 	}
 
@@ -1003,7 +1003,7 @@ func testSourcesSliceUpdateAll(t *testing.T) {
 		}
 	}
 
-	slice := SourceSlice{o}
+	slice := GroupSlice{o}
 	if rowsAff, err := slice.UpdateAll(ctx, tx, updateMap); err != nil {
 		t.Error(err)
 	} else if rowsAff != 1 {
@@ -1011,29 +1011,29 @@ func testSourcesSliceUpdateAll(t *testing.T) {
 	}
 }
 
-func testSourcesUpsert(t *testing.T) {
+func testGroupsUpsert(t *testing.T) {
 	t.Parallel()
 
-	if len(sourceColumns) == len(sourcePrimaryKeyColumns) {
+	if len(groupColumns) == len(groupPrimaryKeyColumns) {
 		t.Skip("Skipping table with only primary key columns")
 	}
 
 	seed := randomize.NewSeed()
 	var err error
 	// Attempt the INSERT side of an UPSERT
-	o := Source{}
-	if err = randomize.Struct(seed, &o, sourceDBTypes, true); err != nil {
-		t.Errorf("Unable to randomize Source struct: %s", err)
+	o := Group{}
+	if err = randomize.Struct(seed, &o, groupDBTypes, true); err != nil {
+		t.Errorf("Unable to randomize Group struct: %s", err)
 	}
 
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))
 	defer func() { _ = tx.Rollback() }()
 	if err = o.Upsert(ctx, tx, false, nil, boil.Infer(), boil.Infer()); err != nil {
-		t.Errorf("Unable to upsert Source: %s", err)
+		t.Errorf("Unable to upsert Group: %s", err)
 	}
 
-	count, err := Sources().Count(ctx, tx)
+	count, err := Groups().Count(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}
@@ -1042,15 +1042,15 @@ func testSourcesUpsert(t *testing.T) {
 	}
 
 	// Attempt the UPDATE side of an UPSERT
-	if err = randomize.Struct(seed, &o, sourceDBTypes, false, sourcePrimaryKeyColumns...); err != nil {
-		t.Errorf("Unable to randomize Source struct: %s", err)
+	if err = randomize.Struct(seed, &o, groupDBTypes, false, groupPrimaryKeyColumns...); err != nil {
+		t.Errorf("Unable to randomize Group struct: %s", err)
 	}
 
 	if err = o.Upsert(ctx, tx, true, nil, boil.Infer(), boil.Infer()); err != nil {
-		t.Errorf("Unable to upsert Source: %s", err)
+		t.Errorf("Unable to upsert Group: %s", err)
 	}
 
-	count, err = Sources().Count(ctx, tx)
+	count, err = Groups().Count(ctx, tx)
 	if err != nil {
 		t.Error(err)
 	}

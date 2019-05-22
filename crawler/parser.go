@@ -2,12 +2,10 @@ package crawler
 
 import (
 	"fmt"
-	"net/http"
 	"os"
 	"path/filepath"
 	"ste/crawler/lib"
-
-	"github.com/PuerkitoBio/goquery"
+	"ste/utils"
 )
 
 // Parser struct
@@ -24,30 +22,13 @@ func New() (*Parser, error) {
 	return &Parser{configs}, nil
 }
 
-func getSource(url string) (*goquery.Document, error) {
-	res, err := http.Get(url)
-	if err != nil {
-		return nil, err
-	}
-	defer res.Body.Close()
-	if res.StatusCode != 200 {
-		return nil, fmt.Errorf("status code error: %d %s", res.StatusCode, res.Status)
-	}
-
-	doc, err := goquery.NewDocumentFromReader(res.Body)
-	if err != nil {
-		return nil, err
-	}
-	return doc, nil
-}
-
 // Parse TODO
 func (p *Parser) Parse(url string) (string, string, error) {
 	config, err := p.getConfig(url)
 	if err != nil {
 		return "", "", err
 	}
-	doc, err := getSource(url)
+	doc, err := utils.GetSource(url)
 	if err != nil {
 		return "", "", err
 	}

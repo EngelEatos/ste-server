@@ -3,7 +3,7 @@
 CAUTION: Do not modify this file unless you know what you are doing.
          Unexpected results may occur if the code is changed deliberately.
 -->
-<dbmodel pgmodeler-ver="0.9.2-alpha1" last-position="0,87" last-zoom="1" max-obj-count="20"
+<dbmodel pgmodeler-ver="0.9.2-alpha1" last-position="0,0" last-zoom="1" max-obj-count="20"
 	 default-owner="postgres">
 <database name="ste" is-template="false" allow-conns="true">
 </database>
@@ -50,20 +50,20 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	</constraint>
 </table>
 
-<table name="source" layer="0" collapse-mode="2" max-obj-count="3">
+<table name="Group" layer="0" collapse-mode="2" max-obj-count="3">
 	<schema name="ste"/>
 	<role name="postgres"/>
-	<position x="80" y="180"/>
+	<position x="140" y="140"/>
 	<column name="id" not-null="true">
 		<type name="serial" length="0"/>
 	</column>
-	<column name="url">
+	<column name="url" not-null="true">
 		<type name="text" length="0"/>
 	</column>
-	<column name="name">
+	<column name="name" not-null="true">
 		<type name="text" length="0"/>
 	</column>
-	<constraint name="sources_pk" type="pk-constr" table="ste.source">
+	<constraint name="sources_pk" type="pk-constr" table="ste.&quot;Group&quot;">
 		<columns names="id" ref-type="src-columns"/>
 	</constraint>
 </table>
@@ -78,7 +78,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<column name="chapter_id" not-null="true">
 		<type name="integer" length="0"/>
 	</column>
-	<column name="queued_at">
+	<column name="queued_at" not-null="true">
 		<type name="date" length="0"/>
 	</column>
 	<column name="finished" default-value="false">
@@ -99,9 +99,6 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<column name="novel_id" not-null="true">
 		<type name="integer" length="0"/>
 	</column>
-	<column name="url">
-		<type name="text" length="0"/>
-	</column>
 	<column name="queued_at" not-null="true">
 		<type name="date" length="0"/>
 	</column>
@@ -109,6 +106,9 @@ CAUTION: Do not modify this file unless you know what you are doing.
 		<type name="bool" length="0"/>
 	</column>
 	<column name="finished_at">
+		<type name="date" length="0"/>
+	</column>
+	<column name="scheduled_at" not-null="true">
 		<type name="date" length="0"/>
 	</column>
 	<constraint name="novel_queue_pk" type="pk-constr" table="ste.novel_queue">
@@ -123,7 +123,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<column name="id" not-null="true">
 		<type name="serial" length="0"/>
 	</column>
-	<column name="name">
+	<column name="name" not-null="true">
 		<type name="text" length="0"/>
 	</column>
 	<constraint name="author_pk" type="pk-constr" table="ste.author">
@@ -157,7 +157,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<column name="id" not-null="true">
 		<type name="integer" length="0"/>
 	</column>
-	<column name="name">
+	<column name="name" not-null="true">
 		<type name="text" length="0"/>
 	</column>
 	<constraint name="nu_genres_pk" type="pk-constr" table="ste.genre">
@@ -172,7 +172,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<column name="id" not-null="true">
 		<type name="integer" length="0"/>
 	</column>
-	<column name="name">
+	<column name="name" not-null="true">
 		<type name="text" length="0"/>
 	</column>
 	<constraint name="nu_tags_pk" type="pk-constr" table="ste.tag">
@@ -193,7 +193,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<column name="chaptercount">
 		<type name="integer" length="0"/>
 	</column>
-	<column name="novel_id_str">
+	<column name="novel_id_str" not-null="true">
 		<type name="text" length="0"/>
 	</column>
 	<column name="ntype_id">
@@ -220,13 +220,13 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<column name="cover_id">
 		<type name="integer" length="0"/>
 	</column>
-	<column name="source_id">
+	<column name="group_id">
 		<type name="integer" length="0"/>
 	</column>
 	<column name="updatedAt">
 		<type name="date" length="0"/>
 	</column>
-	<column name="fetchedAt">
+	<column name="fetchedAt" not-null="true">
 		<type name="date" length="0"/>
 	</column>
 	<constraint name="nu_novel_pk" type="pk-constr" table="ste.novel">
@@ -281,7 +281,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<column name="id" not-null="true">
 		<type name="integer" length="0"/>
 	</column>
-	<column name="name">
+	<column name="name" not-null="true">
 		<type name="text" length="0"/>
 	</column>
 	<constraint name="Language_pk" type="pk-constr" table="ste.language">
@@ -311,20 +311,20 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<column name="id" not-null="true" sequence="ste.ste_seq">
 		<type name="integer" length="0"/>
 	</column>
-	<column name="title">
+	<column name="title" not-null="true">
 		<type name="text" length="0"/>
 	</column>
-	<column name="url">
+	<column name="url" not-null="true">
 		<type name="text" length="0"/>
 	</column>
-	<column name="idx">
+	<column name="idx" not-null="true">
 		<type name="integer" length="0"/>
 	</column>
-	<column name="downloaded">
-		<type name="bool" length="0"/>
+	<column name="part">
+		<type name="integer" length="0"/>
 	</column>
-	<column name="path">
-		<type name="text" length="0"/>
+	<column name="downloaded" not-null="true">
+		<type name="bool" length="0"/>
 	</column>
 	<constraint name="chapters_pk" type="pk-constr" table="ste.chapter">
 		<columns names="id" ref-type="src-columns"/>
@@ -338,7 +338,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<column name="id" not-null="true">
 		<type name="integer" length="0"/>
 	</column>
-	<column name="name">
+	<column name="name" not-null="true">
 		<type name="text" length="0"/>
 	</column>
 	<constraint name="novel_type_pk" type="pk-constr" table="ste.novel_type">
@@ -407,8 +407,8 @@ CAUTION: Do not modify this file unless you know what you are doing.
 </constraint>
 
 <constraint name="FK_novel_source" type="fk-constr" comparison-type="MATCH FULL"
-	 upd-action="NO ACTION" del-action="NO ACTION" ref-table="ste.source" table="ste.novel">
-	<columns names="source_id" ref-type="src-columns"/>
+	 upd-action="NO ACTION" del-action="NO ACTION" ref-table="ste.&quot;Group&quot;" table="ste.novel">
+	<columns names="group_id" ref-type="src-columns"/>
 	<columns names="id" ref-type="dst-columns"/>
 </constraint>
 
@@ -500,7 +500,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 
 <relationship name="&quot;rel_Novel_Source&quot;" type="relfk" layer="0"
 	 src-table="ste.novel"
-	 dst-table="ste.source" reference-fk="FK_novel_source"
+	 dst-table="ste.&quot;Group&quot;" reference-fk="FK_novel_source"
 	 src-required="false" dst-required="false"/>
 
 <relationship name="&quot;rel_Novel_Language&quot;" type="relfk" layer="0"

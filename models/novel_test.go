@@ -2723,57 +2723,6 @@ func testNovelToOneCoverUsingCover(t *testing.T) {
 	}
 }
 
-func testNovelToOneSourceUsingSource(t *testing.T) {
-	ctx := context.Background()
-	tx := MustTx(boil.BeginTx(ctx, nil))
-	defer func() { _ = tx.Rollback() }()
-
-	var local Novel
-	var foreign Source
-
-	seed := randomize.NewSeed()
-	if err := randomize.Struct(seed, &local, novelDBTypes, true, novelColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Novel struct: %s", err)
-	}
-	if err := randomize.Struct(seed, &foreign, sourceDBTypes, false, sourceColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Source struct: %s", err)
-	}
-
-	if err := foreign.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-
-	queries.Assign(&local.SourceID, foreign.ID)
-	if err := local.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-
-	check, err := local.Source().One(ctx, tx)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if !queries.Equal(check.ID, foreign.ID) {
-		t.Errorf("want: %v, got %v", foreign.ID, check.ID)
-	}
-
-	slice := NovelSlice{&local}
-	if err = local.L.LoadSource(ctx, tx, false, (*[]*Novel)(&slice), nil); err != nil {
-		t.Fatal(err)
-	}
-	if local.R.Source == nil {
-		t.Error("struct should have been eager loaded")
-	}
-
-	local.R.Source = nil
-	if err = local.L.LoadSource(ctx, tx, true, &local, nil); err != nil {
-		t.Fatal(err)
-	}
-	if local.R.Source == nil {
-		t.Error("struct should have been eager loaded")
-	}
-}
-
 func testNovelToOneLanguageUsingLanguage(t *testing.T) {
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))
@@ -2872,6 +2821,57 @@ func testNovelToOneNovelTypeUsingNtype(t *testing.T) {
 		t.Fatal(err)
 	}
 	if local.R.Ntype == nil {
+		t.Error("struct should have been eager loaded")
+	}
+}
+
+func testNovelToOneGroupUsingGroup(t *testing.T) {
+	ctx := context.Background()
+	tx := MustTx(boil.BeginTx(ctx, nil))
+	defer func() { _ = tx.Rollback() }()
+
+	var local Novel
+	var foreign Group
+
+	seed := randomize.NewSeed()
+	if err := randomize.Struct(seed, &local, novelDBTypes, true, novelColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Novel struct: %s", err)
+	}
+	if err := randomize.Struct(seed, &foreign, groupDBTypes, false, groupColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Group struct: %s", err)
+	}
+
+	if err := foreign.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	queries.Assign(&local.GroupID, foreign.ID)
+	if err := local.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	check, err := local.Group().One(ctx, tx)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !queries.Equal(check.ID, foreign.ID) {
+		t.Errorf("want: %v, got %v", foreign.ID, check.ID)
+	}
+
+	slice := NovelSlice{&local}
+	if err = local.L.LoadGroup(ctx, tx, false, (*[]*Novel)(&slice), nil); err != nil {
+		t.Fatal(err)
+	}
+	if local.R.Group == nil {
+		t.Error("struct should have been eager loaded")
+	}
+
+	local.R.Group = nil
+	if err = local.L.LoadGroup(ctx, tx, true, &local, nil); err != nil {
+		t.Fatal(err)
+	}
+	if local.R.Group == nil {
 		t.Error("struct should have been eager loaded")
 	}
 }
@@ -2977,115 +2977,6 @@ func testNovelToOneRemoveOpCoverUsingCover(t *testing.T) {
 	}
 
 	if !queries.IsValuerNil(a.CoverID) {
-		t.Error("foreign key value should be nil")
-	}
-
-	if len(b.R.Novels) != 0 {
-		t.Error("failed to remove a from b's relationships")
-	}
-}
-
-func testNovelToOneSetOpSourceUsingSource(t *testing.T) {
-	var err error
-
-	ctx := context.Background()
-	tx := MustTx(boil.BeginTx(ctx, nil))
-	defer func() { _ = tx.Rollback() }()
-
-	var a Novel
-	var b, c Source
-
-	seed := randomize.NewSeed()
-	if err = randomize.Struct(seed, &a, novelDBTypes, false, strmangle.SetComplement(novelPrimaryKeyColumns, novelColumnsWithoutDefault)...); err != nil {
-		t.Fatal(err)
-	}
-	if err = randomize.Struct(seed, &b, sourceDBTypes, false, strmangle.SetComplement(sourcePrimaryKeyColumns, sourceColumnsWithoutDefault)...); err != nil {
-		t.Fatal(err)
-	}
-	if err = randomize.Struct(seed, &c, sourceDBTypes, false, strmangle.SetComplement(sourcePrimaryKeyColumns, sourceColumnsWithoutDefault)...); err != nil {
-		t.Fatal(err)
-	}
-
-	if err := a.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-
-	for i, x := range []*Source{&b, &c} {
-		err = a.SetSource(ctx, tx, i != 0, x)
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		if a.R.Source != x {
-			t.Error("relationship struct not set to correct value")
-		}
-
-		if x.R.Novels[0] != &a {
-			t.Error("failed to append to foreign relationship struct")
-		}
-		if !queries.Equal(a.SourceID, x.ID) {
-			t.Error("foreign key was wrong value", a.SourceID)
-		}
-
-		zero := reflect.Zero(reflect.TypeOf(a.SourceID))
-		reflect.Indirect(reflect.ValueOf(&a.SourceID)).Set(zero)
-
-		if err = a.Reload(ctx, tx); err != nil {
-			t.Fatal("failed to reload", err)
-		}
-
-		if !queries.Equal(a.SourceID, x.ID) {
-			t.Error("foreign key was wrong value", a.SourceID, x.ID)
-		}
-	}
-}
-
-func testNovelToOneRemoveOpSourceUsingSource(t *testing.T) {
-	var err error
-
-	ctx := context.Background()
-	tx := MustTx(boil.BeginTx(ctx, nil))
-	defer func() { _ = tx.Rollback() }()
-
-	var a Novel
-	var b Source
-
-	seed := randomize.NewSeed()
-	if err = randomize.Struct(seed, &a, novelDBTypes, false, strmangle.SetComplement(novelPrimaryKeyColumns, novelColumnsWithoutDefault)...); err != nil {
-		t.Fatal(err)
-	}
-	if err = randomize.Struct(seed, &b, sourceDBTypes, false, strmangle.SetComplement(sourcePrimaryKeyColumns, sourceColumnsWithoutDefault)...); err != nil {
-		t.Fatal(err)
-	}
-
-	if err = a.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-
-	if err = a.SetSource(ctx, tx, true, &b); err != nil {
-		t.Fatal(err)
-	}
-
-	if err = a.RemoveSource(ctx, tx, &b); err != nil {
-		t.Error("failed to remove relationship")
-	}
-
-	count, err := a.Source().Count(ctx, tx)
-	if err != nil {
-		t.Error(err)
-	}
-	if count != 0 {
-		t.Error("want no relationships remaining")
-	}
-
-	if a.R.Source != nil {
-		t.Error("R struct entry should be nil")
-	}
-
-	if !queries.IsValuerNil(a.SourceID) {
 		t.Error("foreign key value should be nil")
 	}
 
@@ -3312,6 +3203,115 @@ func testNovelToOneRemoveOpNovelTypeUsingNtype(t *testing.T) {
 	}
 }
 
+func testNovelToOneSetOpGroupUsingGroup(t *testing.T) {
+	var err error
+
+	ctx := context.Background()
+	tx := MustTx(boil.BeginTx(ctx, nil))
+	defer func() { _ = tx.Rollback() }()
+
+	var a Novel
+	var b, c Group
+
+	seed := randomize.NewSeed()
+	if err = randomize.Struct(seed, &a, novelDBTypes, false, strmangle.SetComplement(novelPrimaryKeyColumns, novelColumnsWithoutDefault)...); err != nil {
+		t.Fatal(err)
+	}
+	if err = randomize.Struct(seed, &b, groupDBTypes, false, strmangle.SetComplement(groupPrimaryKeyColumns, groupColumnsWithoutDefault)...); err != nil {
+		t.Fatal(err)
+	}
+	if err = randomize.Struct(seed, &c, groupDBTypes, false, strmangle.SetComplement(groupPrimaryKeyColumns, groupColumnsWithoutDefault)...); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := a.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	for i, x := range []*Group{&b, &c} {
+		err = a.SetGroup(ctx, tx, i != 0, x)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if a.R.Group != x {
+			t.Error("relationship struct not set to correct value")
+		}
+
+		if x.R.GroupNovels[0] != &a {
+			t.Error("failed to append to foreign relationship struct")
+		}
+		if !queries.Equal(a.GroupID, x.ID) {
+			t.Error("foreign key was wrong value", a.GroupID)
+		}
+
+		zero := reflect.Zero(reflect.TypeOf(a.GroupID))
+		reflect.Indirect(reflect.ValueOf(&a.GroupID)).Set(zero)
+
+		if err = a.Reload(ctx, tx); err != nil {
+			t.Fatal("failed to reload", err)
+		}
+
+		if !queries.Equal(a.GroupID, x.ID) {
+			t.Error("foreign key was wrong value", a.GroupID, x.ID)
+		}
+	}
+}
+
+func testNovelToOneRemoveOpGroupUsingGroup(t *testing.T) {
+	var err error
+
+	ctx := context.Background()
+	tx := MustTx(boil.BeginTx(ctx, nil))
+	defer func() { _ = tx.Rollback() }()
+
+	var a Novel
+	var b Group
+
+	seed := randomize.NewSeed()
+	if err = randomize.Struct(seed, &a, novelDBTypes, false, strmangle.SetComplement(novelPrimaryKeyColumns, novelColumnsWithoutDefault)...); err != nil {
+		t.Fatal(err)
+	}
+	if err = randomize.Struct(seed, &b, groupDBTypes, false, strmangle.SetComplement(groupPrimaryKeyColumns, groupColumnsWithoutDefault)...); err != nil {
+		t.Fatal(err)
+	}
+
+	if err = a.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	if err = a.SetGroup(ctx, tx, true, &b); err != nil {
+		t.Fatal(err)
+	}
+
+	if err = a.RemoveGroup(ctx, tx, &b); err != nil {
+		t.Error("failed to remove relationship")
+	}
+
+	count, err := a.Group().Count(ctx, tx)
+	if err != nil {
+		t.Error(err)
+	}
+	if count != 0 {
+		t.Error("want no relationships remaining")
+	}
+
+	if a.R.Group != nil {
+		t.Error("R struct entry should be nil")
+	}
+
+	if !queries.IsValuerNil(a.GroupID) {
+		t.Error("foreign key value should be nil")
+	}
+
+	if len(b.R.GroupNovels) != 0 {
+		t.Error("failed to remove a from b's relationships")
+	}
+}
+
 func testNovelsReload(t *testing.T) {
 	t.Parallel()
 
@@ -3386,7 +3386,7 @@ func testNovelsSelect(t *testing.T) {
 }
 
 var (
-	novelDBTypes = map[string]string{`ID`: `integer`, `Title`: `text`, `Chaptercount`: `integer`, `NovelIDSTR`: `text`, `NtypeID`: `integer`, `Description`: `text`, `LanguageID`: `integer`, `Year`: `integer`, `Status`: `integer`, `Licensed`: `boolean`, `CompletlyTranslated`: `boolean`, `CoverID`: `integer`, `SourceID`: `integer`, `UpdatedAt`: `date`, `FetchedAt`: `date`}
+	novelDBTypes = map[string]string{`ID`: `integer`, `Title`: `text`, `Chaptercount`: `integer`, `NovelIDSTR`: `text`, `NtypeID`: `integer`, `Description`: `text`, `LanguageID`: `integer`, `Year`: `integer`, `Status`: `integer`, `Licensed`: `boolean`, `CompletlyTranslated`: `boolean`, `CoverID`: `integer`, `UpdatedAt`: `date`, `FetchedAt`: `date`, `GroupID`: `integer`}
 	_            = bytes.MinRead
 )
 

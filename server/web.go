@@ -75,7 +75,29 @@ func (tpm *templateManager) seriesHandler(w http.ResponseWriter, r *http.Request
 			log.Fatal(err)
 		}
 		// insert novel and cover
-		novel, err := dbm.InsertNovel(ctx, pNovel)
+		novel, err := dbm.InsertNovel(pNovel)
+		if err != nil {
+			log.Fatal(err)
+		}
+		// pull chapter
+		chapters, err := nuapi.GetAllChapter(pNovel.NovelIDSTR)
+		if err != nil {
+			log.Fatal(err)
+		}
+		for _, chapter := range chapters {
+			// insert chapter into db
+			c, err := dbm.InsertChapter(novel, &chapter)
+			if err != nil {
+				log.Fatal(err)
+			}
+			// insert chapter into queue
+			_, err = dbm.InsertChapterQueue(novel, c)
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
+		// insert into novelqueue for next check
+		_, err = dbm.InsertNovelQueue(novel)
 		if err != nil {
 			log.Fatal(err)
 		}

@@ -27,7 +27,7 @@ type Novel struct {
 	ID                  int         `boil:"id" json:"id" toml:"id" yaml:"id"`
 	Title               string      `boil:"title" json:"title" toml:"title" yaml:"title"`
 	Chaptercount        null.Int    `boil:"chaptercount" json:"chaptercount,omitempty" toml:"chaptercount" yaml:"chaptercount,omitempty"`
-	NovelIDSTR          null.String `boil:"novel_id_str" json:"novel_id_str,omitempty" toml:"novel_id_str" yaml:"novel_id_str,omitempty"`
+	NovelIDSTR          string      `boil:"novel_id_str" json:"novel_id_str" toml:"novel_id_str" yaml:"novel_id_str"`
 	NtypeID             null.Int    `boil:"ntype_id" json:"ntype_id,omitempty" toml:"ntype_id" yaml:"ntype_id,omitempty"`
 	Description         null.String `boil:"description" json:"description,omitempty" toml:"description" yaml:"description,omitempty"`
 	LanguageID          null.Int    `boil:"language_id" json:"language_id,omitempty" toml:"language_id" yaml:"language_id,omitempty"`
@@ -36,9 +36,9 @@ type Novel struct {
 	Licensed            null.Bool   `boil:"licensed" json:"licensed,omitempty" toml:"licensed" yaml:"licensed,omitempty"`
 	CompletlyTranslated null.Bool   `boil:"completly_translated" json:"completly_translated,omitempty" toml:"completly_translated" yaml:"completly_translated,omitempty"`
 	CoverID             null.Int    `boil:"cover_id" json:"cover_id,omitempty" toml:"cover_id" yaml:"cover_id,omitempty"`
-	SourceID            null.Int    `boil:"source_id" json:"source_id,omitempty" toml:"source_id" yaml:"source_id,omitempty"`
 	UpdatedAt           null.Time   `boil:"updatedAt" json:"updatedAt,omitempty" toml:"updatedAt" yaml:"updatedAt,omitempty"`
-	FetchedAt           null.Time   `boil:"fetchedAt" json:"fetchedAt,omitempty" toml:"fetchedAt" yaml:"fetchedAt,omitempty"`
+	FetchedAt           time.Time   `boil:"fetchedAt" json:"fetchedAt" toml:"fetchedAt" yaml:"fetchedAt"`
+	GroupID             null.Int    `boil:"group_id" json:"group_id,omitempty" toml:"group_id" yaml:"group_id,omitempty"`
 
 	R *novelR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L novelL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -57,9 +57,9 @@ var NovelColumns = struct {
 	Licensed            string
 	CompletlyTranslated string
 	CoverID             string
-	SourceID            string
 	UpdatedAt           string
 	FetchedAt           string
+	GroupID             string
 }{
 	ID:                  "id",
 	Title:               "title",
@@ -73,9 +73,9 @@ var NovelColumns = struct {
 	Licensed:            "licensed",
 	CompletlyTranslated: "completly_translated",
 	CoverID:             "cover_id",
-	SourceID:            "source_id",
 	UpdatedAt:           "updatedAt",
 	FetchedAt:           "fetchedAt",
+	GroupID:             "group_id",
 }
 
 // Generated where
@@ -84,7 +84,7 @@ var NovelWhere = struct {
 	ID                  whereHelperint
 	Title               whereHelperstring
 	Chaptercount        whereHelpernull_Int
-	NovelIDSTR          whereHelpernull_String
+	NovelIDSTR          whereHelperstring
 	NtypeID             whereHelpernull_Int
 	Description         whereHelpernull_String
 	LanguageID          whereHelpernull_Int
@@ -93,14 +93,14 @@ var NovelWhere = struct {
 	Licensed            whereHelpernull_Bool
 	CompletlyTranslated whereHelpernull_Bool
 	CoverID             whereHelpernull_Int
-	SourceID            whereHelpernull_Int
 	UpdatedAt           whereHelpernull_Time
-	FetchedAt           whereHelpernull_Time
+	FetchedAt           whereHelpertime_Time
+	GroupID             whereHelpernull_Int
 }{
 	ID:                  whereHelperint{field: `id`},
 	Title:               whereHelperstring{field: `title`},
 	Chaptercount:        whereHelpernull_Int{field: `chaptercount`},
-	NovelIDSTR:          whereHelpernull_String{field: `novel_id_str`},
+	NovelIDSTR:          whereHelperstring{field: `novel_id_str`},
 	NtypeID:             whereHelpernull_Int{field: `ntype_id`},
 	Description:         whereHelpernull_String{field: `description`},
 	LanguageID:          whereHelpernull_Int{field: `language_id`},
@@ -109,17 +109,17 @@ var NovelWhere = struct {
 	Licensed:            whereHelpernull_Bool{field: `licensed`},
 	CompletlyTranslated: whereHelpernull_Bool{field: `completly_translated`},
 	CoverID:             whereHelpernull_Int{field: `cover_id`},
-	SourceID:            whereHelpernull_Int{field: `source_id`},
 	UpdatedAt:           whereHelpernull_Time{field: `updatedAt`},
-	FetchedAt:           whereHelpernull_Time{field: `fetchedAt`},
+	FetchedAt:           whereHelpertime_Time{field: `fetchedAt`},
+	GroupID:             whereHelpernull_Int{field: `group_id`},
 }
 
 // NovelRels is where relationship names are stored.
 var NovelRels = struct {
 	Cover                  string
-	Source                 string
 	Language               string
 	Ntype                  string
+	Group                  string
 	Authors                string
 	Chapters               string
 	ChapterQueues          string
@@ -130,9 +130,9 @@ var NovelRels = struct {
 	Tags                   string
 }{
 	Cover:                  "Cover",
-	Source:                 "Source",
 	Language:               "Language",
 	Ntype:                  "Ntype",
+	Group:                  "Group",
 	Authors:                "Authors",
 	Chapters:               "Chapters",
 	ChapterQueues:          "ChapterQueues",
@@ -146,9 +146,9 @@ var NovelRels = struct {
 // novelR is where relationships are stored.
 type novelR struct {
 	Cover                  *Cover
-	Source                 *Source
 	Language               *Language
 	Ntype                  *NovelType
+	Group                  *Group
 	Authors                AuthorSlice
 	Chapters               ChapterSlice
 	ChapterQueues          ChapterQueueSlice
@@ -168,8 +168,8 @@ func (*novelR) NewStruct() *novelR {
 type novelL struct{}
 
 var (
-	novelColumns               = []string{"id", "title", "chaptercount", "novel_id_str", "ntype_id", "description", "language_id", "year", "status", "licensed", "completly_translated", "cover_id", "source_id", "updatedAt", "fetchedAt"}
-	novelColumnsWithoutDefault = []string{"title", "chaptercount", "novel_id_str", "ntype_id", "description", "language_id", "year", "status", "licensed", "completly_translated", "cover_id", "source_id", "updatedAt", "fetchedAt"}
+	novelColumns               = []string{"id", "title", "chaptercount", "novel_id_str", "ntype_id", "description", "language_id", "year", "status", "licensed", "completly_translated", "cover_id", "updatedAt", "fetchedAt", "group_id"}
+	novelColumnsWithoutDefault = []string{"title", "chaptercount", "novel_id_str", "ntype_id", "description", "language_id", "year", "status", "licensed", "completly_translated", "cover_id", "updatedAt", "fetchedAt", "group_id"}
 	novelColumnsWithDefault    = []string{"id"}
 	novelPrimaryKeyColumns     = []string{"id"}
 )
@@ -463,20 +463,6 @@ func (o *Novel) Cover(mods ...qm.QueryMod) coverQuery {
 	return query
 }
 
-// Source pointed to by the foreign key.
-func (o *Novel) Source(mods ...qm.QueryMod) sourceQuery {
-	queryMods := []qm.QueryMod{
-		qm.Where("id=?", o.SourceID),
-	}
-
-	queryMods = append(queryMods, mods...)
-
-	query := Sources(queryMods...)
-	queries.SetFrom(query.Query, "\"ste\".\"source\"")
-
-	return query
-}
-
 // Language pointed to by the foreign key.
 func (o *Novel) Language(mods ...qm.QueryMod) languageQuery {
 	queryMods := []qm.QueryMod{
@@ -501,6 +487,20 @@ func (o *Novel) Ntype(mods ...qm.QueryMod) novelTypeQuery {
 
 	query := NovelTypes(queryMods...)
 	queries.SetFrom(query.Query, "\"ste\".\"novel_type\"")
+
+	return query
+}
+
+// Group pointed to by the foreign key.
+func (o *Novel) Group(mods ...qm.QueryMod) groupQuery {
+	queryMods := []qm.QueryMod{
+		qm.Where("id=?", o.GroupID),
+	}
+
+	queryMods = append(queryMods, mods...)
+
+	query := Groups(queryMods...)
+	queries.SetFrom(query.Query, "\"ste\".\"Group\"")
 
 	return query
 }
@@ -784,111 +784,6 @@ func (novelL) LoadCover(ctx context.Context, e boil.ContextExecutor, singular bo
 	return nil
 }
 
-// LoadSource allows an eager lookup of values, cached into the
-// loaded structs of the objects. This is for an N-1 relationship.
-func (novelL) LoadSource(ctx context.Context, e boil.ContextExecutor, singular bool, maybeNovel interface{}, mods queries.Applicator) error {
-	var slice []*Novel
-	var object *Novel
-
-	if singular {
-		object = maybeNovel.(*Novel)
-	} else {
-		slice = *maybeNovel.(*[]*Novel)
-	}
-
-	args := make([]interface{}, 0, 1)
-	if singular {
-		if object.R == nil {
-			object.R = &novelR{}
-		}
-		if !queries.IsNil(object.SourceID) {
-			args = append(args, object.SourceID)
-		}
-
-	} else {
-	Outer:
-		for _, obj := range slice {
-			if obj.R == nil {
-				obj.R = &novelR{}
-			}
-
-			for _, a := range args {
-				if queries.Equal(a, obj.SourceID) {
-					continue Outer
-				}
-			}
-
-			if !queries.IsNil(obj.SourceID) {
-				args = append(args, obj.SourceID)
-			}
-
-		}
-	}
-
-	if len(args) == 0 {
-		return nil
-	}
-
-	query := NewQuery(qm.From(`ste.source`), qm.WhereIn(`id in ?`, args...))
-	if mods != nil {
-		mods.Apply(query)
-	}
-
-	results, err := query.QueryContext(ctx, e)
-	if err != nil {
-		return errors.Wrap(err, "failed to eager load Source")
-	}
-
-	var resultSlice []*Source
-	if err = queries.Bind(results, &resultSlice); err != nil {
-		return errors.Wrap(err, "failed to bind eager loaded slice Source")
-	}
-
-	if err = results.Close(); err != nil {
-		return errors.Wrap(err, "failed to close results of eager load for source")
-	}
-	if err = results.Err(); err != nil {
-		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for source")
-	}
-
-	if len(novelAfterSelectHooks) != 0 {
-		for _, obj := range resultSlice {
-			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
-				return err
-			}
-		}
-	}
-
-	if len(resultSlice) == 0 {
-		return nil
-	}
-
-	if singular {
-		foreign := resultSlice[0]
-		object.R.Source = foreign
-		if foreign.R == nil {
-			foreign.R = &sourceR{}
-		}
-		foreign.R.Novels = append(foreign.R.Novels, object)
-		return nil
-	}
-
-	for _, local := range slice {
-		for _, foreign := range resultSlice {
-			if queries.Equal(local.SourceID, foreign.ID) {
-				local.R.Source = foreign
-				if foreign.R == nil {
-					foreign.R = &sourceR{}
-				}
-				foreign.R.Novels = append(foreign.R.Novels, local)
-				break
-			}
-		}
-	}
-
-	return nil
-}
-
 // LoadLanguage allows an eager lookup of values, cached into the
 // loaded structs of the objects. This is for an N-1 relationship.
 func (novelL) LoadLanguage(ctx context.Context, e boil.ContextExecutor, singular bool, maybeNovel interface{}, mods queries.Applicator) error {
@@ -1099,6 +994,111 @@ func (novelL) LoadNtype(ctx context.Context, e boil.ContextExecutor, singular bo
 	return nil
 }
 
+// LoadGroup allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for an N-1 relationship.
+func (novelL) LoadGroup(ctx context.Context, e boil.ContextExecutor, singular bool, maybeNovel interface{}, mods queries.Applicator) error {
+	var slice []*Novel
+	var object *Novel
+
+	if singular {
+		object = maybeNovel.(*Novel)
+	} else {
+		slice = *maybeNovel.(*[]*Novel)
+	}
+
+	args := make([]interface{}, 0, 1)
+	if singular {
+		if object.R == nil {
+			object.R = &novelR{}
+		}
+		if !queries.IsNil(object.GroupID) {
+			args = append(args, object.GroupID)
+		}
+
+	} else {
+	Outer:
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &novelR{}
+			}
+
+			for _, a := range args {
+				if queries.Equal(a, obj.GroupID) {
+					continue Outer
+				}
+			}
+
+			if !queries.IsNil(obj.GroupID) {
+				args = append(args, obj.GroupID)
+			}
+
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	query := NewQuery(qm.From(`ste.Group`), qm.WhereIn(`id in ?`, args...))
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load Group")
+	}
+
+	var resultSlice []*Group
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice Group")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results of eager load for Group")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for Group")
+	}
+
+	if len(novelAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+
+	if len(resultSlice) == 0 {
+		return nil
+	}
+
+	if singular {
+		foreign := resultSlice[0]
+		object.R.Group = foreign
+		if foreign.R == nil {
+			foreign.R = &groupR{}
+		}
+		foreign.R.GroupNovels = append(foreign.R.GroupNovels, object)
+		return nil
+	}
+
+	for _, local := range slice {
+		for _, foreign := range resultSlice {
+			if queries.Equal(local.GroupID, foreign.ID) {
+				local.R.Group = foreign
+				if foreign.R == nil {
+					foreign.R = &groupR{}
+				}
+				foreign.R.GroupNovels = append(foreign.R.GroupNovels, local)
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
 // LoadAuthors allows an eager lookup of values, cached into the
 // loaded structs of the objects. This is for a 1-M or N-M relationship.
 func (novelL) LoadAuthors(ctx context.Context, e boil.ContextExecutor, singular bool, maybeNovel interface{}, mods queries.Applicator) error {
@@ -1275,7 +1275,7 @@ func (novelL) LoadChapters(ctx context.Context, e boil.ContextExecutor, singular
 		one := new(Chapter)
 		var localJoinCol int
 
-		err = results.Scan(&one.ID, &one.Title, &one.URL, &one.Idx, &one.Downloaded, &one.Path, &localJoinCol)
+		err = results.Scan(&one.ID, &one.Title, &one.URL, &one.Idx, &one.Part, &one.Downloaded, &localJoinCol)
 		if err != nil {
 			return errors.Wrap(err, "failed to scan eager loaded results for chapter")
 		}
@@ -1695,7 +1695,7 @@ func (novelL) LoadRecommendedNovelNovels(ctx context.Context, e boil.ContextExec
 		one := new(Novel)
 		var localJoinCol int
 
-		err = results.Scan(&one.ID, &one.Title, &one.Chaptercount, &one.NovelIDSTR, &one.NtypeID, &one.Description, &one.LanguageID, &one.Year, &one.Status, &one.Licensed, &one.CompletlyTranslated, &one.CoverID, &one.SourceID, &one.UpdatedAt, &one.FetchedAt, &localJoinCol)
+		err = results.Scan(&one.ID, &one.Title, &one.Chaptercount, &one.NovelIDSTR, &one.NtypeID, &one.Description, &one.LanguageID, &one.Year, &one.Status, &one.Licensed, &one.CompletlyTranslated, &one.CoverID, &one.UpdatedAt, &one.FetchedAt, &one.GroupID, &localJoinCol)
 		if err != nil {
 			return errors.Wrap(err, "failed to scan eager loaded results for novel")
 		}
@@ -1810,7 +1810,7 @@ func (novelL) LoadNovels(ctx context.Context, e boil.ContextExecutor, singular b
 		one := new(Novel)
 		var localJoinCol int
 
-		err = results.Scan(&one.ID, &one.Title, &one.Chaptercount, &one.NovelIDSTR, &one.NtypeID, &one.Description, &one.LanguageID, &one.Year, &one.Status, &one.Licensed, &one.CompletlyTranslated, &one.CoverID, &one.SourceID, &one.UpdatedAt, &one.FetchedAt, &localJoinCol)
+		err = results.Scan(&one.ID, &one.Title, &one.Chaptercount, &one.NovelIDSTR, &one.NtypeID, &one.Description, &one.LanguageID, &one.Year, &one.Status, &one.Licensed, &one.CompletlyTranslated, &one.CoverID, &one.UpdatedAt, &one.FetchedAt, &one.GroupID, &localJoinCol)
 		if err != nil {
 			return errors.Wrap(err, "failed to scan eager loaded results for novel")
 		}
@@ -2057,84 +2057,6 @@ func (o *Novel) RemoveCover(ctx context.Context, exec boil.ContextExecutor, rela
 	return nil
 }
 
-// SetSource of the novel to the related item.
-// Sets o.R.Source to related.
-// Adds o to related.R.Novels.
-func (o *Novel) SetSource(ctx context.Context, exec boil.ContextExecutor, insert bool, related *Source) error {
-	var err error
-	if insert {
-		if err = related.Insert(ctx, exec, boil.Infer()); err != nil {
-			return errors.Wrap(err, "failed to insert into foreign table")
-		}
-	}
-
-	updateQuery := fmt.Sprintf(
-		"UPDATE \"ste\".\"novel\" SET %s WHERE %s",
-		strmangle.SetParamNames("\"", "\"", 1, []string{"source_id"}),
-		strmangle.WhereClause("\"", "\"", 2, novelPrimaryKeyColumns),
-	)
-	values := []interface{}{related.ID, o.ID}
-
-	if boil.DebugMode {
-		fmt.Fprintln(boil.DebugWriter, updateQuery)
-		fmt.Fprintln(boil.DebugWriter, values)
-	}
-
-	if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
-		return errors.Wrap(err, "failed to update local table")
-	}
-
-	queries.Assign(&o.SourceID, related.ID)
-	if o.R == nil {
-		o.R = &novelR{
-			Source: related,
-		}
-	} else {
-		o.R.Source = related
-	}
-
-	if related.R == nil {
-		related.R = &sourceR{
-			Novels: NovelSlice{o},
-		}
-	} else {
-		related.R.Novels = append(related.R.Novels, o)
-	}
-
-	return nil
-}
-
-// RemoveSource relationship.
-// Sets o.R.Source to nil.
-// Removes o from all passed in related items' relationships struct (Optional).
-func (o *Novel) RemoveSource(ctx context.Context, exec boil.ContextExecutor, related *Source) error {
-	var err error
-
-	queries.SetScanner(&o.SourceID, nil)
-	if _, err = o.Update(ctx, exec, boil.Whitelist("source_id")); err != nil {
-		return errors.Wrap(err, "failed to update local table")
-	}
-
-	o.R.Source = nil
-	if related == nil || related.R == nil {
-		return nil
-	}
-
-	for i, ri := range related.R.Novels {
-		if queries.Equal(o.SourceID, ri.SourceID) {
-			continue
-		}
-
-		ln := len(related.R.Novels)
-		if ln > 1 && i < ln-1 {
-			related.R.Novels[i] = related.R.Novels[ln-1]
-		}
-		related.R.Novels = related.R.Novels[:ln-1]
-		break
-	}
-	return nil
-}
-
 // SetLanguage of the novel to the related item.
 // Sets o.R.Language to related.
 // Adds o to related.R.Novels.
@@ -2286,6 +2208,84 @@ func (o *Novel) RemoveNtype(ctx context.Context, exec boil.ContextExecutor, rela
 			related.R.NtypeNovels[i] = related.R.NtypeNovels[ln-1]
 		}
 		related.R.NtypeNovels = related.R.NtypeNovels[:ln-1]
+		break
+	}
+	return nil
+}
+
+// SetGroup of the novel to the related item.
+// Sets o.R.Group to related.
+// Adds o to related.R.GroupNovels.
+func (o *Novel) SetGroup(ctx context.Context, exec boil.ContextExecutor, insert bool, related *Group) error {
+	var err error
+	if insert {
+		if err = related.Insert(ctx, exec, boil.Infer()); err != nil {
+			return errors.Wrap(err, "failed to insert into foreign table")
+		}
+	}
+
+	updateQuery := fmt.Sprintf(
+		"UPDATE \"ste\".\"novel\" SET %s WHERE %s",
+		strmangle.SetParamNames("\"", "\"", 1, []string{"group_id"}),
+		strmangle.WhereClause("\"", "\"", 2, novelPrimaryKeyColumns),
+	)
+	values := []interface{}{related.ID, o.ID}
+
+	if boil.DebugMode {
+		fmt.Fprintln(boil.DebugWriter, updateQuery)
+		fmt.Fprintln(boil.DebugWriter, values)
+	}
+
+	if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+		return errors.Wrap(err, "failed to update local table")
+	}
+
+	queries.Assign(&o.GroupID, related.ID)
+	if o.R == nil {
+		o.R = &novelR{
+			Group: related,
+		}
+	} else {
+		o.R.Group = related
+	}
+
+	if related.R == nil {
+		related.R = &groupR{
+			GroupNovels: NovelSlice{o},
+		}
+	} else {
+		related.R.GroupNovels = append(related.R.GroupNovels, o)
+	}
+
+	return nil
+}
+
+// RemoveGroup relationship.
+// Sets o.R.Group to nil.
+// Removes o from all passed in related items' relationships struct (Optional).
+func (o *Novel) RemoveGroup(ctx context.Context, exec boil.ContextExecutor, related *Group) error {
+	var err error
+
+	queries.SetScanner(&o.GroupID, nil)
+	if _, err = o.Update(ctx, exec, boil.Whitelist("group_id")); err != nil {
+		return errors.Wrap(err, "failed to update local table")
+	}
+
+	o.R.Group = nil
+	if related == nil || related.R == nil {
+		return nil
+	}
+
+	for i, ri := range related.R.GroupNovels {
+		if queries.Equal(o.GroupID, ri.GroupID) {
+			continue
+		}
+
+		ln := len(related.R.GroupNovels)
+		if ln > 1 && i < ln-1 {
+			related.R.GroupNovels[i] = related.R.GroupNovels[ln-1]
+		}
+		related.R.GroupNovels = related.R.GroupNovels[:ln-1]
 		break
 	}
 	return nil

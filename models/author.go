@@ -14,7 +14,6 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	"github.com/volatiletech/null"
 	"github.com/volatiletech/sqlboiler/boil"
 	"github.com/volatiletech/sqlboiler/queries"
 	"github.com/volatiletech/sqlboiler/queries/qm"
@@ -24,8 +23,8 @@ import (
 
 // Author is an object representing the database table.
 type Author struct {
-	ID   int         `boil:"id" json:"id" toml:"id" yaml:"id"`
-	Name null.String `boil:"name" json:"name,omitempty" toml:"name" yaml:"name,omitempty"`
+	ID   int    `boil:"id" json:"id" toml:"id" yaml:"id"`
+	Name string `boil:"name" json:"name" toml:"name" yaml:"name"`
 
 	R *authorR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L authorL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -41,44 +40,12 @@ var AuthorColumns = struct {
 
 // Generated where
 
-type whereHelperint struct{ field string }
-
-func (w whereHelperint) EQ(x int) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
-func (w whereHelperint) NEQ(x int) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
-func (w whereHelperint) LT(x int) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
-func (w whereHelperint) LTE(x int) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
-func (w whereHelperint) GT(x int) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
-func (w whereHelperint) GTE(x int) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
-
-type whereHelpernull_String struct{ field string }
-
-func (w whereHelpernull_String) EQ(x null.String) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, false, x)
-}
-func (w whereHelpernull_String) NEQ(x null.String) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, true, x)
-}
-func (w whereHelpernull_String) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
-func (w whereHelpernull_String) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
-func (w whereHelpernull_String) LT(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LT, x)
-}
-func (w whereHelpernull_String) LTE(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LTE, x)
-}
-func (w whereHelpernull_String) GT(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GT, x)
-}
-func (w whereHelpernull_String) GTE(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GTE, x)
-}
-
 var AuthorWhere = struct {
 	ID   whereHelperint
-	Name whereHelpernull_String
+	Name whereHelperstring
 }{
 	ID:   whereHelperint{field: `id`},
-	Name: whereHelpernull_String{field: `name`},
+	Name: whereHelperstring{field: `name`},
 }
 
 // AuthorRels is where relationship names are stored.
@@ -466,7 +433,7 @@ func (authorL) LoadNovels(ctx context.Context, e boil.ContextExecutor, singular 
 		one := new(Novel)
 		var localJoinCol int
 
-		err = results.Scan(&one.ID, &one.Title, &one.Chaptercount, &one.NovelIDSTR, &one.NtypeID, &one.Description, &one.LanguageID, &one.Year, &one.Status, &one.Licensed, &one.CompletlyTranslated, &one.CoverID, &one.SourceID, &one.UpdatedAt, &one.FetchedAt, &localJoinCol)
+		err = results.Scan(&one.ID, &one.Title, &one.Chaptercount, &one.NovelIDSTR, &one.NtypeID, &one.Description, &one.LanguageID, &one.Year, &one.Status, &one.Licensed, &one.CompletlyTranslated, &one.CoverID, &one.UpdatedAt, &one.FetchedAt, &one.GroupID, &localJoinCol)
 		if err != nil {
 			return errors.Wrap(err, "failed to scan eager loaded results for novel")
 		}

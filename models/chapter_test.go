@@ -1034,7 +1034,7 @@ func testChaptersSelect(t *testing.T) {
 }
 
 var (
-	chapterDBTypes = map[string]string{`ID`: `integer`, `Title`: `text`, `URL`: `text`, `Idx`: `integer`, `Downloaded`: `boolean`, `Path`: `text`}
+	chapterDBTypes = map[string]string{`ID`: `integer`, `Title`: `text`, `URL`: `text`, `Idx`: `integer`, `Part`: `integer`, `Downloaded`: `boolean`}
 	_              = bytes.MinRead
 )
 

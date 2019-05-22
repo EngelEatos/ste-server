@@ -6,6 +6,8 @@ package models
 import "testing"
 
 func TestUpsert(t *testing.T) {
+	t.Run("Groups", testGroupsUpsert)
+
 	t.Run("Authors", testAuthorsUpsert)
 
 	t.Run("Chapters", testChaptersUpsert)
@@ -23,8 +25,6 @@ func TestUpsert(t *testing.T) {
 	t.Run("NovelQueues", testNovelQueuesUpsert)
 
 	t.Run("NovelTypes", testNovelTypesUpsert)
-
-	t.Run("Sources", testSourcesUpsert)
 
 	t.Run("Tags", testTagsUpsert)
 }

@@ -26,7 +26,7 @@ import (
 type ChapterQueue struct {
 	NovelID    int       `boil:"novel_id" json:"novel_id" toml:"novel_id" yaml:"novel_id"`
 	ChapterID  int       `boil:"chapter_id" json:"chapter_id" toml:"chapter_id" yaml:"chapter_id"`
-	QueuedAt   null.Time `boil:"queued_at" json:"queued_at,omitempty" toml:"queued_at" yaml:"queued_at,omitempty"`
+	QueuedAt   time.Time `boil:"queued_at" json:"queued_at" toml:"queued_at" yaml:"queued_at"`
 	Finished   null.Bool `boil:"finished" json:"finished,omitempty" toml:"finished" yaml:"finished,omitempty"`
 	FinishedAt null.Time `boil:"finished_at" json:"finished_at,omitempty" toml:"finished_at" yaml:"finished_at,omitempty"`
 
@@ -49,6 +49,50 @@ var ChapterQueueColumns = struct {
 }
 
 // Generated where
+
+type whereHelpertime_Time struct{ field string }
+
+func (w whereHelpertime_Time) EQ(x time.Time) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.EQ, x)
+}
+func (w whereHelpertime_Time) NEQ(x time.Time) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.NEQ, x)
+}
+func (w whereHelpertime_Time) LT(x time.Time) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelpertime_Time) LTE(x time.Time) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelpertime_Time) GT(x time.Time) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelpertime_Time) GTE(x time.Time) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
+
+type whereHelpernull_Bool struct{ field string }
+
+func (w whereHelpernull_Bool) EQ(x null.Bool) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, false, x)
+}
+func (w whereHelpernull_Bool) NEQ(x null.Bool) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, true, x)
+}
+func (w whereHelpernull_Bool) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
+func (w whereHelpernull_Bool) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
+func (w whereHelpernull_Bool) LT(x null.Bool) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelpernull_Bool) LTE(x null.Bool) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelpernull_Bool) GT(x null.Bool) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelpernull_Bool) GTE(x null.Bool) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
 
 type whereHelpernull_Time struct{ field string }
 
@@ -76,13 +120,13 @@ func (w whereHelpernull_Time) GTE(x null.Time) qm.QueryMod {
 var ChapterQueueWhere = struct {
 	NovelID    whereHelperint
 	ChapterID  whereHelperint
-	QueuedAt   whereHelpernull_Time
+	QueuedAt   whereHelpertime_Time
 	Finished   whereHelpernull_Bool
 	FinishedAt whereHelpernull_Time
 }{
 	NovelID:    whereHelperint{field: `novel_id`},
 	ChapterID:  whereHelperint{field: `chapter_id`},
-	QueuedAt:   whereHelpernull_Time{field: `queued_at`},
+	QueuedAt:   whereHelpertime_Time{field: `queued_at`},
 	Finished:   whereHelpernull_Bool{field: `finished`},
 	FinishedAt: whereHelpernull_Time{field: `finished_at`},
 }

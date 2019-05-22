@@ -3,38 +3,20 @@ package server
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
-	"log"
-	"os"
-	"ste/models"
-
 	"github.com/bmaupin/go-epub"
 	"github.com/volatiletech/sqlboiler/queries/qm"
+	"io/ioutil"
+	"log"
+	"ste/models"
+	"ste/utils"
 )
 
 const (
-	cssfile  = ""
-	fontfile = ""
+	cssfile    = ""
+	fontfile   = ""
+	outputPath = "./raw_novel/"
 )
 
-func fileExists(path string) bool {
-	if _, err := os.Stat(path); err == nil {
-		return true
-	}
-	return false
-}
-
-// func rpadd(s string, wlen int, pchar string) string {
-// 	return padd(s, wlen, pchar, false)
-// }
-
-// func lpadd(s string, wlen int, pchar string) string {
-// 	return padd(s, wlen, pchar, true)
-// }
-
-// func zpadd(s string, wlen int) string {
-// 	return padd(s, wlen, "0", true)
-// }
 // i=0; 0 - 99
 // i=1; 100 - 199
 // i=2; 200 - 299
@@ -80,19 +62,24 @@ func Build(novel *models.Novel, oPath string) error {
 	}
 
 	for _, chapter := range chapters {
-		if !chapter.Path.Valid || !fileExists(chapter.Path.String) {
-			log.Printf("chapter file does not exist: %s\n", chapter.Path.String)
-			continue
-		}
-		data, err := ioutil.ReadFile(chapter.Path.String)
+		path, err := utils.GeneratePath(outputPath, chapter.ID)
 		if err != nil {
 			log.Fatal(err)
 		}
-		filename := fmt.Sprintf("%04d.html", chapter.Idx.Int)
-		title := chapter.Title.String
-		if !chapter.Title.Valid {
-			title = fmt.Sprintf("Chapter %d", chapter.Idx.Int)
+		exists, err := utils.FileExists(path)
+		if err != nil {
+			log.Fatal(err)
 		}
+		if !exists {
+			log.Printf("chapter file does not exist: %s\n", path)
+			continue
+		}
+		data, err := ioutil.ReadFile(path)
+		if err != nil {
+			log.Fatal(err)
+		}
+		filename := fmt.Sprintf("%04d.html", chapter.Idx)
+		title := chapter.Title
 		_, err = e.AddSection(string(data), title, filename, csspath)
 		if err != nil {
 			log.Fatal(err)

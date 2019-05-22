@@ -24,65 +24,44 @@ import (
 
 // NovelQueue is an object representing the database table.
 type NovelQueue struct {
-	NovelID    int         `boil:"novel_id" json:"novel_id" toml:"novel_id" yaml:"novel_id"`
-	URL        null.String `boil:"url" json:"url,omitempty" toml:"url" yaml:"url,omitempty"`
-	QueuedAt   time.Time   `boil:"queued_at" json:"queued_at" toml:"queued_at" yaml:"queued_at"`
-	Finished   null.Bool   `boil:"finished" json:"finished,omitempty" toml:"finished" yaml:"finished,omitempty"`
-	FinishedAt null.Time   `boil:"finished_at" json:"finished_at,omitempty" toml:"finished_at" yaml:"finished_at,omitempty"`
+	NovelID     int       `boil:"novel_id" json:"novel_id" toml:"novel_id" yaml:"novel_id"`
+	QueuedAt    time.Time `boil:"queued_at" json:"queued_at" toml:"queued_at" yaml:"queued_at"`
+	Finished    null.Bool `boil:"finished" json:"finished,omitempty" toml:"finished" yaml:"finished,omitempty"`
+	FinishedAt  null.Time `boil:"finished_at" json:"finished_at,omitempty" toml:"finished_at" yaml:"finished_at,omitempty"`
+	ScheduledAt time.Time `boil:"scheduled_at" json:"scheduled_at" toml:"scheduled_at" yaml:"scheduled_at"`
 
 	R *novelQueueR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L novelQueueL  `boil:"-" json:"-" toml:"-" yaml:"-"`
 }
 
 var NovelQueueColumns = struct {
-	NovelID    string
-	URL        string
-	QueuedAt   string
-	Finished   string
-	FinishedAt string
+	NovelID     string
+	QueuedAt    string
+	Finished    string
+	FinishedAt  string
+	ScheduledAt string
 }{
-	NovelID:    "novel_id",
-	URL:        "url",
-	QueuedAt:   "queued_at",
-	Finished:   "finished",
-	FinishedAt: "finished_at",
+	NovelID:     "novel_id",
+	QueuedAt:    "queued_at",
+	Finished:    "finished",
+	FinishedAt:  "finished_at",
+	ScheduledAt: "scheduled_at",
 }
 
 // Generated where
 
-type whereHelpertime_Time struct{ field string }
-
-func (w whereHelpertime_Time) EQ(x time.Time) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.EQ, x)
-}
-func (w whereHelpertime_Time) NEQ(x time.Time) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.NEQ, x)
-}
-func (w whereHelpertime_Time) LT(x time.Time) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LT, x)
-}
-func (w whereHelpertime_Time) LTE(x time.Time) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LTE, x)
-}
-func (w whereHelpertime_Time) GT(x time.Time) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GT, x)
-}
-func (w whereHelpertime_Time) GTE(x time.Time) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GTE, x)
-}
-
 var NovelQueueWhere = struct {
-	NovelID    whereHelperint
-	URL        whereHelpernull_String
-	QueuedAt   whereHelpertime_Time
-	Finished   whereHelpernull_Bool
-	FinishedAt whereHelpernull_Time
+	NovelID     whereHelperint
+	QueuedAt    whereHelpertime_Time
+	Finished    whereHelpernull_Bool
+	FinishedAt  whereHelpernull_Time
+	ScheduledAt whereHelpertime_Time
 }{
-	NovelID:    whereHelperint{field: `novel_id`},
-	URL:        whereHelpernull_String{field: `url`},
-	QueuedAt:   whereHelpertime_Time{field: `queued_at`},
-	Finished:   whereHelpernull_Bool{field: `finished`},
-	FinishedAt: whereHelpernull_Time{field: `finished_at`},
+	NovelID:     whereHelperint{field: `novel_id`},
+	QueuedAt:    whereHelpertime_Time{field: `queued_at`},
+	Finished:    whereHelpernull_Bool{field: `finished`},
+	FinishedAt:  whereHelpernull_Time{field: `finished_at`},
+	ScheduledAt: whereHelpertime_Time{field: `scheduled_at`},
 }
 
 // NovelQueueRels is where relationship names are stored.
@@ -106,8 +85,8 @@ func (*novelQueueR) NewStruct() *novelQueueR {
 type novelQueueL struct{}
 
 var (
-	novelQueueColumns               = []string{"novel_id", "url", "queued_at", "finished", "finished_at"}
-	novelQueueColumnsWithoutDefault = []string{"novel_id", "url", "queued_at", "finished_at"}
+	novelQueueColumns               = []string{"novel_id", "queued_at", "finished", "finished_at", "scheduled_at"}
+	novelQueueColumnsWithoutDefault = []string{"novel_id", "queued_at", "finished_at", "scheduled_at"}
 	novelQueueColumnsWithDefault    = []string{"finished"}
 	novelQueuePrimaryKeyColumns     = []string{"novel_id", "queued_at"}
 )

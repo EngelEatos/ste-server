@@ -24,12 +24,12 @@ import (
 
 // Chapter is an object representing the database table.
 type Chapter struct {
-	ID         int         `boil:"id" json:"id" toml:"id" yaml:"id"`
-	Title      null.String `boil:"title" json:"title,omitempty" toml:"title" yaml:"title,omitempty"`
-	URL        null.String `boil:"url" json:"url,omitempty" toml:"url" yaml:"url,omitempty"`
-	Idx        null.Int    `boil:"idx" json:"idx,omitempty" toml:"idx" yaml:"idx,omitempty"`
-	Downloaded null.Bool   `boil:"downloaded" json:"downloaded,omitempty" toml:"downloaded" yaml:"downloaded,omitempty"`
-	Path       null.String `boil:"path" json:"path,omitempty" toml:"path" yaml:"path,omitempty"`
+	ID         int      `boil:"id" json:"id" toml:"id" yaml:"id"`
+	Title      string   `boil:"title" json:"title" toml:"title" yaml:"title"`
+	URL        string   `boil:"url" json:"url" toml:"url" yaml:"url"`
+	Idx        int      `boil:"idx" json:"idx" toml:"idx" yaml:"idx"`
+	Part       null.Int `boil:"part" json:"part,omitempty" toml:"part" yaml:"part,omitempty"`
+	Downloaded bool     `boil:"downloaded" json:"downloaded" toml:"downloaded" yaml:"downloaded"`
 
 	R *chapterR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L chapterL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -40,15 +40,15 @@ var ChapterColumns = struct {
 	Title      string
 	URL        string
 	Idx        string
+	Part       string
 	Downloaded string
-	Path       string
 }{
 	ID:         "id",
 	Title:      "title",
 	URL:        "url",
 	Idx:        "idx",
+	Part:       "part",
 	Downloaded: "downloaded",
-	Path:       "path",
 }
 
 // Generated where
@@ -76,43 +76,29 @@ func (w whereHelpernull_Int) GTE(x null.Int) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.GTE, x)
 }
 
-type whereHelpernull_Bool struct{ field string }
+type whereHelperbool struct{ field string }
 
-func (w whereHelpernull_Bool) EQ(x null.Bool) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, false, x)
-}
-func (w whereHelpernull_Bool) NEQ(x null.Bool) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, true, x)
-}
-func (w whereHelpernull_Bool) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
-func (w whereHelpernull_Bool) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
-func (w whereHelpernull_Bool) LT(x null.Bool) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LT, x)
-}
-func (w whereHelpernull_Bool) LTE(x null.Bool) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LTE, x)
-}
-func (w whereHelpernull_Bool) GT(x null.Bool) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GT, x)
-}
-func (w whereHelpernull_Bool) GTE(x null.Bool) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GTE, x)
-}
+func (w whereHelperbool) EQ(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
+func (w whereHelperbool) NEQ(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
+func (w whereHelperbool) LT(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
+func (w whereHelperbool) LTE(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
+func (w whereHelperbool) GT(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
+func (w whereHelperbool) GTE(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
 
 var ChapterWhere = struct {
 	ID         whereHelperint
-	Title      whereHelpernull_String
-	URL        whereHelpernull_String
-	Idx        whereHelpernull_Int
-	Downloaded whereHelpernull_Bool
-	Path       whereHelpernull_String
+	Title      whereHelperstring
+	URL        whereHelperstring
+	Idx        whereHelperint
+	Part       whereHelpernull_Int
+	Downloaded whereHelperbool
 }{
 	ID:         whereHelperint{field: `id`},
-	Title:      whereHelpernull_String{field: `title`},
-	URL:        whereHelpernull_String{field: `url`},
-	Idx:        whereHelpernull_Int{field: `idx`},
-	Downloaded: whereHelpernull_Bool{field: `downloaded`},
-	Path:       whereHelpernull_String{field: `path`},
+	Title:      whereHelperstring{field: `title`},
+	URL:        whereHelperstring{field: `url`},
+	Idx:        whereHelperint{field: `idx`},
+	Part:       whereHelpernull_Int{field: `part`},
+	Downloaded: whereHelperbool{field: `downloaded`},
 }
 
 // ChapterRels is where relationship names are stored.
@@ -139,8 +125,8 @@ func (*chapterR) NewStruct() *chapterR {
 type chapterL struct{}
 
 var (
-	chapterColumns               = []string{"id", "title", "url", "idx", "downloaded", "path"}
-	chapterColumnsWithoutDefault = []string{"title", "url", "idx", "downloaded", "path"}
+	chapterColumns               = []string{"id", "title", "url", "idx", "part", "downloaded"}
+	chapterColumnsWithoutDefault = []string{"title", "url", "idx", "part", "downloaded"}
 	chapterColumnsWithDefault    = []string{"id"}
 	chapterPrimaryKeyColumns     = []string{"id"}
 )
@@ -524,7 +510,7 @@ func (chapterL) LoadNovels(ctx context.Context, e boil.ContextExecutor, singular
 		one := new(Novel)
 		var localJoinCol int
 
-		err = results.Scan(&one.ID, &one.Title, &one.Chaptercount, &one.NovelIDSTR, &one.NtypeID, &one.Description, &one.LanguageID, &one.Year, &one.Status, &one.Licensed, &one.CompletlyTranslated, &one.CoverID, &one.SourceID, &one.UpdatedAt, &one.FetchedAt, &localJoinCol)
+		err = results.Scan(&one.ID, &one.Title, &one.Chaptercount, &one.NovelIDSTR, &one.NtypeID, &one.Description, &one.LanguageID, &one.Year, &one.Status, &one.Licensed, &one.CompletlyTranslated, &one.CoverID, &one.UpdatedAt, &one.FetchedAt, &one.GroupID, &localJoinCol)
 		if err != nil {
 			return errors.Wrap(err, "failed to scan eager loaded results for novel")
 		}

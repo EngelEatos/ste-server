@@ -14,7 +14,6 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	"github.com/volatiletech/null"
 	"github.com/volatiletech/sqlboiler/boil"
 	"github.com/volatiletech/sqlboiler/queries"
 	"github.com/volatiletech/sqlboiler/queries/qm"
@@ -24,8 +23,8 @@ import (
 
 // NovelType is an object representing the database table.
 type NovelType struct {
-	ID   int         `boil:"id" json:"id" toml:"id" yaml:"id"`
-	Name null.String `boil:"name" json:"name,omitempty" toml:"name" yaml:"name,omitempty"`
+	ID   int    `boil:"id" json:"id" toml:"id" yaml:"id"`
+	Name string `boil:"name" json:"name" toml:"name" yaml:"name"`
 
 	R *novelTypeR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L novelTypeL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -43,10 +42,10 @@ var NovelTypeColumns = struct {
 
 var NovelTypeWhere = struct {
 	ID   whereHelperint
-	Name whereHelpernull_String
+	Name whereHelperstring
 }{
 	ID:   whereHelperint{field: `id`},
-	Name: whereHelpernull_String{field: `name`},
+	Name: whereHelperstring{field: `name`},
 }
 
 // NovelTypeRels is where relationship names are stored.

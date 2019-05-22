@@ -1,20 +1,15 @@
 package updater
 
 import (
-	"bytes"
 	"context"
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"log"
-	"os"
-	"path"
 	"ste/crawler"
 	"ste/models"
 	nuapi "ste/novelupdatesapi"
 	"ste/server"
-	"strings"
 	"time"
 
 	"github.com/volatiletech/null"
@@ -25,7 +20,7 @@ import (
 const (
 	chapterlimit = 100
 	novellimit   = 10
-	outputPath   = "./"
+	outputPath   = "./raw_novel/"
 )
 
 // TODO: implement updateNovel
@@ -41,10 +36,11 @@ const (
 // 	// n.setG
 // }
 
+// Difference TODO:
 func Difference(a models.ChapterSlice, b []nuapi.Chapter) (diff []nuapi.Chapter) {
 	m := make(map[int]bool)
 	for _, item := range a {
-		m[item.IDX] =  true
+		m[item.Idx.Int] = true
 	}
 
 	for _, item := range b {
@@ -54,6 +50,7 @@ func Difference(a models.ChapterSlice, b []nuapi.Chapter) (diff []nuapi.Chapter)
 	}
 	return
 }
+
 func workerNovel(ctx context.Context, db *sql.DB, jobs <-chan *models.NovelQueue) {
 	// parse novel page and get chapters
 	// insert chapters into chapterqueue
@@ -84,58 +81,16 @@ func workerNovel(ctx context.Context, db *sql.DB, jobs <-chan *models.NovelQueue
 		if err != nil {
 
 		}
+		// TODO: compare dbChapter and chapter
 		for a, k := range dbChapter {
-			k.
+
 		}
-		// difference between chapter and chapter in db
+		// TODO: difference between chapter and chapter in db
 
-		// insert into queue
+		// TODO: insert into queue with next scheduledTime
 
 	}
 
-}
-
-func padd(s string, wlen int, pchar string, left bool) string {
-	if len(s) >= wlen {
-		return s
-	}
-	c := wlen - len(s)
-	padding := strings.Repeat(pchar, c)
-	if left {
-		return padding + s
-	}
-	return s + padding
-}
-
-func zpadd(s string, wlen int) string {
-	return padd(s, wlen, "0", true)
-}
-
-func chunkString(input string, chunksize int) []string {
-	var result []string
-	runes := bytes.Runes([]byte(input))
-	for i := 0; i < len(runes); i += chunksize {
-		eidx := i + chunksize
-		if eidx > len(runes) {
-			eidx = len(runes)
-		}
-		result = append(result, string(runes[i:eidx]))
-	}
-	return result
-}
-
-func generatePath(id int) (string, error) {
-	// 9223 3720 3685 4775 807
-	// 0000 0000 0000 0000 0001/ 0000 0000 0000 0000 001.json
-	padded := zpadd(string(id), 20)
-	chunked := chunkString(padded, 4)
-	p := strings.Join(chunked, "/")
-	fullpath := path.Join(outputPath, p, fmt.Sprintf("%s.json", padded))
-	err := os.MkdirAll(fullpath, os.ModePerm)
-	if err != nil {
-		return "", err
-	}
-	return fullpath, nil
 }
 
 // Chapter ..
@@ -166,7 +121,7 @@ func workerChapter(ctx context.Context, db *sql.DB, jobs <-chan *models.ChapterQ
 			continue
 		}
 		// generate Path
-		oPath, err := generatePath(chapter.ID)
+		oPath, err := utils.generatePath(outputPath, chapter.ID)
 		if err != nil {
 			log.Printf("failed to generate path for %d: %s\n", chapter.ID, err)
 			continue
@@ -181,9 +136,8 @@ func workerChapter(ctx context.Context, db *sql.DB, jobs <-chan *models.ChapterQ
 			log.Printf("failed to write json-data to file: %s\n", err)
 			continue
 		}
-		// update chapter in db
 		chapter.Downloaded = null.BoolFrom(true)
-		// trigger bookcreator??
+		// TODO: trigger bookcreator??
 		// update chapter in queue
 		j.Finished = null.BoolFrom(true)
 		j.FinishedAt = null.TimeFrom(time.Now())

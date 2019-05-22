@@ -14,7 +14,6 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	"github.com/volatiletech/null"
 	"github.com/volatiletech/sqlboiler/boil"
 	"github.com/volatiletech/sqlboiler/queries"
 	"github.com/volatiletech/sqlboiler/queries/qm"
@@ -24,8 +23,8 @@ import (
 
 // Genre is an object representing the database table.
 type Genre struct {
-	ID   int         `boil:"id" json:"id" toml:"id" yaml:"id"`
-	Name null.String `boil:"name" json:"name,omitempty" toml:"name" yaml:"name,omitempty"`
+	ID   int    `boil:"id" json:"id" toml:"id" yaml:"id"`
+	Name string `boil:"name" json:"name" toml:"name" yaml:"name"`
 
 	R *genreR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L genreL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -43,10 +42,10 @@ var GenreColumns = struct {
 
 var GenreWhere = struct {
 	ID   whereHelperint
-	Name whereHelpernull_String
+	Name whereHelperstring
 }{
 	ID:   whereHelperint{field: `id`},
-	Name: whereHelpernull_String{field: `name`},
+	Name: whereHelperstring{field: `name`},
 }
 
 // GenreRels is where relationship names are stored.
@@ -434,7 +433,7 @@ func (genreL) LoadNovels(ctx context.Context, e boil.ContextExecutor, singular b
 		one := new(Novel)
 		var localJoinCol int
 
-		err = results.Scan(&one.ID, &one.Title, &one.Chaptercount, &one.NovelIDSTR, &one.NtypeID, &one.Description, &one.LanguageID, &one.Year, &one.Status, &one.Licensed, &one.CompletlyTranslated, &one.CoverID, &one.SourceID, &one.UpdatedAt, &one.FetchedAt, &localJoinCol)
+		err = results.Scan(&one.ID, &one.Title, &one.Chaptercount, &one.NovelIDSTR, &one.NtypeID, &one.Description, &one.LanguageID, &one.Year, &one.Status, &one.Licensed, &one.CompletlyTranslated, &one.CoverID, &one.UpdatedAt, &one.FetchedAt, &one.GroupID, &localJoinCol)
 		if err != nil {
 			return errors.Wrap(err, "failed to scan eager loaded results for novel")
 		}

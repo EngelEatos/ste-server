@@ -1,18 +1,14 @@
 package novelupdatesapi
 
 import (
-	"context"
-	"database/sql"
 	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
-	"reflect"
 	"regexp"
-	"ste/models"
-	"strconv"
+	"ste/utils"
 	"strings"
 	"time"
 
@@ -43,51 +39,61 @@ type Novel struct {
 	CoverURL            string
 }
 
-func (n *Novel) equal(ctx context.Context, novel *models.Novel, db *sql.DB) bool {
-	genres, err := novel.Genres().All(ctx, db)
-	if err != nil {
+// TODO: compare function between model.Novel and nuapi.Novel
+// func (n *Novel) equal(ctx context.Context, novel *models.Novel, db *sql.DB) bool {
+// 	genres, err := novel.Genres().All(ctx, db)
+// 	if err != nil {
 
-	}
-	var intGenres []int
-	for _, genre := range genres {
-		intGenres = append(intGenres, genre.ID)
-	}
-	tags, err := novel.Tags().All(ctx, db)
-	var intTags []int
-	for _, tag := range tags {
-		intTags = append(intTags, tag.ID)
-	}
+// 	}
+// 	var intGenres []int
+// 	for _, genre := range genres {
+// 		intGenres = append(intGenres, genre.ID)
+// 	}
+// 	tags, err := novel.Tags().All(ctx, db)
+// 	var intTags []int
+// 	for _, tag := range tags {
+// 		intTags = append(intTags, tag.ID)
+// 	}
 
-	authors, err := novel.Authors().All(ctx, db)
-	if err != nil {
+// 	authors, err := novel.Authors().All(ctx, db)
+// 	if err != nil {
 
-	}
-	var strAuthors []string
-	for _, author := range authors {
-		strAuthors = append(strAuthors, author.Name.String)
-	}
-	cover, err := novel.Cover().One(ctx, db)
-	if err != nil {
+// 	}
+// 	var strAuthors []string
+// 	for _, author := range authors {
+// 		strAuthors = append(strAuthors, author.Name.String)
+// 	}
+// 	cover, err := novel.Cover().One(ctx, db)
+// 	if err != nil {
 
-	}
-	ntype, err := novel.Ntype().One(ctx, db)
-	if err != nil {
+// 	}
+// 	ntype, err := novel.Ntype().One(ctx, db)
+// 	if err != nil {
 
-	}
-	return (n.Title == novel.Title) && (n.Chaptercount == novel.Chaptercount.Int) && (n.NovelIDSTR == novel.NovelIDSTR.String) &&
-		(n.Type == ntype.ID) && (reflect.DeepEqual(novel.Genres, intGenres) && (reflect.DeepEqual(novel.Tags, intTags)) &&
-		(n.Description == novel.Description.String) && (n.LanguageID == novel.LanguageID.Int) && (n.Year == novel.Year.Int) && (n.Status == novel.Status.Int) &&
-		(n.Licensed == novel.Licensed.Bool) && (n.CompletlyTranslated == novel.CompletlyTranslated.Bool) && (reflect.DeepEqual(n.Authors, strAuthors)) &&
-		(n.CoverURL == cover.URL))
+// 	}
+// 	return (n.Title == novel.Title) && (n.Chaptercount == novel.Chaptercount.Int) && (n.NovelIDSTR == novel.NovelIDSTR.String) &&
+// 		(n.Type == ntype.ID) && (reflect.DeepEqual(novel.Genres, intGenres) && (reflect.DeepEqual(novel.Tags, intTags)) &&
+// 		(n.Description == novel.Description.String) && (n.LanguageID == novel.LanguageID.Int) && (n.Year == novel.Year.Int) && (n.Status == novel.Status.Int) &&
+// 		(n.Licensed == novel.Licensed.Bool) && (n.CompletlyTranslated == novel.CompletlyTranslated.Bool) && (reflect.DeepEqual(n.Authors, strAuthors)) &&
+// 		(n.CoverURL == cover.URL))
 
+// }
+
+// Group struct
+type Group struct {
+	Name string
+	URL  string
 }
 
 // Chapter - struct
 type Chapter struct {
 	ReleaseDate time.Time
-	Group       string
-	Chapter     string
+	Group       Group
+	Title       string
+	URL         string
 	Idx         int
+	EndIdx      int
+	Part        int
 }
 
 func getBool(s string) (bool, error) {
@@ -104,46 +110,15 @@ func getBool(s string) (bool, error) {
 func parseStatus(status string) (int, int, error) {
 	exp := regexp.MustCompile(`(?P<chapterCount>\d{1,5})(?:|\+)\sChapters\s\((?P<status>.+?)\)`)
 	match := exp.FindStringSubmatch(status)
-	chapterCount, err := parseInt(match[1])
+	chapterCount, err := utils.ParseInt(match[1])
 	if err != nil {
 		return -1, -1, err
 	}
-	stat, err := getInt(strings.ToLower(match[2]), StatusTypes)
+	stat, err := utils.GetInt(strings.ToLower(match[2]), StatusTypes)
 	if err != nil {
 		return -1, -1, err
 	}
 	return chapterCount, stat, nil
-}
-
-func strip(s string) string {
-	reg := regexp.MustCompile(`\r?\n`)
-	s = reg.ReplaceAllString(s, "")
-	return strings.Join(strings.Fields(s), "")
-}
-
-func parseInt(s string) (int, error) {
-	i, err := strconv.Atoi(s)
-	if err != nil {
-		return -1, err
-	}
-	return i, nil
-}
-
-func getSource(url string) (*goquery.Document, error) {
-	res, err := http.Get(url)
-	if err != nil {
-		return nil, err
-	}
-	defer res.Body.Close()
-	if res.StatusCode != 200 {
-		return nil, fmt.Errorf("status code error: %d %s", res.StatusCode, res.Status)
-	}
-
-	doc, err := goquery.NewDocumentFromReader(res.Body)
-	if err != nil {
-		return nil, err
-	}
-	return doc, nil
 }
 
 func getElementsSlice(selector string, doc *goquery.Document) []string {
@@ -164,18 +139,11 @@ func getRecommendations(doc *goquery.Document) map[string]string {
 
 func getType(doc *goquery.Document) (int, error) {
 	ntype := strings.ReplaceAll(strings.ToLower(doc.Find("a.genre.type").First().Text()), " ", "-")
-	rvalue, err := getInt(ntype, NovelTypes)
+	rvalue, err := utils.GetInt(ntype, NovelTypes)
 	if err != nil {
 		return -1, err
 	}
 	return rvalue, nil
-}
-
-func getInt(key string, dict map[string]int) (int, error) {
-	if val, ok := dict[key]; ok {
-		return val, nil
-	}
-	return -1, fmt.Errorf("%s not in %v", key, dict)
 }
 
 func getIntArray(array []string, dict map[string]int) []int {
@@ -197,7 +165,7 @@ func getLanguage(doc *goquery.Document) (int, error) {
 		return -1, errors.New("href of a.grenre.lang empty")
 	}
 	lang := href[len("https://www.novelupdates.com/language/") : len(href)-1]
-	langid, err := getInt(lang, Languages)
+	langid, err := utils.GetInt(lang, Languages)
 	if err != nil {
 		return -1, err
 	}
@@ -213,7 +181,7 @@ func getCover(doc *goquery.Document) string {
 // ParseNovel - parse site , arg novelID
 func ParseNovel(novelID string) (*Novel, error) {
 	url := baseurl + novelID
-	doc, err := getSource(url)
+	doc, err := utils.GetSource(url)
 	if err != nil {
 		return nil, err
 	}
@@ -229,7 +197,7 @@ func ParseNovel(novelID string) (*Novel, error) {
 		log.Printf("failed get langId for novel %s: %s\n", title, err)
 	}
 	authors := getElementsSlice("div#showauthors > a.genre", doc)
-	year, err := parseInt(strip(doc.Find("div#edityear").Text()))
+	year, err := utils.ParseInt(utils.Strip(doc.Find("div#edityear").Text()))
 	if err != nil {
 		log.Printf("failed to get year of novel %s: %s\n", title, err)
 	}
@@ -237,11 +205,11 @@ func ParseNovel(novelID string) (*Novel, error) {
 	if err != nil {
 		log.Printf("failed to parse status for %s: %s\n", title, err)
 	}
-	licensed, err := getBool(strip(doc.Find("div#showlicensed").Text()))
+	licensed, err := getBool(utils.Strip(doc.Find("div#showlicensed").Text()))
 	if err != nil {
 		log.Printf("failed to parse bool for %s: %s", title, err)
 	}
-	completelyTranslated, err := getBool(strip(doc.Find("div#showtranslated").Text()))
+	completelyTranslated, err := getBool(utils.Strip(doc.Find("div#showtranslated").Text()))
 	if err != nil {
 		log.Printf("failed to parse bool for %s: %s", title, err)
 	}
@@ -269,8 +237,21 @@ func ParseNovel(novelID string) (*Novel, error) {
 	}, nil
 }
 
+// ResolveNuLinks -- resolve intern novelupdates links
+func ResolveNuLinks(url string) string {
+	if !strings.HasPrefix(url, "https://www.novelupdates.com/extnu/") {
+		return url
+	}
+	res, err := http.Get(url)
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer res.Body.Close()
+	return res.Request.URL.String()
+}
+
 func getMaxPage(novelID string) (int, error) {
-	doc, err := getSource(baseurl + novelID)
+	doc, err := utils.GetSource(baseurl + novelID)
 	if err != nil {
 		return -1, err
 	}
@@ -278,7 +259,7 @@ func getMaxPage(novelID string) (int, error) {
 	if pagination.Length() > 0 {
 		return -1, errors.New("pagination not found")
 	}
-	return parseInt(pagination.First().Text())
+	return utils.ParseInt(pagination.First().Text())
 }
 
 // GetAllChapter - GetAllChapter by novelID
@@ -300,26 +281,87 @@ func GetAllChapter(novelID string) ([]Chapter, error) {
 
 // GetChapter by novelID, idx
 func getChapter(novelID string, idx int) ([]Chapter, error) {
-	doc, err := getSource(baseurl + novelID + "/pg?=" + string(idx))
+	doc, err := utils.GetSource(baseurl + novelID + "/pg?=" + string(idx))
 	if err != nil {
 		return nil, err
 	}
 	var result []Chapter
 	doc.Find("table#myTable > tbody > tr").Each(func(idx int, row *goquery.Selection) {
-		cols := row.Find("td")
-		date := cols.First()
-		t, err := time.Parse("01-02-06", date.Text())
-		if err != nil {
-			log.Println("failed to parse date")
-		}
-		t = time.Now()
-
-		group := date.Next().AttrOr("href", "")
-		chapter := date.Next().Next().AttrOr("href", "")
-		// TODO: pares idx
-		result = append(result, Chapter{t, group, chapter, -1})
+		c := Chapter{}
+		row.Find("td").Each(func(idx int, col *goquery.Selection) {
+			if idx == 1 {
+				// ReleaseDate
+				t, err := time.Parse("01-02-06", col.Text())
+				if err != nil {
+					log.Println("failed to parse date")
+				}
+				c.ReleaseDate = t
+			} else if idx == 2 {
+				// group
+				group := Group{Name: col.Text(), URL: col.AttrOr("href", "")}
+				c.Group = group
+			} else if idx == 3 {
+				// chapter url
+				itype, sIdx := parseIdx(col.Text())
+				if itype == 0 {
+					// chapter range
+					c.Idx, err = utils.ParseInt(sIdx[0])
+					if err != nil {
+						log.Printf("failed to parse Idx: %s\n", sIdx[0])
+					}
+					c.EndIdx, err = utils.ParseInt(sIdx[1])
+					if err != nil {
+						log.Printf("failed to parse EndIdx: %s\n", sIdx[1])
+					}
+					// TODO: resolve range issue
+				} else if itype == 1 {
+					if len(sIdx) == 1 {
+						// c99
+						c.Idx, err = utils.ParseInt(sIdx[0])
+						if err != nil {
+							log.Printf("failed to parse Idx: %s\n", sIdx[0])
+						}
+						c.Title = "Chapter " + sIdx[0]
+					} else if len(sIdx) == 2 {
+						// c99.1 - c99 part 1
+						c.Idx, err = utils.ParseInt(sIdx[0])
+						if err != nil {
+							log.Printf("failed to parse Idx: %s\n", sIdx[0])
+						}
+						c.Part, err = utils.ParseInt(sIdx[1])
+						if err != nil {
+							log.Printf("failed to parse Part: %s\n", sIdx[1])
+						}
+						c.Title = "Chapter " + sIdx[0] + "." + sIdx[1]
+					}
+				}
+			}
+		})
+		result = append(result, c)
 	})
 	return result, nil
+}
+
+// TODO: change order of return type
+func parseIdx(chaptername string) (int, []string) {
+	if strings.Contains(chaptername, "-") {
+		re := regexp.MustCompile(`c(\d+)-(\d+)`)
+		matches := re.FindStringSubmatch(chaptername)
+		if len(matches) == 3 {
+			return 0, matches[1:]
+		}
+		return -1, nil
+	}
+	chaptername = strings.ReplaceAll(chaptername, "prologue", "c0")
+	re := regexp.MustCompile(`c(\d+)(?:\.(\d+)|)(?:\s+part(\d+)|)`)
+	matches := re.FindStringSubmatch(chaptername)
+	var rlmatch []string
+	for i := 1; i < len(matches); i++ {
+		if len(matches[i]) > 0 {
+			rlmatch = append(rlmatch, matches[i])
+		}
+	}
+	return 1, rlmatch
 }
 
 func getNextPage(doc *goquery.Document) (string, error) {
@@ -356,7 +398,7 @@ func GetSeriesRanking(count int) (map[string]string, error) {
 	series := make(map[string]string)
 	for i := 1; i <= pages; i++ {
 		url := "https://www.novelupdates.com/series-ranking/?rank=popmonth&pg=" + string(i)
-		doc, err := getSource(url)
+		doc, err := utils.GetSource(url)
 		if err != nil {
 			return series, err
 		}
@@ -371,7 +413,7 @@ func GetSeriesRanking(count int) (map[string]string, error) {
 // GetNovelsByPage - by idx
 func GetNovelsByPage(idx int) (map[string]string, bool, error) {
 	url := fmt.Sprintf("https://www.novelupdates.com/novelslisting/?st=%d", idx)
-	doc, err := getSource(url)
+	doc, err := utils.GetSource(url)
 	if err != nil {
 		return nil, false, err
 	}
