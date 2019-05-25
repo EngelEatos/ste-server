@@ -12,12 +12,12 @@ import "testing"
 // It does NOT run each operation group in parallel.
 // Separating the tests thusly grants avoidance of Postgres deadlocks.
 func TestParent(t *testing.T) {
-	t.Run("Groups", testGroups)
 	t.Run("Authors", testAuthors)
 	t.Run("Chapters", testChapters)
 	t.Run("ChapterQueues", testChapterQueues)
 	t.Run("Covers", testCovers)
 	t.Run("Genres", testGenres)
+	t.Run("Groups", testGroups)
 	t.Run("Languages", testLanguages)
 	t.Run("Novels", testNovels)
 	t.Run("NovelQueues", testNovelQueues)
@@ -26,12 +26,12 @@ func TestParent(t *testing.T) {
 }
 
 func TestDelete(t *testing.T) {
-	t.Run("Groups", testGroupsDelete)
 	t.Run("Authors", testAuthorsDelete)
 	t.Run("Chapters", testChaptersDelete)
 	t.Run("ChapterQueues", testChapterQueuesDelete)
 	t.Run("Covers", testCoversDelete)
 	t.Run("Genres", testGenresDelete)
+	t.Run("Groups", testGroupsDelete)
 	t.Run("Languages", testLanguagesDelete)
 	t.Run("Novels", testNovelsDelete)
 	t.Run("NovelQueues", testNovelQueuesDelete)
@@ -40,12 +40,12 @@ func TestDelete(t *testing.T) {
 }
 
 func TestQueryDeleteAll(t *testing.T) {
-	t.Run("Groups", testGroupsQueryDeleteAll)
 	t.Run("Authors", testAuthorsQueryDeleteAll)
 	t.Run("Chapters", testChaptersQueryDeleteAll)
 	t.Run("ChapterQueues", testChapterQueuesQueryDeleteAll)
 	t.Run("Covers", testCoversQueryDeleteAll)
 	t.Run("Genres", testGenresQueryDeleteAll)
+	t.Run("Groups", testGroupsQueryDeleteAll)
 	t.Run("Languages", testLanguagesQueryDeleteAll)
 	t.Run("Novels", testNovelsQueryDeleteAll)
 	t.Run("NovelQueues", testNovelQueuesQueryDeleteAll)
@@ -54,12 +54,12 @@ func TestQueryDeleteAll(t *testing.T) {
 }
 
 func TestSliceDeleteAll(t *testing.T) {
-	t.Run("Groups", testGroupsSliceDeleteAll)
 	t.Run("Authors", testAuthorsSliceDeleteAll)
 	t.Run("Chapters", testChaptersSliceDeleteAll)
 	t.Run("ChapterQueues", testChapterQueuesSliceDeleteAll)
 	t.Run("Covers", testCoversSliceDeleteAll)
 	t.Run("Genres", testGenresSliceDeleteAll)
+	t.Run("Groups", testGroupsSliceDeleteAll)
 	t.Run("Languages", testLanguagesSliceDeleteAll)
 	t.Run("Novels", testNovelsSliceDeleteAll)
 	t.Run("NovelQueues", testNovelQueuesSliceDeleteAll)
@@ -68,12 +68,12 @@ func TestSliceDeleteAll(t *testing.T) {
 }
 
 func TestExists(t *testing.T) {
-	t.Run("Groups", testGroupsExists)
 	t.Run("Authors", testAuthorsExists)
 	t.Run("Chapters", testChaptersExists)
 	t.Run("ChapterQueues", testChapterQueuesExists)
 	t.Run("Covers", testCoversExists)
 	t.Run("Genres", testGenresExists)
+	t.Run("Groups", testGroupsExists)
 	t.Run("Languages", testLanguagesExists)
 	t.Run("Novels", testNovelsExists)
 	t.Run("NovelQueues", testNovelQueuesExists)
@@ -82,12 +82,12 @@ func TestExists(t *testing.T) {
 }
 
 func TestFind(t *testing.T) {
-	t.Run("Groups", testGroupsFind)
 	t.Run("Authors", testAuthorsFind)
 	t.Run("Chapters", testChaptersFind)
 	t.Run("ChapterQueues", testChapterQueuesFind)
 	t.Run("Covers", testCoversFind)
 	t.Run("Genres", testGenresFind)
+	t.Run("Groups", testGroupsFind)
 	t.Run("Languages", testLanguagesFind)
 	t.Run("Novels", testNovelsFind)
 	t.Run("NovelQueues", testNovelQueuesFind)
@@ -96,12 +96,12 @@ func TestFind(t *testing.T) {
 }
 
 func TestBind(t *testing.T) {
-	t.Run("Groups", testGroupsBind)
 	t.Run("Authors", testAuthorsBind)
 	t.Run("Chapters", testChaptersBind)
 	t.Run("ChapterQueues", testChapterQueuesBind)
 	t.Run("Covers", testCoversBind)
 	t.Run("Genres", testGenresBind)
+	t.Run("Groups", testGroupsBind)
 	t.Run("Languages", testLanguagesBind)
 	t.Run("Novels", testNovelsBind)
 	t.Run("NovelQueues", testNovelQueuesBind)
@@ -110,12 +110,12 @@ func TestBind(t *testing.T) {
 }
 
 func TestOne(t *testing.T) {
-	t.Run("Groups", testGroupsOne)
 	t.Run("Authors", testAuthorsOne)
 	t.Run("Chapters", testChaptersOne)
 	t.Run("ChapterQueues", testChapterQueuesOne)
 	t.Run("Covers", testCoversOne)
 	t.Run("Genres", testGenresOne)
+	t.Run("Groups", testGroupsOne)
 	t.Run("Languages", testLanguagesOne)
 	t.Run("Novels", testNovelsOne)
 	t.Run("NovelQueues", testNovelQueuesOne)
@@ -124,12 +124,12 @@ func TestOne(t *testing.T) {
 }
 
 func TestAll(t *testing.T) {
-	t.Run("Groups", testGroupsAll)
 	t.Run("Authors", testAuthorsAll)
 	t.Run("Chapters", testChaptersAll)
 	t.Run("ChapterQueues", testChapterQueuesAll)
 	t.Run("Covers", testCoversAll)
 	t.Run("Genres", testGenresAll)
+	t.Run("Groups", testGroupsAll)
 	t.Run("Languages", testLanguagesAll)
 	t.Run("Novels", testNovelsAll)
 	t.Run("NovelQueues", testNovelQueuesAll)
@@ -138,12 +138,12 @@ func TestAll(t *testing.T) {
 }
 
 func TestCount(t *testing.T) {
-	t.Run("Groups", testGroupsCount)
 	t.Run("Authors", testAuthorsCount)
 	t.Run("Chapters", testChaptersCount)
 	t.Run("ChapterQueues", testChapterQueuesCount)
 	t.Run("Covers", testCoversCount)
 	t.Run("Genres", testGenresCount)
+	t.Run("Groups", testGroupsCount)
 	t.Run("Languages", testLanguagesCount)
 	t.Run("Novels", testNovelsCount)
 	t.Run("NovelQueues", testNovelQueuesCount)
@@ -152,12 +152,12 @@ func TestCount(t *testing.T) {
 }
 
 func TestHooks(t *testing.T) {
-	t.Run("Groups", testGroupsHooks)
 	t.Run("Authors", testAuthorsHooks)
 	t.Run("Chapters", testChaptersHooks)
 	t.Run("ChapterQueues", testChapterQueuesHooks)
 	t.Run("Covers", testCoversHooks)
 	t.Run("Genres", testGenresHooks)
+	t.Run("Groups", testGroupsHooks)
 	t.Run("Languages", testLanguagesHooks)
 	t.Run("Novels", testNovelsHooks)
 	t.Run("NovelQueues", testNovelQueuesHooks)
@@ -166,8 +166,6 @@ func TestHooks(t *testing.T) {
 }
 
 func TestInsert(t *testing.T) {
-	t.Run("Groups", testGroupsInsert)
-	t.Run("Groups", testGroupsInsertWhitelist)
 	t.Run("Authors", testAuthorsInsert)
 	t.Run("Authors", testAuthorsInsertWhitelist)
 	t.Run("Chapters", testChaptersInsert)
@@ -178,6 +176,8 @@ func TestInsert(t *testing.T) {
 	t.Run("Covers", testCoversInsertWhitelist)
 	t.Run("Genres", testGenresInsert)
 	t.Run("Genres", testGenresInsertWhitelist)
+	t.Run("Groups", testGroupsInsert)
+	t.Run("Groups", testGroupsInsertWhitelist)
 	t.Run("Languages", testLanguagesInsert)
 	t.Run("Languages", testLanguagesInsertWhitelist)
 	t.Run("Novels", testNovelsInsert)
@@ -209,20 +209,18 @@ func TestOneToOne(t *testing.T) {}
 // TestToMany tests cannot be run in parallel
 // or deadlocks can occur.
 func TestToMany(t *testing.T) {
-	t.Run("GroupToGroupNovels", testGroupToManyGroupNovels)
 	t.Run("AuthorToNovels", testAuthorToManyNovels)
 	t.Run("ChapterToNovels", testChapterToManyNovels)
 	t.Run("ChapterToChapterQueues", testChapterToManyChapterQueues)
 	t.Run("CoverToNovels", testCoverToManyNovels)
 	t.Run("GenreToNovels", testGenreToManyNovels)
+	t.Run("GroupToNovels", testGroupToManyNovels)
 	t.Run("LanguageToNovels", testLanguageToManyNovels)
 	t.Run("NovelToAuthors", testNovelToManyAuthors)
 	t.Run("NovelToChapters", testNovelToManyChapters)
 	t.Run("NovelToChapterQueues", testNovelToManyChapterQueues)
 	t.Run("NovelToGenres", testNovelToManyGenres)
 	t.Run("NovelToNovelQueues", testNovelToManyNovelQueues)
-	t.Run("NovelToRecommendedNovelNovels", testNovelToManyRecommendedNovelNovels)
-	t.Run("NovelToNovels", testNovelToManyNovels)
 	t.Run("NovelToTags", testNovelToManyTags)
 	t.Run("NovelTypeToNtypeNovels", testNovelTypeToManyNtypeNovels)
 	t.Run("TagToNovels", testTagToManyNovels)
@@ -236,7 +234,7 @@ func TestToOneSet(t *testing.T) {
 	t.Run("NovelToCoverUsingNovels", testNovelToOneSetOpCoverUsingCover)
 	t.Run("NovelToLanguageUsingNovels", testNovelToOneSetOpLanguageUsingLanguage)
 	t.Run("NovelToNovelTypeUsingNtypeNovels", testNovelToOneSetOpNovelTypeUsingNtype)
-	t.Run("NovelToGroupUsingGroupNovels", testNovelToOneSetOpGroupUsingGroup)
+	t.Run("NovelToGroupUsingNovels", testNovelToOneSetOpGroupUsingGroup)
 	t.Run("NovelQueueToNovelUsingNovelQueues", testNovelQueueToOneSetOpNovelUsingNovel)
 }
 
@@ -246,7 +244,7 @@ func TestToOneRemove(t *testing.T) {
 	t.Run("NovelToCoverUsingNovels", testNovelToOneRemoveOpCoverUsingCover)
 	t.Run("NovelToLanguageUsingNovels", testNovelToOneRemoveOpLanguageUsingLanguage)
 	t.Run("NovelToNovelTypeUsingNtypeNovels", testNovelToOneRemoveOpNovelTypeUsingNtype)
-	t.Run("NovelToGroupUsingGroupNovels", testNovelToOneRemoveOpGroupUsingGroup)
+	t.Run("NovelToGroupUsingNovels", testNovelToOneRemoveOpGroupUsingGroup)
 }
 
 // TestOneToOneSet tests cannot be run in parallel
@@ -260,20 +258,18 @@ func TestOneToOneRemove(t *testing.T) {}
 // TestToManyAdd tests cannot be run in parallel
 // or deadlocks can occur.
 func TestToManyAdd(t *testing.T) {
-	t.Run("GroupToGroupNovels", testGroupToManyAddOpGroupNovels)
 	t.Run("AuthorToNovels", testAuthorToManyAddOpNovels)
 	t.Run("ChapterToNovels", testChapterToManyAddOpNovels)
 	t.Run("ChapterToChapterQueues", testChapterToManyAddOpChapterQueues)
 	t.Run("CoverToNovels", testCoverToManyAddOpNovels)
 	t.Run("GenreToNovels", testGenreToManyAddOpNovels)
+	t.Run("GroupToNovels", testGroupToManyAddOpNovels)
 	t.Run("LanguageToNovels", testLanguageToManyAddOpNovels)
 	t.Run("NovelToAuthors", testNovelToManyAddOpAuthors)
 	t.Run("NovelToChapters", testNovelToManyAddOpChapters)
 	t.Run("NovelToChapterQueues", testNovelToManyAddOpChapterQueues)
 	t.Run("NovelToGenres", testNovelToManyAddOpGenres)
 	t.Run("NovelToNovelQueues", testNovelToManyAddOpNovelQueues)
-	t.Run("NovelToRecommendedNovelNovels", testNovelToManyAddOpRecommendedNovelNovels)
-	t.Run("NovelToNovels", testNovelToManyAddOpNovels)
 	t.Run("NovelToTags", testNovelToManyAddOpTags)
 	t.Run("NovelTypeToNtypeNovels", testNovelTypeToManyAddOpNtypeNovels)
 	t.Run("TagToNovels", testTagToManyAddOpNovels)
@@ -282,17 +278,15 @@ func TestToManyAdd(t *testing.T) {
 // TestToManySet tests cannot be run in parallel
 // or deadlocks can occur.
 func TestToManySet(t *testing.T) {
-	t.Run("GroupToGroupNovels", testGroupToManySetOpGroupNovels)
 	t.Run("AuthorToNovels", testAuthorToManySetOpNovels)
 	t.Run("ChapterToNovels", testChapterToManySetOpNovels)
 	t.Run("CoverToNovels", testCoverToManySetOpNovels)
 	t.Run("GenreToNovels", testGenreToManySetOpNovels)
+	t.Run("GroupToNovels", testGroupToManySetOpNovels)
 	t.Run("LanguageToNovels", testLanguageToManySetOpNovels)
 	t.Run("NovelToAuthors", testNovelToManySetOpAuthors)
 	t.Run("NovelToChapters", testNovelToManySetOpChapters)
 	t.Run("NovelToGenres", testNovelToManySetOpGenres)
-	t.Run("NovelToRecommendedNovelNovels", testNovelToManySetOpRecommendedNovelNovels)
-	t.Run("NovelToNovels", testNovelToManySetOpNovels)
 	t.Run("NovelToTags", testNovelToManySetOpTags)
 	t.Run("NovelTypeToNtypeNovels", testNovelTypeToManySetOpNtypeNovels)
 	t.Run("TagToNovels", testTagToManySetOpNovels)
@@ -301,29 +295,27 @@ func TestToManySet(t *testing.T) {
 // TestToManyRemove tests cannot be run in parallel
 // or deadlocks can occur.
 func TestToManyRemove(t *testing.T) {
-	t.Run("GroupToGroupNovels", testGroupToManyRemoveOpGroupNovels)
 	t.Run("AuthorToNovels", testAuthorToManyRemoveOpNovels)
 	t.Run("ChapterToNovels", testChapterToManyRemoveOpNovels)
 	t.Run("CoverToNovels", testCoverToManyRemoveOpNovels)
 	t.Run("GenreToNovels", testGenreToManyRemoveOpNovels)
+	t.Run("GroupToNovels", testGroupToManyRemoveOpNovels)
 	t.Run("LanguageToNovels", testLanguageToManyRemoveOpNovels)
 	t.Run("NovelToAuthors", testNovelToManyRemoveOpAuthors)
 	t.Run("NovelToChapters", testNovelToManyRemoveOpChapters)
 	t.Run("NovelToGenres", testNovelToManyRemoveOpGenres)
-	t.Run("NovelToRecommendedNovelNovels", testNovelToManyRemoveOpRecommendedNovelNovels)
-	t.Run("NovelToNovels", testNovelToManyRemoveOpNovels)
 	t.Run("NovelToTags", testNovelToManyRemoveOpTags)
 	t.Run("NovelTypeToNtypeNovels", testNovelTypeToManyRemoveOpNtypeNovels)
 	t.Run("TagToNovels", testTagToManyRemoveOpNovels)
 }
 
 func TestReload(t *testing.T) {
-	t.Run("Groups", testGroupsReload)
 	t.Run("Authors", testAuthorsReload)
 	t.Run("Chapters", testChaptersReload)
 	t.Run("ChapterQueues", testChapterQueuesReload)
 	t.Run("Covers", testCoversReload)
 	t.Run("Genres", testGenresReload)
+	t.Run("Groups", testGroupsReload)
 	t.Run("Languages", testLanguagesReload)
 	t.Run("Novels", testNovelsReload)
 	t.Run("NovelQueues", testNovelQueuesReload)
@@ -332,12 +324,12 @@ func TestReload(t *testing.T) {
 }
 
 func TestReloadAll(t *testing.T) {
-	t.Run("Groups", testGroupsReloadAll)
 	t.Run("Authors", testAuthorsReloadAll)
 	t.Run("Chapters", testChaptersReloadAll)
 	t.Run("ChapterQueues", testChapterQueuesReloadAll)
 	t.Run("Covers", testCoversReloadAll)
 	t.Run("Genres", testGenresReloadAll)
+	t.Run("Groups", testGroupsReloadAll)
 	t.Run("Languages", testLanguagesReloadAll)
 	t.Run("Novels", testNovelsReloadAll)
 	t.Run("NovelQueues", testNovelQueuesReloadAll)
@@ -346,12 +338,12 @@ func TestReloadAll(t *testing.T) {
 }
 
 func TestSelect(t *testing.T) {
-	t.Run("Groups", testGroupsSelect)
 	t.Run("Authors", testAuthorsSelect)
 	t.Run("Chapters", testChaptersSelect)
 	t.Run("ChapterQueues", testChapterQueuesSelect)
 	t.Run("Covers", testCoversSelect)
 	t.Run("Genres", testGenresSelect)
+	t.Run("Groups", testGroupsSelect)
 	t.Run("Languages", testLanguagesSelect)
 	t.Run("Novels", testNovelsSelect)
 	t.Run("NovelQueues", testNovelQueuesSelect)
@@ -360,12 +352,12 @@ func TestSelect(t *testing.T) {
 }
 
 func TestUpdate(t *testing.T) {
-	t.Run("Groups", testGroupsUpdate)
 	t.Run("Authors", testAuthorsUpdate)
 	t.Run("Chapters", testChaptersUpdate)
 	t.Run("ChapterQueues", testChapterQueuesUpdate)
 	t.Run("Covers", testCoversUpdate)
 	t.Run("Genres", testGenresUpdate)
+	t.Run("Groups", testGroupsUpdate)
 	t.Run("Languages", testLanguagesUpdate)
 	t.Run("Novels", testNovelsUpdate)
 	t.Run("NovelQueues", testNovelQueuesUpdate)
@@ -374,12 +366,12 @@ func TestUpdate(t *testing.T) {
 }
 
 func TestSliceUpdateAll(t *testing.T) {
-	t.Run("Groups", testGroupsSliceUpdateAll)
 	t.Run("Authors", testAuthorsSliceUpdateAll)
 	t.Run("Chapters", testChaptersSliceUpdateAll)
 	t.Run("ChapterQueues", testChapterQueuesSliceUpdateAll)
 	t.Run("Covers", testCoversSliceUpdateAll)
 	t.Run("Genres", testGenresSliceUpdateAll)
+	t.Run("Groups", testGroupsSliceUpdateAll)
 	t.Run("Languages", testLanguagesSliceUpdateAll)
 	t.Run("Novels", testNovelsSliceUpdateAll)
 	t.Run("NovelQueues", testNovelQueuesSliceUpdateAll)

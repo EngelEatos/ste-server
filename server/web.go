@@ -41,7 +41,14 @@ func WebStart() {
 	// create templateManager
 	tpm := new(templateManager)
 	// load templates
-	tpm.templates = template.Must(template.ParseGlob("server/templates/*"))
+	t, err := template.ParseGlob("server/templates/*.html")
+	if err != nil {
+		log.Fatal("failed to load templates: ", err)
+	}
+	tpm.templates = template.Must(t, err)
+	if err != nil {
+		log.Fatal("failed to set templates: ", err)
+	}
 	// create buffer pool
 	tpm.bufpool = bpool.NewBufferPool(64)
 	// create router
@@ -84,6 +91,7 @@ func (tpm *templateManager) seriesHandler(w http.ResponseWriter, r *http.Request
 		if err != nil {
 			log.Fatal(err)
 		}
+		log.Printf("found %d chapters\n", len(chapters))
 		for _, chapter := range chapters {
 			// insert chapter into db
 			c, err := dbm.InsertChapter(novel, &chapter)
@@ -102,10 +110,10 @@ func (tpm *templateManager) seriesHandler(w http.ResponseWriter, r *http.Request
 			log.Fatal(err)
 		}
 		log.Printf("seriesHandler: %s\n", novel.Title)
-		tpm.renderPage(w, r, "series", novel)
+		tpm.renderPage(w, r, "series.html", novel)
 	} else {
 		log.Printf("seriesHandler: %s\n", novel.Title)
-		tpm.renderPage(w, r, "series", novel)
+		tpm.renderPage(w, r, "series.html", novel)
 	}
 }
 
@@ -145,11 +153,11 @@ func (tpm *templateManager) queuesHandler(w http.ResponseWriter, r *http.Request
 		log.Fatal(err)
 	}
 	queues := queues{ChapterQueue: chapterQueue, NovelQueue: novelQueue}
-	tpm.renderPage(w, r, "queues", queues)
+	tpm.renderPage(w, r, "queues.html", queues)
 }
 
 func (tpm *templateManager) searchHandler(w http.ResponseWriter, r *http.Request) {
-	tpm.renderPage(w, r, "home", nil)
+	tpm.renderPage(w, r, "home.html", nil)
 }
 
 func (tpm *templateManager) renderPage(w http.ResponseWriter, r *http.Request, name string, data interface{}) {
@@ -159,7 +167,7 @@ func (tpm *templateManager) renderPage(w http.ResponseWriter, r *http.Request, n
 	if err != nil {
 		log.Println(stacktrace.Propagate(err, "Can't load template"))
 		w.WriteHeader(http.StatusInternalServerError)
-		_ = tpm.templates.ExecuteTemplate(w, "error", terror{Title: "failed at " + r.URL.String(), Msg: "GTFO"})
+		_ = tpm.templates.ExecuteTemplate(w, "error.html", terror{Title: "failed at " + r.URL.String(), Msg: "GTFO"})
 		return
 	}
 	w.Header().Set("Content-Type", "text/html;charset=UTF-8")

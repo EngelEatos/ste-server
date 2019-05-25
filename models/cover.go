@@ -24,25 +24,25 @@ import (
 
 // Cover is an object representing the database table.
 type Cover struct {
-	ID         int         `boil:"id" json:"id" toml:"id" yaml:"id"`
-	URL        string      `boil:"url" json:"url" toml:"url" yaml:"url"`
 	Downloaded null.Bool   `boil:"downloaded" json:"downloaded,omitempty" toml:"downloaded" yaml:"downloaded,omitempty"`
+	ID         int         `boil:"id" json:"id" toml:"id" yaml:"id"`
 	Path       null.String `boil:"path" json:"path,omitempty" toml:"path" yaml:"path,omitempty"`
+	URL        string      `boil:"url" json:"url" toml:"url" yaml:"url"`
 
 	R *coverR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L coverL  `boil:"-" json:"-" toml:"-" yaml:"-"`
 }
 
 var CoverColumns = struct {
-	ID         string
-	URL        string
 	Downloaded string
+	ID         string
 	Path       string
+	URL        string
 }{
-	ID:         "id",
-	URL:        "url",
 	Downloaded: "downloaded",
+	ID:         "id",
 	Path:       "path",
+	URL:        "url",
 }
 
 // Generated where
@@ -71,15 +71,15 @@ func (w whereHelpernull_String) GTE(x null.String) qm.QueryMod {
 }
 
 var CoverWhere = struct {
-	ID         whereHelperint
-	URL        whereHelperstring
 	Downloaded whereHelpernull_Bool
+	ID         whereHelperint
 	Path       whereHelpernull_String
+	URL        whereHelperstring
 }{
-	ID:         whereHelperint{field: `id`},
-	URL:        whereHelperstring{field: `url`},
-	Downloaded: whereHelpernull_Bool{field: `downloaded`},
-	Path:       whereHelpernull_String{field: `path`},
+	Downloaded: whereHelpernull_Bool{field: "\"ste\".\"cover\".\"downloaded\""},
+	ID:         whereHelperint{field: "\"ste\".\"cover\".\"id\""},
+	Path:       whereHelpernull_String{field: "\"ste\".\"cover\".\"path\""},
+	URL:        whereHelperstring{field: "\"ste\".\"cover\".\"url\""},
 }
 
 // CoverRels is where relationship names are stored.
@@ -103,9 +103,9 @@ func (*coverR) NewStruct() *coverR {
 type coverL struct{}
 
 var (
-	coverColumns               = []string{"id", "url", "downloaded", "path"}
-	coverColumnsWithoutDefault = []string{"url", "path"}
-	coverColumnsWithDefault    = []string{"id", "downloaded"}
+	coverColumns               = []string{"downloaded", "id", "path", "url"}
+	coverColumnsWithoutDefault = []string{"path", "url"}
+	coverColumnsWithDefault    = []string{"downloaded", "id"}
 	coverPrimaryKeyColumns     = []string{"id"}
 )
 
@@ -1035,10 +1035,6 @@ func (q coverQuery) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (i
 
 // DeleteAll deletes all rows in the slice, using an executor.
 func (o CoverSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
-	if o == nil {
-		return 0, errors.New("models: no Cover slice provided for delete all")
-	}
-
 	if len(o) == 0 {
 		return 0, nil
 	}

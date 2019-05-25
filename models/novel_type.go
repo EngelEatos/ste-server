@@ -44,8 +44,8 @@ var NovelTypeWhere = struct {
 	ID   whereHelperint
 	Name whereHelperstring
 }{
-	ID:   whereHelperint{field: `id`},
-	Name: whereHelperstring{field: `name`},
+	ID:   whereHelperint{field: "\"ste\".\"novel_type\".\"id\""},
+	Name: whereHelperstring{field: "\"ste\".\"novel_type\".\"name\""},
 }
 
 // NovelTypeRels is where relationship names are stored.
@@ -1001,10 +1001,6 @@ func (q novelTypeQuery) DeleteAll(ctx context.Context, exec boil.ContextExecutor
 
 // DeleteAll deletes all rows in the slice, using an executor.
 func (o NovelTypeSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
-	if o == nil {
-		return 0, errors.New("models: no NovelType slice provided for delete all")
-	}
-
 	if len(o) == 0 {
 		return 0, nil
 	}

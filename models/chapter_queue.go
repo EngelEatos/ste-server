@@ -24,52 +24,31 @@ import (
 
 // ChapterQueue is an object representing the database table.
 type ChapterQueue struct {
-	NovelID    int       `boil:"novel_id" json:"novel_id" toml:"novel_id" yaml:"novel_id"`
 	ChapterID  int       `boil:"chapter_id" json:"chapter_id" toml:"chapter_id" yaml:"chapter_id"`
-	QueuedAt   time.Time `boil:"queued_at" json:"queued_at" toml:"queued_at" yaml:"queued_at"`
 	Finished   null.Bool `boil:"finished" json:"finished,omitempty" toml:"finished" yaml:"finished,omitempty"`
 	FinishedAt null.Time `boil:"finished_at" json:"finished_at,omitempty" toml:"finished_at" yaml:"finished_at,omitempty"`
+	NovelID    int       `boil:"novel_id" json:"novel_id" toml:"novel_id" yaml:"novel_id"`
+	QueuedAt   time.Time `boil:"queued_at" json:"queued_at" toml:"queued_at" yaml:"queued_at"`
 
 	R *chapterQueueR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L chapterQueueL  `boil:"-" json:"-" toml:"-" yaml:"-"`
 }
 
 var ChapterQueueColumns = struct {
-	NovelID    string
 	ChapterID  string
-	QueuedAt   string
 	Finished   string
 	FinishedAt string
+	NovelID    string
+	QueuedAt   string
 }{
-	NovelID:    "novel_id",
 	ChapterID:  "chapter_id",
-	QueuedAt:   "queued_at",
 	Finished:   "finished",
 	FinishedAt: "finished_at",
+	NovelID:    "novel_id",
+	QueuedAt:   "queued_at",
 }
 
 // Generated where
-
-type whereHelpertime_Time struct{ field string }
-
-func (w whereHelpertime_Time) EQ(x time.Time) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.EQ, x)
-}
-func (w whereHelpertime_Time) NEQ(x time.Time) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.NEQ, x)
-}
-func (w whereHelpertime_Time) LT(x time.Time) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LT, x)
-}
-func (w whereHelpertime_Time) LTE(x time.Time) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LTE, x)
-}
-func (w whereHelpertime_Time) GT(x time.Time) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GT, x)
-}
-func (w whereHelpertime_Time) GTE(x time.Time) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GTE, x)
-}
 
 type whereHelpernull_Bool struct{ field string }
 
@@ -117,18 +96,39 @@ func (w whereHelpernull_Time) GTE(x null.Time) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.GTE, x)
 }
 
+type whereHelpertime_Time struct{ field string }
+
+func (w whereHelpertime_Time) EQ(x time.Time) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.EQ, x)
+}
+func (w whereHelpertime_Time) NEQ(x time.Time) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.NEQ, x)
+}
+func (w whereHelpertime_Time) LT(x time.Time) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelpertime_Time) LTE(x time.Time) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelpertime_Time) GT(x time.Time) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelpertime_Time) GTE(x time.Time) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
+
 var ChapterQueueWhere = struct {
-	NovelID    whereHelperint
 	ChapterID  whereHelperint
-	QueuedAt   whereHelpertime_Time
 	Finished   whereHelpernull_Bool
 	FinishedAt whereHelpernull_Time
+	NovelID    whereHelperint
+	QueuedAt   whereHelpertime_Time
 }{
-	NovelID:    whereHelperint{field: `novel_id`},
-	ChapterID:  whereHelperint{field: `chapter_id`},
-	QueuedAt:   whereHelpertime_Time{field: `queued_at`},
-	Finished:   whereHelpernull_Bool{field: `finished`},
-	FinishedAt: whereHelpernull_Time{field: `finished_at`},
+	ChapterID:  whereHelperint{field: "\"ste\".\"chapter_queue\".\"chapter_id\""},
+	Finished:   whereHelpernull_Bool{field: "\"ste\".\"chapter_queue\".\"finished\""},
+	FinishedAt: whereHelpernull_Time{field: "\"ste\".\"chapter_queue\".\"finished_at\""},
+	NovelID:    whereHelperint{field: "\"ste\".\"chapter_queue\".\"novel_id\""},
+	QueuedAt:   whereHelpertime_Time{field: "\"ste\".\"chapter_queue\".\"queued_at\""},
 }
 
 // ChapterQueueRels is where relationship names are stored.
@@ -155,8 +155,8 @@ func (*chapterQueueR) NewStruct() *chapterQueueR {
 type chapterQueueL struct{}
 
 var (
-	chapterQueueColumns               = []string{"novel_id", "chapter_id", "queued_at", "finished", "finished_at"}
-	chapterQueueColumnsWithoutDefault = []string{"novel_id", "chapter_id", "queued_at", "finished_at"}
+	chapterQueueColumns               = []string{"chapter_id", "finished", "finished_at", "novel_id", "queued_at"}
+	chapterQueueColumnsWithoutDefault = []string{"chapter_id", "finished_at", "novel_id", "queued_at"}
 	chapterQueueColumnsWithDefault    = []string{"finished"}
 	chapterQueuePrimaryKeyColumns     = []string{"novel_id", "chapter_id"}
 )
@@ -1172,10 +1172,6 @@ func (q chapterQueueQuery) DeleteAll(ctx context.Context, exec boil.ContextExecu
 
 // DeleteAll deletes all rows in the slice, using an executor.
 func (o ChapterQueueSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
-	if o == nil {
-		return 0, errors.New("models: no ChapterQueue slice provided for delete all")
-	}
-
 	if len(o) == 0 {
 		return 0, nil
 	}

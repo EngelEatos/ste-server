@@ -75,10 +75,12 @@
                             </tr>
                             <tr>
                                 <th>fetched At</th>
-                                <td>{{ if .fetchedAt.Valid }} {{ .fetchedAt.Time }} {{ else }} - {{ end }}</td>
+                                <td>{{ .FetchedAt }}</td>
                             </tr>
                             <tr>
-
+                                <th>Chapter Count</th>
+                                <td> {{ .Chaptercount.Int }} </td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>

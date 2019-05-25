@@ -1,11 +1,15 @@
 package main
 
 import (
-	"fmt"
-	"net/http"
+	"log"
+	nuapi "ste/novelupdatesapi"
 )
 
 func main() {
-	url := "https://www.novelupdates.com/extnu/2548756/"
-	
+
+	chapters, err := nuapi.GetChapter("god-of-slaughter", 1)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Printf("lenght: %d\n", len(chapters))
 }

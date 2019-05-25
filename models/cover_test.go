@@ -896,7 +896,7 @@ func testCoversSelect(t *testing.T) {
 }
 
 var (
-	coverDBTypes = map[string]string{`ID`: `integer`, `URL`: `text`, `Downloaded`: `boolean`, `Path`: `text`}
+	coverDBTypes = map[string]string{`Downloaded`: `boolean`, `ID`: `integer`, `Path`: `text`, `URL`: `text`}
 	_            = bytes.MinRead
 )
 

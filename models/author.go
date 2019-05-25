@@ -40,12 +40,30 @@ var AuthorColumns = struct {
 
 // Generated where
 
+type whereHelperint struct{ field string }
+
+func (w whereHelperint) EQ(x int) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
+func (w whereHelperint) NEQ(x int) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
+func (w whereHelperint) LT(x int) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
+func (w whereHelperint) LTE(x int) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
+func (w whereHelperint) GT(x int) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
+func (w whereHelperint) GTE(x int) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
+
+type whereHelperstring struct{ field string }
+
+func (w whereHelperstring) EQ(x string) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
+func (w whereHelperstring) NEQ(x string) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
+func (w whereHelperstring) LT(x string) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
+func (w whereHelperstring) LTE(x string) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
+func (w whereHelperstring) GT(x string) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
+func (w whereHelperstring) GTE(x string) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
+
 var AuthorWhere = struct {
 	ID   whereHelperint
 	Name whereHelperstring
 }{
-	ID:   whereHelperint{field: `id`},
-	Name: whereHelperstring{field: `name`},
+	ID:   whereHelperint{field: "\"ste\".\"author\".\"id\""},
+	Name: whereHelperstring{field: "\"ste\".\"author\".\"name\""},
 }
 
 // AuthorRels is where relationship names are stored.
@@ -433,7 +451,7 @@ func (authorL) LoadNovels(ctx context.Context, e boil.ContextExecutor, singular 
 		one := new(Novel)
 		var localJoinCol int
 
-		err = results.Scan(&one.ID, &one.Title, &one.Chaptercount, &one.NovelIDSTR, &one.NtypeID, &one.Description, &one.LanguageID, &one.Year, &one.Status, &one.Licensed, &one.CompletlyTranslated, &one.CoverID, &one.UpdatedAt, &one.FetchedAt, &one.GroupID, &localJoinCol)
+		err = results.Scan(&one.Chaptercount, &one.CompletlyTranslated, &one.CoverID, &one.Description, &one.FetchedAt, &one.GroupID, &one.ID, &one.LanguageID, &one.Licensed, &one.NovelIDSTR, &one.NtypeID, &one.Status, &one.Title, &one.UpdatedAt, &one.Year, &localJoinCol)
 		if err != nil {
 			return errors.Wrap(err, "failed to scan eager loaded results for novel")
 		}
@@ -1039,10 +1057,6 @@ func (q authorQuery) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (
 
 // DeleteAll deletes all rows in the slice, using an executor.
 func (o AuthorSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
-	if o == nil {
-		return 0, errors.New("models: no Author slice provided for delete all")
-	}
-
 	if len(o) == 0 {
 		return 0, nil
 	}

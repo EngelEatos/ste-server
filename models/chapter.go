@@ -24,34 +24,43 @@ import (
 
 // Chapter is an object representing the database table.
 type Chapter struct {
+	Downloaded bool     `boil:"downloaded" json:"downloaded" toml:"downloaded" yaml:"downloaded"`
 	ID         int      `boil:"id" json:"id" toml:"id" yaml:"id"`
-	Title      string   `boil:"title" json:"title" toml:"title" yaml:"title"`
-	URL        string   `boil:"url" json:"url" toml:"url" yaml:"url"`
 	Idx        int      `boil:"idx" json:"idx" toml:"idx" yaml:"idx"`
 	Part       null.Int `boil:"part" json:"part,omitempty" toml:"part" yaml:"part,omitempty"`
-	Downloaded bool     `boil:"downloaded" json:"downloaded" toml:"downloaded" yaml:"downloaded"`
+	Title      string   `boil:"title" json:"title" toml:"title" yaml:"title"`
+	URL        string   `boil:"url" json:"url" toml:"url" yaml:"url"`
 
 	R *chapterR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L chapterL  `boil:"-" json:"-" toml:"-" yaml:"-"`
 }
 
 var ChapterColumns = struct {
+	Downloaded string
 	ID         string
-	Title      string
-	URL        string
 	Idx        string
 	Part       string
-	Downloaded string
+	Title      string
+	URL        string
 }{
+	Downloaded: "downloaded",
 	ID:         "id",
-	Title:      "title",
-	URL:        "url",
 	Idx:        "idx",
 	Part:       "part",
-	Downloaded: "downloaded",
+	Title:      "title",
+	URL:        "url",
 }
 
 // Generated where
+
+type whereHelperbool struct{ field string }
+
+func (w whereHelperbool) EQ(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
+func (w whereHelperbool) NEQ(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
+func (w whereHelperbool) LT(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
+func (w whereHelperbool) LTE(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
+func (w whereHelperbool) GT(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
+func (w whereHelperbool) GTE(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
 
 type whereHelpernull_Int struct{ field string }
 
@@ -76,29 +85,20 @@ func (w whereHelpernull_Int) GTE(x null.Int) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.GTE, x)
 }
 
-type whereHelperbool struct{ field string }
-
-func (w whereHelperbool) EQ(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
-func (w whereHelperbool) NEQ(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
-func (w whereHelperbool) LT(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
-func (w whereHelperbool) LTE(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
-func (w whereHelperbool) GT(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
-func (w whereHelperbool) GTE(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
-
 var ChapterWhere = struct {
+	Downloaded whereHelperbool
 	ID         whereHelperint
-	Title      whereHelperstring
-	URL        whereHelperstring
 	Idx        whereHelperint
 	Part       whereHelpernull_Int
-	Downloaded whereHelperbool
+	Title      whereHelperstring
+	URL        whereHelperstring
 }{
-	ID:         whereHelperint{field: `id`},
-	Title:      whereHelperstring{field: `title`},
-	URL:        whereHelperstring{field: `url`},
-	Idx:        whereHelperint{field: `idx`},
-	Part:       whereHelpernull_Int{field: `part`},
-	Downloaded: whereHelperbool{field: `downloaded`},
+	Downloaded: whereHelperbool{field: "\"ste\".\"chapter\".\"downloaded\""},
+	ID:         whereHelperint{field: "\"ste\".\"chapter\".\"id\""},
+	Idx:        whereHelperint{field: "\"ste\".\"chapter\".\"idx\""},
+	Part:       whereHelpernull_Int{field: "\"ste\".\"chapter\".\"part\""},
+	Title:      whereHelperstring{field: "\"ste\".\"chapter\".\"title\""},
+	URL:        whereHelperstring{field: "\"ste\".\"chapter\".\"url\""},
 }
 
 // ChapterRels is where relationship names are stored.
@@ -125,8 +125,8 @@ func (*chapterR) NewStruct() *chapterR {
 type chapterL struct{}
 
 var (
-	chapterColumns               = []string{"id", "title", "url", "idx", "part", "downloaded"}
-	chapterColumnsWithoutDefault = []string{"title", "url", "idx", "part", "downloaded"}
+	chapterColumns               = []string{"downloaded", "id", "idx", "part", "title", "url"}
+	chapterColumnsWithoutDefault = []string{"downloaded", "idx", "part", "title", "url"}
 	chapterColumnsWithDefault    = []string{"id"}
 	chapterPrimaryKeyColumns     = []string{"id"}
 )
@@ -510,7 +510,7 @@ func (chapterL) LoadNovels(ctx context.Context, e boil.ContextExecutor, singular
 		one := new(Novel)
 		var localJoinCol int
 
-		err = results.Scan(&one.ID, &one.Title, &one.Chaptercount, &one.NovelIDSTR, &one.NtypeID, &one.Description, &one.LanguageID, &one.Year, &one.Status, &one.Licensed, &one.CompletlyTranslated, &one.CoverID, &one.UpdatedAt, &one.FetchedAt, &one.GroupID, &localJoinCol)
+		err = results.Scan(&one.Chaptercount, &one.CompletlyTranslated, &one.CoverID, &one.Description, &one.FetchedAt, &one.GroupID, &one.ID, &one.LanguageID, &one.Licensed, &one.NovelIDSTR, &one.NtypeID, &one.Status, &one.Title, &one.UpdatedAt, &one.Year, &localJoinCol)
 		if err != nil {
 			return errors.Wrap(err, "failed to scan eager loaded results for novel")
 		}
@@ -1264,10 +1264,6 @@ func (q chapterQuery) DeleteAll(ctx context.Context, exec boil.ContextExecutor) 
 
 // DeleteAll deletes all rows in the slice, using an executor.
 func (o ChapterSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
-	if o == nil {
-		return 0, errors.New("models: no Chapter slice provided for delete all")
-	}
-
 	if len(o) == 0 {
 		return 0, nil
 	}

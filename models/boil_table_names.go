@@ -4,7 +4,6 @@
 package models
 
 var TableNames = struct {
-	Group          string
 	Author         string
 	AuthorOfNovel  string
 	Chapter        string
@@ -13,15 +12,14 @@ var TableNames = struct {
 	Cover          string
 	Genre          string
 	GenreOfNovel   string
+	Group          string
 	Language       string
 	Novel          string
 	NovelQueue     string
 	NovelType      string
-	Recommendation string
 	Tag            string
 	TagOfNovel     string
 }{
-	Group:          "Group",
 	Author:         "author",
 	AuthorOfNovel:  "author_of_novel",
 	Chapter:        "chapter",
@@ -30,11 +28,11 @@ var TableNames = struct {
 	Cover:          "cover",
 	Genre:          "genre",
 	GenreOfNovel:   "genre_of_novel",
+	Group:          "group",
 	Language:       "language",
 	Novel:          "novel",
 	NovelQueue:     "novel_queue",
 	NovelType:      "novel_type",
-	Recommendation: "recommendation",
 	Tag:            "tag",
 	TagOfNovel:     "tag_of_novel",
 }

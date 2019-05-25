@@ -777,7 +777,7 @@ func testChapterQueuesSelect(t *testing.T) {
 }
 
 var (
-	chapterQueueDBTypes = map[string]string{`NovelID`: `integer`, `ChapterID`: `integer`, `QueuedAt`: `date`, `Finished`: `boolean`, `FinishedAt`: `date`}
+	chapterQueueDBTypes = map[string]string{`ChapterID`: `integer`, `Finished`: `boolean`, `FinishedAt`: `date`, `NovelID`: `integer`, `QueuedAt`: `date`}
 	_                   = bytes.MinRead
 )
 

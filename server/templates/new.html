@@ -1,0 +1,145 @@
+<html>
+
+<head>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+    <script>
+        function dragover_handler(event) {
+            event.preventDefault();
+            event.dataTransfer.dropEffect = "move"
+        }
+
+        function drop_handler(event) {
+            event.preventDefault();
+            var rectangle = event.target.getBoundingClientRect();
+
+            var data = event.dataTransfer.getData("text/plain");
+            console.log()
+            event.target.appendChild(document.getElementById(data));
+        }
+
+        function calcRatio(srcWidth, srcHeight, maxWidth, maxHeight) {
+            var ratio = Math.min(maxWidth / srcWidth, maxHeight / srcHeight);
+            return {
+                width: srcWidth * ratio,
+                height: srcHeight * ratio
+            };
+        }
+
+        function getPath(k) {
+            var goal = k;
+            var parent = k.parent();
+            var nodes = [];
+            while (parent) {
+                // id/class
+                var j = parent.prop("tagName");
+                console.log(j)
+                if (parent.attr('id')) {
+                    nodes.unshift(j+"#"+parent.attr('id'));
+                    console.log(parent.attr(id))
+                    break;
+                } else if (parent.attr("class")) {
+                    nodes.unshift(j+"." + parent.attr("class").split(/\s+/).join("."));
+                    parent = parent.parent();
+                } else {
+                    console.log("no id or class error");
+                    break;
+                }
+            }
+            console.log(nodes.join(" > ") + " > " + k.prop("tagName"))
+        }
+        function highlight(dclass) {
+            dclass = dclass.replace(/\s+/g, "\.");
+            console.log(dclass);
+            $("." + dclass).css("background-color", "yellow");
+        }
+
+        function getPathTo(element) {
+            if (element.id !== '')
+                return 'id("' + element.id + '")';
+            if (element === document.body)
+                return element.tagName;
+
+            var ix = 0;
+            var siblings = element.parentNode.childNodes;
+            for (var i = 0; i < siblings.length; i++) {
+                var sibling = siblings[i];
+                if (sibling === element)
+                    return getPathTo(element.parentNode) + '/' + element.tagName + '[' + (ix + 1) + ']';
+                if (sibling.nodeType === 1 && sibling.tagName === element.tagName)
+                    ix++;
+            }
+        }
+
+        $(function () {
+            $('.goal').droppable({
+                drop: function (ev, ui) {
+                    var dropped = ui.draggable;
+                    var droppedOn = $(this);
+                    if (dropped.height() > droppedOn.height() || dropped.width() > droppedOn
+                    .width()) {
+                        var size = calcRatio(dropped.width(), dropped.height(), droppedOn.width(),
+                            droppedOn.height());
+                        $(ui.helper).css('height', size.height);
+                        $(ui.helper).css('width', size.width);
+                    }
+                    $(dropped).detach().css({
+                        top: 0,
+                        left: 0
+                    }).appendTo(droppedOn);
+                    highlight(dropped.attr("class"));
+                    console.log(getPathTo(dropped))
+                }
+            })
+            $("#clientframe-container").load("http://127.0.0.1:5500/server/templates/test.html", function () {
+                console.log("load success");
+                $("#clientframe-container").find("*").draggable({
+                    revert: "invalid",
+                    snap: ".goal",
+                    stack: ".ui-draggable"
+                });
+            });
+        });
+    </script>
+    <style>
+        .goal {
+            width: 100%;
+            height: 200px;
+            /* position: absolute; */
+            /* top:0; */
+            background-color: green;
+            border: 5px solid black;
+        }
+
+        .wrapper {
+            display: flex;
+        }
+
+        .col {
+            flex: 50%;
+        }
+
+        #clientframe {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrapper">
+        <div class="col">
+            <div id="clientframe-container">
+                <!-- <iframe id="clientframe" src="./test.html"></iframe> -->
+            </div>
+        </div>
+        <div class="col">
+            <div class="goal">cover</div>
+            <div class="goal">Title</div>
+            <div class="goal">Chapter</div>
+            <div class="goal">Description</div>
+        </div>
+    </div>
+</body>
+
+</html>

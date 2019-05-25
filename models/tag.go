@@ -44,8 +44,8 @@ var TagWhere = struct {
 	ID   whereHelperint
 	Name whereHelperstring
 }{
-	ID:   whereHelperint{field: `id`},
-	Name: whereHelperstring{field: `name`},
+	ID:   whereHelperint{field: "\"ste\".\"tag\".\"id\""},
+	Name: whereHelperstring{field: "\"ste\".\"tag\".\"name\""},
 }
 
 // TagRels is where relationship names are stored.
@@ -433,7 +433,7 @@ func (tagL) LoadNovels(ctx context.Context, e boil.ContextExecutor, singular boo
 		one := new(Novel)
 		var localJoinCol int
 
-		err = results.Scan(&one.ID, &one.Title, &one.Chaptercount, &one.NovelIDSTR, &one.NtypeID, &one.Description, &one.LanguageID, &one.Year, &one.Status, &one.Licensed, &one.CompletlyTranslated, &one.CoverID, &one.UpdatedAt, &one.FetchedAt, &one.GroupID, &localJoinCol)
+		err = results.Scan(&one.Chaptercount, &one.CompletlyTranslated, &one.CoverID, &one.Description, &one.FetchedAt, &one.GroupID, &one.ID, &one.LanguageID, &one.Licensed, &one.NovelIDSTR, &one.NtypeID, &one.Status, &one.Title, &one.UpdatedAt, &one.Year, &localJoinCol)
 		if err != nil {
 			return errors.Wrap(err, "failed to scan eager loaded results for novel")
 		}
@@ -1039,10 +1039,6 @@ func (q tagQuery) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int
 
 // DeleteAll deletes all rows in the slice, using an executor.
 func (o TagSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
-	if o == nil {
-		return 0, errors.New("models: no Tag slice provided for delete all")
-	}
-
 	if len(o) == 0 {
 		return 0, nil
 	}

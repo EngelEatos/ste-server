@@ -24,10 +24,10 @@ import (
 
 // NovelQueue is an object representing the database table.
 type NovelQueue struct {
-	NovelID     int       `boil:"novel_id" json:"novel_id" toml:"novel_id" yaml:"novel_id"`
-	QueuedAt    time.Time `boil:"queued_at" json:"queued_at" toml:"queued_at" yaml:"queued_at"`
 	Finished    null.Bool `boil:"finished" json:"finished,omitempty" toml:"finished" yaml:"finished,omitempty"`
 	FinishedAt  null.Time `boil:"finished_at" json:"finished_at,omitempty" toml:"finished_at" yaml:"finished_at,omitempty"`
+	NovelID     int       `boil:"novel_id" json:"novel_id" toml:"novel_id" yaml:"novel_id"`
+	QueuedAt    time.Time `boil:"queued_at" json:"queued_at" toml:"queued_at" yaml:"queued_at"`
 	ScheduledAt time.Time `boil:"scheduled_at" json:"scheduled_at" toml:"scheduled_at" yaml:"scheduled_at"`
 
 	R *novelQueueR `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -35,33 +35,33 @@ type NovelQueue struct {
 }
 
 var NovelQueueColumns = struct {
-	NovelID     string
-	QueuedAt    string
 	Finished    string
 	FinishedAt  string
+	NovelID     string
+	QueuedAt    string
 	ScheduledAt string
 }{
-	NovelID:     "novel_id",
-	QueuedAt:    "queued_at",
 	Finished:    "finished",
 	FinishedAt:  "finished_at",
+	NovelID:     "novel_id",
+	QueuedAt:    "queued_at",
 	ScheduledAt: "scheduled_at",
 }
 
 // Generated where
 
 var NovelQueueWhere = struct {
-	NovelID     whereHelperint
-	QueuedAt    whereHelpertime_Time
 	Finished    whereHelpernull_Bool
 	FinishedAt  whereHelpernull_Time
+	NovelID     whereHelperint
+	QueuedAt    whereHelpertime_Time
 	ScheduledAt whereHelpertime_Time
 }{
-	NovelID:     whereHelperint{field: `novel_id`},
-	QueuedAt:    whereHelpertime_Time{field: `queued_at`},
-	Finished:    whereHelpernull_Bool{field: `finished`},
-	FinishedAt:  whereHelpernull_Time{field: `finished_at`},
-	ScheduledAt: whereHelpertime_Time{field: `scheduled_at`},
+	Finished:    whereHelpernull_Bool{field: "\"ste\".\"novel_queue\".\"finished\""},
+	FinishedAt:  whereHelpernull_Time{field: "\"ste\".\"novel_queue\".\"finished_at\""},
+	NovelID:     whereHelperint{field: "\"ste\".\"novel_queue\".\"novel_id\""},
+	QueuedAt:    whereHelpertime_Time{field: "\"ste\".\"novel_queue\".\"queued_at\""},
+	ScheduledAt: whereHelpertime_Time{field: "\"ste\".\"novel_queue\".\"scheduled_at\""},
 }
 
 // NovelQueueRels is where relationship names are stored.
@@ -85,8 +85,8 @@ func (*novelQueueR) NewStruct() *novelQueueR {
 type novelQueueL struct{}
 
 var (
-	novelQueueColumns               = []string{"novel_id", "queued_at", "finished", "finished_at", "scheduled_at"}
-	novelQueueColumnsWithoutDefault = []string{"novel_id", "queued_at", "finished_at", "scheduled_at"}
+	novelQueueColumns               = []string{"finished", "finished_at", "novel_id", "queued_at", "scheduled_at"}
+	novelQueueColumnsWithoutDefault = []string{"finished_at", "novel_id", "queued_at", "scheduled_at"}
 	novelQueueColumnsWithDefault    = []string{"finished"}
 	novelQueuePrimaryKeyColumns     = []string{"novel_id", "queued_at"}
 )
@@ -940,10 +940,6 @@ func (q novelQueueQuery) DeleteAll(ctx context.Context, exec boil.ContextExecuto
 
 // DeleteAll deletes all rows in the slice, using an executor.
 func (o NovelQueueSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
-	if o == nil {
-		return 0, errors.New("models: no NovelQueue slice provided for delete all")
-	}
-
 	if len(o) == 0 {
 		return 0, nil
 	}

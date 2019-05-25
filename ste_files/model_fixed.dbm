@@ -1,0 +1,530 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+CAUTION: Do not modify this file unless you know what you are doing.
+         Unexpected results may occur if the code is changed deliberately.
+-->
+<dbmodel pgmodeler-ver="0.9.1" last-position="0,0" last-zoom="1"
+	 default-owner="postgres">
+<database name="ste" is-template="false" allow-conns="true">
+</database>
+
+<schema name="public" rect-visible="true" fill-color="#e1e1e1" sql-disabled="true">
+</schema>
+
+<schema name="ste" rect-visible="true" fill-color="#e1e1e1">
+	<role name="postgres"/>
+</schema>
+
+<table name="author_of_novel">
+	<schema name="ste"/>
+	<role name="postgres"/>
+	<position x="760" y="120"/>
+	<column name="author_id" not-null="true">
+		<type name="integer" length="0"/>
+	</column>
+	<column name="novel_id" not-null="true">
+		<type name="integer" length="0"/>
+	</column>
+	<constraint name="author_novel_pk" type="pk-constr" table="ste.author_of_novel">
+		<columns names="author_id,novel_id" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<table name="chapter_of_novel">
+	<schema name="ste"/>
+	<role name="postgres"/>
+	<position x="1080" y="160"/>
+	<column name="novel_id" not-null="true">
+		<type name="integer" length="0"/>
+	</column>
+	<column name="chapter_id" not-null="true">
+		<type name="integer" length="0"/>
+	</column>
+	<constraint name="novel_chapter_pk" type="pk-constr" table="ste.chapter_of_novel">
+		<columns names="novel_id,chapter_id" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<table name="group">
+	<schema name="ste"/>
+	<role name="postgres"/>
+	<position x="120" y="100"/>
+	<column name="id" not-null="true">
+		<type name="serial" length="0"/>
+	</column>
+	<column name="url" not-null="true">
+		<type name="text" length="0"/>
+	</column>
+	<column name="name" not-null="true">
+		<type name="text" length="0"/>
+	</column>
+	<constraint name="sources_pk" type="pk-constr" table="ste.&quot;group&quot;">
+		<columns names="id" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<table name="chapter_queue">
+	<schema name="ste"/>
+	<role name="postgres"/>
+	<position x="1520" y="320"/>
+	<column name="novel_id" not-null="true">
+		<type name="integer" length="0"/>
+	</column>
+	<column name="chapter_id" not-null="true">
+		<type name="integer" length="0"/>
+	</column>
+	<column name="queued_at" not-null="true">
+		<type name="date" length="0"/>
+	</column>
+	<column name="finished" default-value="false">
+		<type name="bool" length="0"/>
+	</column>
+	<column name="finished_at">
+		<type name="date" length="0"/>
+	</column>
+	<constraint name="chapter_queue_pk" type="pk-constr" table="ste.chapter_queue">
+		<columns names="novel_id,chapter_id" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<table name="novel_queue">
+	<schema name="ste"/>
+	<role name="postgres"/>
+	<position x="40" y="180"/>
+	<column name="novel_id" not-null="true">
+		<type name="integer" length="0"/>
+	</column>
+	<column name="queued_at" not-null="true">
+		<type name="date" length="0"/>
+	</column>
+	<column name="finished" default-value="false">
+		<type name="bool" length="0"/>
+	</column>
+	<column name="finished_at">
+		<type name="date" length="0"/>
+	</column>
+	<column name="scheduled_at" not-null="true">
+		<type name="date" length="0"/>
+	</column>
+	<constraint name="novel_queue_pk" type="pk-constr" table="ste.novel_queue">
+		<columns names="novel_id,queued_at" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<table name="author">
+	<schema name="ste"/>
+	<role name="postgres"/>
+	<position x="380" y="120"/>
+	<column name="id" not-null="true">
+		<type name="serial" length="0"/>
+	</column>
+	<column name="name" not-null="true">
+		<type name="text" length="0"/>
+	</column>
+	<constraint name="author_pk" type="pk-constr" table="ste.author">
+		<columns names="id" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<schema name="novelupdates" rect-visible="true" fill-color="#e1e1e1">
+	<role name="postgres"/>
+</schema>
+
+<table name="genre_of_novel">
+	<schema name="ste"/>
+	<role name="postgres"/>
+	<position x="560" y="900"/>
+	<column name="novel_id" not-null="true">
+		<type name="integer" length="0"/>
+	</column>
+	<column name="genre_id" not-null="true">
+		<type name="integer" length="0"/>
+	</column>
+	<constraint name="nu_novel_genre_pk" type="pk-constr" table="ste.genre_of_novel">
+		<columns names="novel_id,genre_id" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<table name="genre">
+	<schema name="ste"/>
+	<role name="postgres"/>
+	<position x="1020" y="780"/>
+	<column name="id" not-null="true">
+		<type name="integer" length="0"/>
+	</column>
+	<column name="name" not-null="true">
+		<type name="text" length="0"/>
+	</column>
+	<constraint name="nu_genres_pk" type="pk-constr" table="ste.genre">
+		<columns names="id" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<table name="tag">
+	<schema name="ste"/>
+	<role name="postgres"/>
+	<position x="80" y="760"/>
+	<column name="id" not-null="true">
+		<type name="integer" length="0"/>
+	</column>
+	<column name="name" not-null="true">
+		<type name="text" length="0"/>
+	</column>
+	<constraint name="nu_tags_pk" type="pk-constr" table="ste.tag">
+		<columns names="id" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<table name="novel">
+	<schema name="ste"/>
+	<role name="postgres"/>
+	<position x="680" y="280"/>
+	<column name="id" not-null="true">
+		<type name="serial" length="0"/>
+	</column>
+	<column name="title" not-null="true">
+		<type name="text" length="0"/>
+	</column>
+	<column name="chaptercount">
+		<type name="integer" length="0"/>
+	</column>
+	<column name="novel_id_str" not-null="true">
+		<type name="text" length="0"/>
+	</column>
+	<column name="ntype_id">
+		<type name="integer" length="0"/>
+	</column>
+	<column name="description">
+		<type name="text" length="0"/>
+	</column>
+	<column name="language_id">
+		<type name="integer" length="0"/>
+	</column>
+	<column name="year">
+		<type name="integer" length="0"/>
+	</column>
+	<column name="status">
+		<type name="integer" length="0"/>
+	</column>
+	<column name="licensed">
+		<type name="bool" length="0"/>
+	</column>
+	<column name="completly_translated">
+		<type name="bool" length="0"/>
+	</column>
+	<column name="cover_id">
+		<type name="integer" length="0"/>
+	</column>
+	<column name="group_id">
+		<type name="integer" length="0"/>
+	</column>
+	<column name="updatedAt">
+		<type name="date" length="0"/>
+	</column>
+	<column name="fetchedAt" not-null="true">
+		<type name="date" length="0"/>
+	</column>
+	<constraint name="nu_novel_pk" type="pk-constr" table="ste.novel">
+		<columns names="id" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<table name="tag_of_novel">
+	<schema name="ste"/>
+	<role name="postgres"/>
+	<position x="40" y="580"/>
+	<column name="novel_id" not-null="true">
+		<type name="integer" length="0"/>
+	</column>
+	<column name="tag_id" not-null="true">
+		<type name="integer" length="0"/>
+	</column>
+	<constraint name="nu_novel_tags_pk" type="pk-constr" table="ste.tag_of_novel">
+		<columns names="novel_id,tag_id" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<table name="cover">
+	<schema name="ste"/>
+	<role name="postgres"/>
+	<position x="1340" y="880"/>
+	<column name="id" not-null="true">
+		<type name="serial" length="0"/>
+	</column>
+	<column name="url" not-null="true">
+		<type name="text" length="0"/>
+	</column>
+	<column name="downloaded" default-value="false">
+		<type name="bool" length="0"/>
+	</column>
+	<column name="path">
+		<type name="text" length="0"/>
+	</column>
+	<constraint name="cover_pk" type="pk-constr" table="ste.cover">
+		<columns names="id" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<table name="language">
+	<schema name="ste"/>
+	<role name="postgres"/>
+	<position x="1520" y="560"/>
+	<column name="id" not-null="true">
+		<type name="integer" length="0"/>
+	</column>
+	<column name="name" not-null="true">
+		<type name="text" length="0"/>
+	</column>
+	<constraint name="Language_pk" type="pk-constr" table="ste.language">
+		<columns names="id" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<table name="chapter">
+	<schema name="ste"/>
+	<role name="postgres"/>
+	<position x="1600" y="120"/>
+	<column name="id" not-null="true">
+		<type name="serial" length="0"/>
+	</column>
+	<column name="title" not-null="true">
+		<type name="text" length="0"/>
+	</column>
+	<column name="url" not-null="true">
+		<type name="text" length="0"/>
+	</column>
+	<column name="idx" not-null="true">
+		<type name="integer" length="0"/>
+	</column>
+	<column name="part">
+		<type name="integer" length="0"/>
+	</column>
+	<column name="downloaded" not-null="true">
+		<type name="bool" length="0"/>
+	</column>
+	<constraint name="chapter_pk" type="pk-constr" table="ste.chapter">
+		<columns names="id" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<table name="novel_type">
+	<schema name="ste"/>
+	<role name="postgres"/>
+	<position x="320" y="860"/>
+	<column name="id" not-null="true">
+		<type name="integer" length="0"/>
+	</column>
+	<column name="name" not-null="true">
+		<type name="text" length="0"/>
+	</column>
+	<constraint name="novel_type_pk" type="pk-constr" table="ste.novel_type">
+		<columns names="id" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<sequence name="chapter_seq"
+	 start="1" increment="1"
+	 min-value="0" max-value="2147483647"
+	 cache="1" cycle="false">
+	<schema name="ste"/>
+	<role name="postgres"/>
+</sequence>
+
+<sequence name="novel_seq"
+	 start="1" increment="1"
+	 min-value="0" max-value="2147483647"
+	 cache="1" cycle="false">
+	<schema name="ste"/>
+	<role name="postgres"/>
+</sequence>
+
+<sequence name="cover_seq"
+	 start="1" increment="1"
+	 min-value="0" max-value="2147483647"
+	 cache="1" cycle="false">
+	<schema name="ste"/>
+	<role name="postgres"/>
+</sequence>
+
+<sequence name="author_seq"
+	 start="1" increment="1"
+	 min-value="0" max-value="2147483647"
+	 cache="1" cycle="false">
+	<schema name="ste"/>
+	<role name="postgres"/>
+</sequence>
+
+<sequence name="group_seq"
+	 start="1" increment="1"
+	 min-value="0" max-value="2147483647"
+	 cache="1" cycle="false">
+	<schema name="ste"/>
+	<role name="postgres"/>
+</sequence>
+
+<constraint name="FK_author_of_novel_author" type="fk-constr" comparison-type="MATCH FULL"
+	 upd-action="CASCADE" del-action="CASCADE" ref-table="ste.author" table="ste.author_of_novel">
+	<columns names="author_id" ref-type="src-columns"/>
+	<columns names="id" ref-type="dst-columns"/>
+</constraint>
+
+<constraint name="FK_author_of_novel_novel" type="fk-constr" comparison-type="MATCH FULL"
+	 upd-action="NO ACTION" del-action="NO ACTION" ref-table="ste.novel" table="ste.author_of_novel">
+	<columns names="novel_id" ref-type="src-columns"/>
+	<columns names="id" ref-type="dst-columns"/>
+</constraint>
+
+<constraint name="FK_chapter_of_novel_chapter" type="fk-constr" comparison-type="MATCH FULL"
+	 upd-action="CASCADE" del-action="NO ACTION" ref-table="ste.chapter" table="ste.chapter_of_novel">
+	<columns names="chapter_id" ref-type="src-columns"/>
+	<columns names="id" ref-type="dst-columns"/>
+</constraint>
+
+<constraint name="FK_chapter_of_novel_novel" type="fk-constr" comparison-type="MATCH FULL"
+	 upd-action="NO ACTION" del-action="NO ACTION" ref-table="ste.novel" table="ste.chapter_of_novel">
+	<columns names="novel_id" ref-type="src-columns"/>
+	<columns names="id" ref-type="dst-columns"/>
+</constraint>
+
+<constraint name="FK_chapter_queue_chapter" type="fk-constr" comparison-type="MATCH FULL"
+	 upd-action="NO ACTION" del-action="NO ACTION" ref-table="ste.chapter" table="ste.chapter_queue">
+	<columns names="chapter_id" ref-type="src-columns"/>
+	<columns names="id" ref-type="dst-columns"/>
+</constraint>
+
+<constraint name="FK_chapter_queue_novel" type="fk-constr" comparison-type="MATCH FULL"
+	 upd-action="NO ACTION" del-action="NO ACTION" ref-table="ste.novel" table="ste.chapter_queue">
+	<columns names="novel_id" ref-type="src-columns"/>
+	<columns names="id" ref-type="dst-columns"/>
+</constraint>
+
+<constraint name="FK_novel_queue_novel" type="fk-constr" comparison-type="MATCH FULL"
+	 upd-action="NO ACTION" del-action="NO ACTION" ref-table="ste.novel" table="ste.novel_queue">
+	<columns names="novel_id" ref-type="src-columns"/>
+	<columns names="id" ref-type="dst-columns"/>
+</constraint>
+
+<constraint name="FK_genre_of_novel_novel" type="fk-constr" comparison-type="MATCH FULL"
+	 upd-action="NO ACTION" del-action="NO ACTION" ref-table="ste.novel" table="ste.genre_of_novel">
+	<columns names="novel_id" ref-type="src-columns"/>
+	<columns names="id" ref-type="dst-columns"/>
+</constraint>
+
+<constraint name="FK_genre_of_novel_genre" type="fk-constr" comparison-type="MATCH FULL"
+	 upd-action="NO ACTION" del-action="NO ACTION" ref-table="ste.genre" table="ste.genre_of_novel">
+	<columns names="genre_id" ref-type="src-columns"/>
+	<columns names="id" ref-type="dst-columns"/>
+</constraint>
+
+<constraint name="FK_novel_chapter" type="fk-constr" comparison-type="MATCH FULL"
+	 upd-action="CASCADE" del-action="CASCADE" ref-table="ste.cover" table="ste.novel">
+	<columns names="cover_id" ref-type="src-columns"/>
+	<columns names="id" ref-type="dst-columns"/>
+</constraint>
+
+<constraint name="FK_novel_source" type="fk-constr" comparison-type="MATCH FULL"
+	 upd-action="NO ACTION" del-action="NO ACTION" ref-table="ste.&quot;group&quot;" table="ste.novel">
+	<columns names="group_id" ref-type="src-columns"/>
+	<columns names="id" ref-type="dst-columns"/>
+</constraint>
+
+<constraint name="FK_novel_language" type="fk-constr" comparison-type="MATCH FULL"
+	 upd-action="NO ACTION" del-action="NO ACTION" ref-table="ste.language" table="ste.novel">
+	<columns names="language_id" ref-type="src-columns"/>
+	<columns names="id" ref-type="dst-columns"/>
+</constraint>
+
+<constraint name="FK_novel_novel_types" type="fk-constr" comparison-type="MATCH FULL"
+	 upd-action="NO ACTION" del-action="NO ACTION" ref-table="ste.novel_type" table="ste.novel">
+	<columns names="ntype_id" ref-type="src-columns"/>
+	<columns names="id" ref-type="dst-columns"/>
+</constraint>
+
+<constraint name="FK_tag_of_novel_novel" type="fk-constr" comparison-type="MATCH FULL"
+	 upd-action="NO ACTION" del-action="NO ACTION" ref-table="ste.novel" table="ste.tag_of_novel">
+	<columns names="novel_id" ref-type="src-columns"/>
+	<columns names="id" ref-type="dst-columns"/>
+</constraint>
+
+<constraint name="FK_tag_of_novel_tag" type="fk-constr" comparison-type="MATCH FULL"
+	 upd-action="NO ACTION" del-action="NO ACTION" ref-table="ste.tag" table="ste.tag_of_novel">
+	<columns names="tag_id" ref-type="src-columns"/>
+	<columns names="id" ref-type="dst-columns"/>
+</constraint>
+
+<relationship name="rel_author_of_novel_author" type="relfk"
+	 src-table="ste.author_of_novel"
+	 dst-table="ste.author" reference-fk="FK_author_of_novel_author"
+	 src-required="false" dst-required="false"/>
+
+<relationship name="rel_author_of_novel_novel" type="relfk"
+	 src-table="ste.author_of_novel"
+	 dst-table="ste.novel" reference-fk="FK_author_of_novel_novel"
+	 src-required="false" dst-required="false"/>
+
+<relationship name="rel_chapter_of_novel_chapter" type="relfk"
+	 src-table="ste.chapter_of_novel"
+	 dst-table="ste.chapter" reference-fk="FK_chapter_of_novel_chapter"
+	 src-required="false" dst-required="false"/>
+
+<relationship name="rel_chapter_of_novel_novel" type="relfk"
+	 src-table="ste.chapter_of_novel"
+	 dst-table="ste.novel" reference-fk="FK_chapter_of_novel_novel"
+	 src-required="false" dst-required="false"/>
+
+<relationship name="rel_chapter_queue_chapter" type="relfk"
+	 src-table="ste.chapter_queue"
+	 dst-table="ste.chapter" reference-fk="FK_chapter_queue_chapter"
+	 src-required="false" dst-required="false"/>
+
+<relationship name="rel_chapter_queue_novel" type="relfk"
+	 src-table="ste.chapter_queue"
+	 dst-table="ste.novel" reference-fk="FK_chapter_queue_novel"
+	 src-required="false" dst-required="false"/>
+
+<relationship name="rel_novel_queue_novel" type="relfk"
+	 src-table="ste.novel_queue"
+	 dst-table="ste.novel" reference-fk="FK_novel_queue_novel"
+	 src-required="false" dst-required="false"/>
+
+<relationship name="rel_genre_of_novel_novel" type="relfk"
+	 src-table="ste.genre_of_novel"
+	 dst-table="ste.novel" reference-fk="FK_genre_of_novel_novel"
+	 src-required="false" dst-required="false"/>
+
+<relationship name="rel_genre_of_novel_genre" type="relfk"
+	 src-table="ste.genre_of_novel"
+	 dst-table="ste.genre" reference-fk="FK_genre_of_novel_genre"
+	 src-required="false" dst-required="false"/>
+
+<relationship name="rel_novel_cover" type="relfk"
+	 src-table="ste.novel"
+	 dst-table="ste.cover" reference-fk="FK_novel_chapter"
+	 src-required="false" dst-required="false"/>
+
+<relationship name="&quot;rel_novel_Group&quot;" type="relfk"
+	 src-table="ste.novel"
+	 dst-table="ste.&quot;group&quot;" reference-fk="FK_novel_source"
+	 src-required="false" dst-required="false"/>
+
+<relationship name="rel_novel_language" type="relfk"
+	 src-table="ste.novel"
+	 dst-table="ste.language" reference-fk="FK_novel_language"
+	 src-required="false" dst-required="false"/>
+
+<relationship name="rel_novel_novel_type" type="relfk"
+	 src-table="ste.novel"
+	 dst-table="ste.novel_type" reference-fk="FK_novel_novel_types"
+	 src-required="false" dst-required="false"/>
+
+<relationship name="rel_tag_of_novel_novel" type="relfk"
+	 src-table="ste.tag_of_novel"
+	 dst-table="ste.novel" reference-fk="FK_tag_of_novel_novel"
+	 src-required="false" dst-required="false"/>
+
+<relationship name="rel_tag_of_novel_tag" type="relfk"
+	 src-table="ste.tag_of_novel"
+	 dst-table="ste.tag" reference-fk="FK_tag_of_novel_tag"
+	 src-required="false" dst-required="false"/>
+
+</dbmodel>

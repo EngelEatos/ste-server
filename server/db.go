@@ -103,6 +103,8 @@ func (dbm *DBM) InsertNovelQueue(novel *models.Novel) (*models.NovelQueue, error
 
 // InsertChapter -- insert nuapi.Chapter into db
 func (dbm *DBM) InsertChapter(novel *models.Novel, chapter *nuapi.Chapter) (*models.Chapter, error) {
+	boil.DebugMode = true
+	log.Printf("trying to insert %#v\n", chapter)
 	ichapter := &models.Chapter{
 		Title:      chapter.Title,
 		URL:        chapter.URL,
@@ -110,12 +112,12 @@ func (dbm *DBM) InsertChapter(novel *models.Novel, chapter *nuapi.Chapter) (*mod
 		Part:       null.IntFrom(chapter.Part),
 		Downloaded: false,
 	}
-	err := ichapter.Insert(dbm.ctx, dbm.DB, boil.Infer())
-	if err != nil {
-		return nil, err
-	}
+	// err := ichapter.Insert(dbm.ctx, dbm.DB, boil.Infer())
+	// if err != nil {
+	// 	return nil, err
+	// }
 	// add chapter to novel
-	err = novel.AddChapters(dbm.ctx, dbm.DB, true, ichapter)
+	err := novel.AddChapters(dbm.ctx, dbm.DB, true, ichapter)
 	if err != nil {
 		ichapter.Delete(dbm.ctx, dbm.DB)
 		return nil, err
@@ -125,11 +127,14 @@ func (dbm *DBM) InsertChapter(novel *models.Novel, chapter *nuapi.Chapter) (*mod
 
 // InsertChapterQueue -- insert chapter of novel into queue
 func (dbm *DBM) InsertChapterQueue(novel *models.Novel, chapter *models.Chapter) (*models.ChapterQueue, error) {
+	boil.DebugMode = true
 	iChapterQueue := &models.ChapterQueue{
-		QueuedAt: time.Now(),
-		Finished: null.BoolFrom(false),
+		QueuedAt:  time.Now(),
+		Finished:  null.BoolFrom(false),
+		ChapterID: chapter.ID,
 	}
-	err := iChapterQueue.Insert(dbm.ctx, dbm.DB, boil.Infer())
+	err := novel.AddChapterQueues(dbm.ctx, dbm.DB, true, iChapterQueue)
+	// err := iChapterQueue.Insert()
 	if err != nil {
 		return nil, err
 	}

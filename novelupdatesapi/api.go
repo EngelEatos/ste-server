@@ -250,27 +250,28 @@ func ResolveNuLinks(url string) string {
 	return res.Request.URL.String()
 }
 
-func getMaxPage(novelID string) (int, error) {
+// GetMaxPage --
+func GetMaxPage(novelID string) (int, error) {
 	doc, err := utils.GetSource(baseurl + novelID)
 	if err != nil {
 		return -1, err
 	}
-	pagination := doc.Find(".digg_pagination > a:nth-last-child(2)")
+	pagination := doc.Find("div.digg_pagination > a:nth-child(5)")
 	if pagination.Length() > 0 {
-		return -1, errors.New("pagination not found")
+		return utils.ParseInt(pagination.First().Text())
 	}
-	return utils.ParseInt(pagination.First().Text())
+	return -1, errors.New("pagination not found")
 }
 
 // GetAllChapter - GetAllChapter by novelID
 func GetAllChapter(novelID string) ([]Chapter, error) {
 	var result []Chapter
-	lastPage, err := getMaxPage(novelID)
+	lastPage, err := GetMaxPage(novelID)
 	if err != nil {
 		return result, err
 	}
 	for i := 1; i <= lastPage; i++ {
-		chapter, err := getChapter(novelID, i)
+		chapter, err := GetChapter(novelID, i)
 		if err != nil {
 			return result, err
 		}
@@ -280,8 +281,10 @@ func GetAllChapter(novelID string) ([]Chapter, error) {
 }
 
 // GetChapter by novelID, idx
-func getChapter(novelID string, idx int) ([]Chapter, error) {
-	doc, err := utils.GetSource(baseurl + novelID + "/pg?=" + string(idx))
+func GetChapter(novelID string, idx int) ([]Chapter, error) {
+	url := fmt.Sprintf("%s%s/?pg=%d", baseurl, novelID, idx)
+	log.Println(url)
+	doc, err := utils.GetSource(url)
 	if err != nil {
 		return nil, err
 	}
@@ -289,18 +292,19 @@ func getChapter(novelID string, idx int) ([]Chapter, error) {
 	doc.Find("table#myTable > tbody > tr").Each(func(idx int, row *goquery.Selection) {
 		c := Chapter{}
 		row.Find("td").Each(func(idx int, col *goquery.Selection) {
-			if idx == 1 {
+			if idx == 0 {
 				// ReleaseDate
-				t, err := time.Parse("01-02-06", col.Text())
+				t, err := time.Parse("01/02/06", col.Text())
 				if err != nil {
 					log.Println("failed to parse date")
 				}
 				c.ReleaseDate = t
-			} else if idx == 2 {
+			} else if idx == 1 {
 				// group
-				group := Group{Name: col.Text(), URL: col.AttrOr("href", "")}
+				gurl := col.Find("a").First().AttrOr("href", "")
+				group := Group{Name: strings.TrimSpace(col.Text()), URL: gurl}
 				c.Group = group
-			} else if idx == 3 {
+			} else if idx == 2 {
 				// chapter url
 				itype, sIdx := parseIdx(col.Text())
 				if itype == 0 {

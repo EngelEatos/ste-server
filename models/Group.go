@@ -24,8 +24,8 @@ import (
 // Group is an object representing the database table.
 type Group struct {
 	ID   int    `boil:"id" json:"id" toml:"id" yaml:"id"`
-	URL  string `boil:"url" json:"url" toml:"url" yaml:"url"`
 	Name string `boil:"name" json:"name" toml:"name" yaml:"name"`
+	URL  string `boil:"url" json:"url" toml:"url" yaml:"url"`
 
 	R *groupR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L groupL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -33,54 +33,36 @@ type Group struct {
 
 var GroupColumns = struct {
 	ID   string
-	URL  string
 	Name string
+	URL  string
 }{
 	ID:   "id",
-	URL:  "url",
 	Name: "name",
+	URL:  "url",
 }
 
 // Generated where
 
-type whereHelperint struct{ field string }
-
-func (w whereHelperint) EQ(x int) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
-func (w whereHelperint) NEQ(x int) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
-func (w whereHelperint) LT(x int) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
-func (w whereHelperint) LTE(x int) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
-func (w whereHelperint) GT(x int) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
-func (w whereHelperint) GTE(x int) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
-
-type whereHelperstring struct{ field string }
-
-func (w whereHelperstring) EQ(x string) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
-func (w whereHelperstring) NEQ(x string) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
-func (w whereHelperstring) LT(x string) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
-func (w whereHelperstring) LTE(x string) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
-func (w whereHelperstring) GT(x string) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
-func (w whereHelperstring) GTE(x string) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
-
 var GroupWhere = struct {
 	ID   whereHelperint
-	URL  whereHelperstring
 	Name whereHelperstring
+	URL  whereHelperstring
 }{
-	ID:   whereHelperint{field: `id`},
-	URL:  whereHelperstring{field: `url`},
-	Name: whereHelperstring{field: `name`},
+	ID:   whereHelperint{field: "\"ste\".\"group\".\"id\""},
+	Name: whereHelperstring{field: "\"ste\".\"group\".\"name\""},
+	URL:  whereHelperstring{field: "\"ste\".\"group\".\"url\""},
 }
 
 // GroupRels is where relationship names are stored.
 var GroupRels = struct {
-	GroupNovels string
+	Novels string
 }{
-	GroupNovels: "GroupNovels",
+	Novels: "Novels",
 }
 
 // groupR is where relationships are stored.
 type groupR struct {
-	GroupNovels NovelSlice
+	Novels NovelSlice
 }
 
 // NewStruct creates a new relationship struct
@@ -92,8 +74,8 @@ func (*groupR) NewStruct() *groupR {
 type groupL struct{}
 
 var (
-	groupColumns               = []string{"id", "url", "name"}
-	groupColumnsWithoutDefault = []string{"url", "name"}
+	groupColumns               = []string{"id", "name", "url"}
+	groupColumnsWithoutDefault = []string{"name", "url"}
 	groupColumnsWithDefault    = []string{"id"}
 	groupPrimaryKeyColumns     = []string{"id"}
 )
@@ -312,7 +294,7 @@ func (q groupQuery) One(ctx context.Context, exec boil.ContextExecutor) (*Group,
 		if errors.Cause(err) == sql.ErrNoRows {
 			return nil, sql.ErrNoRows
 		}
-		return nil, errors.Wrap(err, "models: failed to execute a one query for Group")
+		return nil, errors.Wrap(err, "models: failed to execute a one query for group")
 	}
 
 	if err := o.doAfterSelectHooks(ctx, exec); err != nil {
@@ -351,7 +333,7 @@ func (q groupQuery) Count(ctx context.Context, exec boil.ContextExecutor) (int64
 
 	err := q.Query.QueryRowContext(ctx, exec).Scan(&count)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: failed to count Group rows")
+		return 0, errors.Wrap(err, "models: failed to count group rows")
 	}
 
 	return count, nil
@@ -367,14 +349,14 @@ func (q groupQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (bool
 
 	err := q.Query.QueryRowContext(ctx, exec).Scan(&count)
 	if err != nil {
-		return false, errors.Wrap(err, "models: failed to check if Group exists")
+		return false, errors.Wrap(err, "models: failed to check if group exists")
 	}
 
 	return count > 0, nil
 }
 
-// GroupNovels retrieves all the novel's Novels with an executor via group_id column.
-func (o *Group) GroupNovels(mods ...qm.QueryMod) novelQuery {
+// Novels retrieves all the novel's Novels with an executor.
+func (o *Group) Novels(mods ...qm.QueryMod) novelQuery {
 	var queryMods []qm.QueryMod
 	if len(mods) != 0 {
 		queryMods = append(queryMods, mods...)
@@ -394,9 +376,9 @@ func (o *Group) GroupNovels(mods ...qm.QueryMod) novelQuery {
 	return query
 }
 
-// LoadGroupNovels allows an eager lookup of values, cached into the
+// LoadNovels allows an eager lookup of values, cached into the
 // loaded structs of the objects. This is for a 1-M or N-M relationship.
-func (groupL) LoadGroupNovels(ctx context.Context, e boil.ContextExecutor, singular bool, maybeGroup interface{}, mods queries.Applicator) error {
+func (groupL) LoadNovels(ctx context.Context, e boil.ContextExecutor, singular bool, maybeGroup interface{}, mods queries.Applicator) error {
 	var slice []*Group
 	var object *Group
 
@@ -463,7 +445,7 @@ func (groupL) LoadGroupNovels(ctx context.Context, e boil.ContextExecutor, singu
 		}
 	}
 	if singular {
-		object.R.GroupNovels = resultSlice
+		object.R.Novels = resultSlice
 		for _, foreign := range resultSlice {
 			if foreign.R == nil {
 				foreign.R = &novelR{}
@@ -476,7 +458,7 @@ func (groupL) LoadGroupNovels(ctx context.Context, e boil.ContextExecutor, singu
 	for _, foreign := range resultSlice {
 		for _, local := range slice {
 			if queries.Equal(local.ID, foreign.GroupID) {
-				local.R.GroupNovels = append(local.R.GroupNovels, foreign)
+				local.R.Novels = append(local.R.Novels, foreign)
 				if foreign.R == nil {
 					foreign.R = &novelR{}
 				}
@@ -489,11 +471,11 @@ func (groupL) LoadGroupNovels(ctx context.Context, e boil.ContextExecutor, singu
 	return nil
 }
 
-// AddGroupNovels adds the given related objects to the existing relationships
-// of the Group, optionally inserting them as new records.
-// Appends related to o.R.GroupNovels.
+// AddNovels adds the given related objects to the existing relationships
+// of the group, optionally inserting them as new records.
+// Appends related to o.R.Novels.
 // Sets related.R.Group appropriately.
-func (o *Group) AddGroupNovels(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Novel) error {
+func (o *Group) AddNovels(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Novel) error {
 	var err error
 	for _, rel := range related {
 		if insert {
@@ -524,10 +506,10 @@ func (o *Group) AddGroupNovels(ctx context.Context, exec boil.ContextExecutor, i
 
 	if o.R == nil {
 		o.R = &groupR{
-			GroupNovels: related,
+			Novels: related,
 		}
 	} else {
-		o.R.GroupNovels = append(o.R.GroupNovels, related...)
+		o.R.Novels = append(o.R.Novels, related...)
 	}
 
 	for _, rel := range related {
@@ -542,13 +524,13 @@ func (o *Group) AddGroupNovels(ctx context.Context, exec boil.ContextExecutor, i
 	return nil
 }
 
-// SetGroupNovels removes all previously related items of the
-// Group replacing them completely with the passed
+// SetNovels removes all previously related items of the
+// group replacing them completely with the passed
 // in related items, optionally inserting them as new records.
-// Sets o.R.Group's GroupNovels accordingly.
-// Replaces o.R.GroupNovels with related.
-// Sets related.R.Group's GroupNovels accordingly.
-func (o *Group) SetGroupNovels(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Novel) error {
+// Sets o.R.Group's Novels accordingly.
+// Replaces o.R.Novels with related.
+// Sets related.R.Group's Novels accordingly.
+func (o *Group) SetNovels(ctx context.Context, exec boil.ContextExecutor, insert bool, related ...*Novel) error {
 	query := "update \"ste\".\"novel\" set \"group_id\" = null where \"group_id\" = $1"
 	values := []interface{}{o.ID}
 	if boil.DebugMode {
@@ -562,7 +544,7 @@ func (o *Group) SetGroupNovels(ctx context.Context, exec boil.ContextExecutor, i
 	}
 
 	if o.R != nil {
-		for _, rel := range o.R.GroupNovels {
+		for _, rel := range o.R.Novels {
 			queries.SetScanner(&rel.GroupID, nil)
 			if rel.R == nil {
 				continue
@@ -571,15 +553,15 @@ func (o *Group) SetGroupNovels(ctx context.Context, exec boil.ContextExecutor, i
 			rel.R.Group = nil
 		}
 
-		o.R.GroupNovels = nil
+		o.R.Novels = nil
 	}
-	return o.AddGroupNovels(ctx, exec, insert, related...)
+	return o.AddNovels(ctx, exec, insert, related...)
 }
 
-// RemoveGroupNovels relationships from objects passed in.
-// Removes related items from R.GroupNovels (uses pointer comparison, removal does not keep order)
+// RemoveNovels relationships from objects passed in.
+// Removes related items from R.Novels (uses pointer comparison, removal does not keep order)
 // Sets related.R.Group.
-func (o *Group) RemoveGroupNovels(ctx context.Context, exec boil.ContextExecutor, related ...*Novel) error {
+func (o *Group) RemoveNovels(ctx context.Context, exec boil.ContextExecutor, related ...*Novel) error {
 	var err error
 	for _, rel := range related {
 		queries.SetScanner(&rel.GroupID, nil)
@@ -595,16 +577,16 @@ func (o *Group) RemoveGroupNovels(ctx context.Context, exec boil.ContextExecutor
 	}
 
 	for _, rel := range related {
-		for i, ri := range o.R.GroupNovels {
+		for i, ri := range o.R.Novels {
 			if rel != ri {
 				continue
 			}
 
-			ln := len(o.R.GroupNovels)
+			ln := len(o.R.Novels)
 			if ln > 1 && i < ln-1 {
-				o.R.GroupNovels[i] = o.R.GroupNovels[ln-1]
+				o.R.Novels[i] = o.R.Novels[ln-1]
 			}
-			o.R.GroupNovels = o.R.GroupNovels[:ln-1]
+			o.R.Novels = o.R.Novels[:ln-1]
 			break
 		}
 	}
@@ -614,7 +596,7 @@ func (o *Group) RemoveGroupNovels(ctx context.Context, exec boil.ContextExecutor
 
 // Groups retrieves all the records using an executor.
 func Groups(mods ...qm.QueryMod) groupQuery {
-	mods = append(mods, qm.From("\"ste\".\"Group\""))
+	mods = append(mods, qm.From("\"ste\".\"group\""))
 	return groupQuery{NewQuery(mods...)}
 }
 
@@ -628,7 +610,7 @@ func FindGroup(ctx context.Context, exec boil.ContextExecutor, iD int, selectCol
 		sel = strings.Join(strmangle.IdentQuoteSlice(dialect.LQ, dialect.RQ, selectCols), ",")
 	}
 	query := fmt.Sprintf(
-		"select %s from \"ste\".\"Group\" where \"id\"=$1", sel,
+		"select %s from \"ste\".\"group\" where \"id\"=$1", sel,
 	)
 
 	q := queries.Raw(query, iD)
@@ -638,7 +620,7 @@ func FindGroup(ctx context.Context, exec boil.ContextExecutor, iD int, selectCol
 		if errors.Cause(err) == sql.ErrNoRows {
 			return nil, sql.ErrNoRows
 		}
-		return nil, errors.Wrap(err, "models: unable to select from Group")
+		return nil, errors.Wrap(err, "models: unable to select from group")
 	}
 
 	return groupObj, nil
@@ -648,7 +630,7 @@ func FindGroup(ctx context.Context, exec boil.ContextExecutor, iD int, selectCol
 // See boil.Columns.InsertColumnSet documentation to understand column list inference for inserts.
 func (o *Group) Insert(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) error {
 	if o == nil {
-		return errors.New("models: no Group provided for insertion")
+		return errors.New("models: no group provided for insertion")
 	}
 
 	var err error
@@ -681,9 +663,9 @@ func (o *Group) Insert(ctx context.Context, exec boil.ContextExecutor, columns b
 			return err
 		}
 		if len(wl) != 0 {
-			cache.query = fmt.Sprintf("INSERT INTO \"ste\".\"Group\" (\"%s\") %%sVALUES (%s)%%s", strings.Join(wl, "\",\""), strmangle.Placeholders(dialect.UseIndexPlaceholders, len(wl), 1, 1))
+			cache.query = fmt.Sprintf("INSERT INTO \"ste\".\"group\" (\"%s\") %%sVALUES (%s)%%s", strings.Join(wl, "\",\""), strmangle.Placeholders(dialect.UseIndexPlaceholders, len(wl), 1, 1))
 		} else {
-			cache.query = "INSERT INTO \"ste\".\"Group\" %sDEFAULT VALUES%s"
+			cache.query = "INSERT INTO \"ste\".\"group\" %sDEFAULT VALUES%s"
 		}
 
 		var queryOutput, queryReturning string
@@ -710,7 +692,7 @@ func (o *Group) Insert(ctx context.Context, exec boil.ContextExecutor, columns b
 	}
 
 	if err != nil {
-		return errors.Wrap(err, "models: unable to insert into Group")
+		return errors.Wrap(err, "models: unable to insert into group")
 	}
 
 	if !cached {
@@ -745,10 +727,10 @@ func (o *Group) Update(ctx context.Context, exec boil.ContextExecutor, columns b
 			wl = strmangle.SetComplement(wl, []string{"created_at"})
 		}
 		if len(wl) == 0 {
-			return 0, errors.New("models: unable to update Group, could not build whitelist")
+			return 0, errors.New("models: unable to update group, could not build whitelist")
 		}
 
-		cache.query = fmt.Sprintf("UPDATE \"ste\".\"Group\" SET %s WHERE %s",
+		cache.query = fmt.Sprintf("UPDATE \"ste\".\"group\" SET %s WHERE %s",
 			strmangle.SetParamNames("\"", "\"", 1, wl),
 			strmangle.WhereClause("\"", "\"", len(wl)+1, groupPrimaryKeyColumns),
 		)
@@ -768,12 +750,12 @@ func (o *Group) Update(ctx context.Context, exec boil.ContextExecutor, columns b
 	var result sql.Result
 	result, err = exec.ExecContext(ctx, cache.query, values...)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to update Group row")
+		return 0, errors.Wrap(err, "models: unable to update group row")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "models: failed to get rows affected by update for Group")
+		return 0, errors.Wrap(err, "models: failed to get rows affected by update for group")
 	}
 
 	if !cached {
@@ -791,12 +773,12 @@ func (q groupQuery) UpdateAll(ctx context.Context, exec boil.ContextExecutor, co
 
 	result, err := q.Query.ExecContext(ctx, exec)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to update all for Group")
+		return 0, errors.Wrap(err, "models: unable to update all for group")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to retrieve rows affected for Group")
+		return 0, errors.Wrap(err, "models: unable to retrieve rows affected for group")
 	}
 
 	return rowsAff, nil
@@ -829,7 +811,7 @@ func (o GroupSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, co
 		args = append(args, pkeyArgs...)
 	}
 
-	sql := fmt.Sprintf("UPDATE \"ste\".\"Group\" SET %s WHERE %s",
+	sql := fmt.Sprintf("UPDATE \"ste\".\"group\" SET %s WHERE %s",
 		strmangle.SetParamNames("\"", "\"", 1, colNames),
 		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), len(colNames)+1, groupPrimaryKeyColumns, len(o)))
 
@@ -854,7 +836,7 @@ func (o GroupSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, co
 // See boil.Columns documentation for how to properly use updateColumns and insertColumns.
 func (o *Group) Upsert(ctx context.Context, exec boil.ContextExecutor, updateOnConflict bool, conflictColumns []string, updateColumns, insertColumns boil.Columns) error {
 	if o == nil {
-		return errors.New("models: no Group provided for upsert")
+		return errors.New("models: no group provided for upsert")
 	}
 
 	if err := o.doBeforeUpsertHooks(ctx, exec); err != nil {
@@ -910,7 +892,7 @@ func (o *Group) Upsert(ctx context.Context, exec boil.ContextExecutor, updateOnC
 		)
 
 		if updateOnConflict && len(update) == 0 {
-			return errors.New("models: unable to upsert Group, could not build update column list")
+			return errors.New("models: unable to upsert group, could not build update column list")
 		}
 
 		conflict := conflictColumns
@@ -918,7 +900,7 @@ func (o *Group) Upsert(ctx context.Context, exec boil.ContextExecutor, updateOnC
 			conflict = make([]string, len(groupPrimaryKeyColumns))
 			copy(conflict, groupPrimaryKeyColumns)
 		}
-		cache.query = buildUpsertQueryPostgres(dialect, "\"ste\".\"Group\"", updateOnConflict, ret, update, conflict, insert)
+		cache.query = buildUpsertQueryPostgres(dialect, "\"ste\".\"group\"", updateOnConflict, ret, update, conflict, insert)
 
 		cache.valueMapping, err = queries.BindMapping(groupType, groupMapping, insert)
 		if err != nil {
@@ -953,7 +935,7 @@ func (o *Group) Upsert(ctx context.Context, exec boil.ContextExecutor, updateOnC
 		_, err = exec.ExecContext(ctx, cache.query, vals...)
 	}
 	if err != nil {
-		return errors.Wrap(err, "models: unable to upsert Group")
+		return errors.Wrap(err, "models: unable to upsert group")
 	}
 
 	if !cached {
@@ -977,7 +959,7 @@ func (o *Group) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, e
 	}
 
 	args := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), groupPrimaryKeyMapping)
-	sql := "DELETE FROM \"ste\".\"Group\" WHERE \"id\"=$1"
+	sql := "DELETE FROM \"ste\".\"group\" WHERE \"id\"=$1"
 
 	if boil.DebugMode {
 		fmt.Fprintln(boil.DebugWriter, sql)
@@ -986,12 +968,12 @@ func (o *Group) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, e
 
 	result, err := exec.ExecContext(ctx, sql, args...)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to delete from Group")
+		return 0, errors.Wrap(err, "models: unable to delete from group")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "models: failed to get rows affected by delete for Group")
+		return 0, errors.Wrap(err, "models: failed to get rows affected by delete for group")
 	}
 
 	if err := o.doAfterDeleteHooks(ctx, exec); err != nil {
@@ -1011,12 +993,12 @@ func (q groupQuery) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (i
 
 	result, err := q.Query.ExecContext(ctx, exec)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to delete all from Group")
+		return 0, errors.Wrap(err, "models: unable to delete all from group")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "models: failed to get rows affected by deleteall for Group")
+		return 0, errors.Wrap(err, "models: failed to get rows affected by deleteall for group")
 	}
 
 	return rowsAff, nil
@@ -1024,10 +1006,6 @@ func (q groupQuery) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (i
 
 // DeleteAll deletes all rows in the slice, using an executor.
 func (o GroupSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
-	if o == nil {
-		return 0, errors.New("models: no Group slice provided for delete all")
-	}
-
 	if len(o) == 0 {
 		return 0, nil
 	}
@@ -1046,7 +1024,7 @@ func (o GroupSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (i
 		args = append(args, pkeyArgs...)
 	}
 
-	sql := "DELETE FROM \"ste\".\"Group\" WHERE " +
+	sql := "DELETE FROM \"ste\".\"group\" WHERE " +
 		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 1, groupPrimaryKeyColumns, len(o))
 
 	if boil.DebugMode {
@@ -1061,7 +1039,7 @@ func (o GroupSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (i
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "models: failed to get rows affected by deleteall for Group")
+		return 0, errors.Wrap(err, "models: failed to get rows affected by deleteall for group")
 	}
 
 	if len(groupAfterDeleteHooks) != 0 {
@@ -1101,7 +1079,7 @@ func (o *GroupSlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor) e
 		args = append(args, pkeyArgs...)
 	}
 
-	sql := "SELECT \"ste\".\"Group\".* FROM \"ste\".\"Group\" WHERE " +
+	sql := "SELECT \"ste\".\"group\".* FROM \"ste\".\"group\" WHERE " +
 		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 1, groupPrimaryKeyColumns, len(*o))
 
 	q := queries.Raw(sql, args...)
@@ -1119,7 +1097,7 @@ func (o *GroupSlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor) e
 // GroupExists checks if the Group row exists.
 func GroupExists(ctx context.Context, exec boil.ContextExecutor, iD int) (bool, error) {
 	var exists bool
-	sql := "select exists(select 1 from \"ste\".\"Group\" where \"id\"=$1 limit 1)"
+	sql := "select exists(select 1 from \"ste\".\"group\" where \"id\"=$1 limit 1)"
 
 	if boil.DebugMode {
 		fmt.Fprintln(boil.DebugWriter, sql)
@@ -1130,7 +1108,7 @@ func GroupExists(ctx context.Context, exec boil.ContextExecutor, iD int) (bool, 
 
 	err := row.Scan(&exists)
 	if err != nil {
-		return false, errors.Wrap(err, "models: unable to check if Group exists")
+		return false, errors.Wrap(err, "models: unable to check if group exists")
 	}
 
 	return exists, nil

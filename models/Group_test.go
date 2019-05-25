@@ -494,7 +494,7 @@ func testGroupsInsertWhitelist(t *testing.T) {
 	}
 }
 
-func testGroupToManyGroupNovels(t *testing.T) {
+func testGroupToManyNovels(t *testing.T) {
 	var err error
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))
@@ -528,7 +528,7 @@ func testGroupToManyGroupNovels(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	check, err := a.GroupNovels().All(ctx, tx)
+	check, err := a.Novels().All(ctx, tx)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -551,18 +551,18 @@ func testGroupToManyGroupNovels(t *testing.T) {
 	}
 
 	slice := GroupSlice{&a}
-	if err = a.L.LoadGroupNovels(ctx, tx, false, (*[]*Group)(&slice), nil); err != nil {
+	if err = a.L.LoadNovels(ctx, tx, false, (*[]*Group)(&slice), nil); err != nil {
 		t.Fatal(err)
 	}
-	if got := len(a.R.GroupNovels); got != 2 {
+	if got := len(a.R.Novels); got != 2 {
 		t.Error("number of eager loaded records wrong, got:", got)
 	}
 
-	a.R.GroupNovels = nil
-	if err = a.L.LoadGroupNovels(ctx, tx, true, &a, nil); err != nil {
+	a.R.Novels = nil
+	if err = a.L.LoadNovels(ctx, tx, true, &a, nil); err != nil {
 		t.Fatal(err)
 	}
-	if got := len(a.R.GroupNovels); got != 2 {
+	if got := len(a.R.Novels); got != 2 {
 		t.Error("number of eager loaded records wrong, got:", got)
 	}
 
@@ -571,7 +571,7 @@ func testGroupToManyGroupNovels(t *testing.T) {
 	}
 }
 
-func testGroupToManyAddOpGroupNovels(t *testing.T) {
+func testGroupToManyAddOpNovels(t *testing.T) {
 	var err error
 
 	ctx := context.Background()
@@ -608,7 +608,7 @@ func testGroupToManyAddOpGroupNovels(t *testing.T) {
 	}
 
 	for i, x := range foreignersSplitByInsertion {
-		err = a.AddGroupNovels(ctx, tx, i != 0, x...)
+		err = a.AddNovels(ctx, tx, i != 0, x...)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -630,14 +630,14 @@ func testGroupToManyAddOpGroupNovels(t *testing.T) {
 			t.Error("relationship was not added properly to the foreign slice")
 		}
 
-		if a.R.GroupNovels[i*2] != first {
+		if a.R.Novels[i*2] != first {
 			t.Error("relationship struct slice not set to correct value")
 		}
-		if a.R.GroupNovels[i*2+1] != second {
+		if a.R.Novels[i*2+1] != second {
 			t.Error("relationship struct slice not set to correct value")
 		}
 
-		count, err := a.GroupNovels().Count(ctx, tx)
+		count, err := a.Novels().Count(ctx, tx)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -647,7 +647,7 @@ func testGroupToManyAddOpGroupNovels(t *testing.T) {
 	}
 }
 
-func testGroupToManySetOpGroupNovels(t *testing.T) {
+func testGroupToManySetOpNovels(t *testing.T) {
 	var err error
 
 	ctx := context.Background()
@@ -678,12 +678,12 @@ func testGroupToManySetOpGroupNovels(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = a.SetGroupNovels(ctx, tx, false, &b, &c)
+	err = a.SetNovels(ctx, tx, false, &b, &c)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	count, err := a.GroupNovels().Count(ctx, tx)
+	count, err := a.Novels().Count(ctx, tx)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -691,12 +691,12 @@ func testGroupToManySetOpGroupNovels(t *testing.T) {
 		t.Error("count was wrong:", count)
 	}
 
-	err = a.SetGroupNovels(ctx, tx, true, &d, &e)
+	err = a.SetNovels(ctx, tx, true, &d, &e)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	count, err = a.GroupNovels().Count(ctx, tx)
+	count, err = a.Novels().Count(ctx, tx)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -730,15 +730,15 @@ func testGroupToManySetOpGroupNovels(t *testing.T) {
 		t.Error("relationship was not added properly to the foreign struct")
 	}
 
-	if a.R.GroupNovels[0] != &d {
+	if a.R.Novels[0] != &d {
 		t.Error("relationship struct slice not set to correct value")
 	}
-	if a.R.GroupNovels[1] != &e {
+	if a.R.Novels[1] != &e {
 		t.Error("relationship struct slice not set to correct value")
 	}
 }
 
-func testGroupToManyRemoveOpGroupNovels(t *testing.T) {
+func testGroupToManyRemoveOpNovels(t *testing.T) {
 	var err error
 
 	ctx := context.Background()
@@ -763,12 +763,12 @@ func testGroupToManyRemoveOpGroupNovels(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = a.AddGroupNovels(ctx, tx, true, foreigners...)
+	err = a.AddNovels(ctx, tx, true, foreigners...)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	count, err := a.GroupNovels().Count(ctx, tx)
+	count, err := a.Novels().Count(ctx, tx)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -776,12 +776,12 @@ func testGroupToManyRemoveOpGroupNovels(t *testing.T) {
 		t.Error("count was wrong:", count)
 	}
 
-	err = a.RemoveGroupNovels(ctx, tx, foreigners[:2]...)
+	err = a.RemoveNovels(ctx, tx, foreigners[:2]...)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	count, err = a.GroupNovels().Count(ctx, tx)
+	count, err = a.Novels().Count(ctx, tx)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -809,15 +809,15 @@ func testGroupToManyRemoveOpGroupNovels(t *testing.T) {
 		t.Error("relationship to a should have been preserved")
 	}
 
-	if len(a.R.GroupNovels) != 2 {
+	if len(a.R.Novels) != 2 {
 		t.Error("should have preserved two relationships")
 	}
 
 	// Removal doesn't do a stable deletion for performance so we have to flip the order
-	if a.R.GroupNovels[1] != &d {
+	if a.R.Novels[1] != &d {
 		t.Error("relationship to d should have been preserved")
 	}
-	if a.R.GroupNovels[0] != &e {
+	if a.R.Novels[0] != &e {
 		t.Error("relationship to e should have been preserved")
 	}
 }
@@ -896,7 +896,7 @@ func testGroupsSelect(t *testing.T) {
 }
 
 var (
-	groupDBTypes = map[string]string{`ID`: `integer`, `URL`: `text`, `Name`: `text`}
+	groupDBTypes = map[string]string{`ID`: `integer`, `Name`: `text`, `URL`: `text`}
 	_            = bytes.MinRead
 )
 
