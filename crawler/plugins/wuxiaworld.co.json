@@ -1,0 +1,17 @@
+{
+    "pageurl" : "https://www.wuxiaworld.co",
+    "url": "{}/{}",
+    "urlRegex": [
+        "https://www.wuxiaworld.co/(.+?)$"
+    ],
+    "names": ["wuxiaco", "wuxia", "wuxiaworld"],
+    "selectors": {
+        "title": "div#id > h1",
+        "cover": "div#fmimg > img",
+        "chapter": "div#list > dd > a",
+        "chapterTitle": "div.bookname > h1",
+        "chapterBody": "div#content"
+    },
+    "killTags": [],
+    "removeTags": []
+}

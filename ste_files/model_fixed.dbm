@@ -3,7 +3,7 @@
 CAUTION: Do not modify this file unless you know what you are doing.
          Unexpected results may occur if the code is changed deliberately.
 -->
-<dbmodel pgmodeler-ver="0.9.1" last-position="0,0" last-zoom="1"
+<dbmodel pgmodeler-ver="0.9.1" last-position="171,0" last-zoom="1"
 	 default-owner="postgres">
 <database name="ste" is-template="false" allow-conns="true">
 </database>
@@ -18,7 +18,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <table name="author_of_novel">
 	<schema name="ste"/>
 	<role name="postgres"/>
-	<position x="760" y="120"/>
+	<position x="540" y="120"/>
 	<column name="author_id" not-null="true">
 		<type name="integer" length="0"/>
 	</column>
@@ -33,7 +33,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <table name="chapter_of_novel">
 	<schema name="ste"/>
 	<role name="postgres"/>
-	<position x="1080" y="160"/>
+	<position x="960" y="120"/>
 	<column name="novel_id" not-null="true">
 		<type name="integer" length="0"/>
 	</column>
@@ -48,7 +48,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <table name="group">
 	<schema name="ste"/>
 	<role name="postgres"/>
-	<position x="120" y="100"/>
+	<position x="1480" y="240"/>
 	<column name="id" not-null="true">
 		<type name="serial" length="0"/>
 	</column>
@@ -66,7 +66,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <table name="chapter_queue">
 	<schema name="ste"/>
 	<role name="postgres"/>
-	<position x="1520" y="320"/>
+	<position x="1440" y="360"/>
 	<column name="novel_id" not-null="true">
 		<type name="integer" length="0"/>
 	</column>
@@ -90,7 +90,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <table name="novel_queue">
 	<schema name="ste"/>
 	<role name="postgres"/>
-	<position x="40" y="180"/>
+	<position x="60" y="280"/>
 	<column name="novel_id" not-null="true">
 		<type name="integer" length="0"/>
 	</column>
@@ -114,7 +114,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <table name="author">
 	<schema name="ste"/>
 	<role name="postgres"/>
-	<position x="380" y="120"/>
+	<position x="180" y="120"/>
 	<column name="id" not-null="true">
 		<type name="serial" length="0"/>
 	</column>
@@ -215,9 +215,6 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<column name="cover_id">
 		<type name="integer" length="0"/>
 	</column>
-	<column name="group_id">
-		<type name="integer" length="0"/>
-	</column>
 	<column name="updatedAt">
 		<type name="date" length="0"/>
 	</column>
@@ -268,7 +265,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <table name="language">
 	<schema name="ste"/>
 	<role name="postgres"/>
-	<position x="1520" y="560"/>
+	<position x="1420" y="560"/>
 	<column name="id" not-null="true">
 		<type name="integer" length="0"/>
 	</column>
@@ -283,7 +280,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <table name="chapter">
 	<schema name="ste"/>
 	<role name="postgres"/>
-	<position x="1600" y="120"/>
+	<position x="1460" y="40"/>
 	<column name="id" not-null="true">
 		<type name="serial" length="0"/>
 	</column>
@@ -301,6 +298,9 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	</column>
 	<column name="downloaded" not-null="true">
 		<type name="bool" length="0"/>
+	</column>
+	<column name="group_id">
+		<type name="integer" length="0"/>
 	</column>
 	<constraint name="chapter_pk" type="pk-constr" table="ste.chapter">
 		<columns names="id" ref-type="src-columns"/>
@@ -362,6 +362,24 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<role name="postgres"/>
 </sequence>
 
+<table name="group_of_novel">
+	<schema name="ste"/>
+	<role name="postgres"/>
+	<position x="1080" y="0"/>
+	<column name="novel_id" not-null="true">
+		<type name="integer" length="0"/>
+	</column>
+	<column name="group_id" not-null="true">
+		<type name="integer" length="0"/>
+	</column>
+	<column name="selected">
+		<type name="bool" length="0"/>
+	</column>
+	<constraint name="group_of_novel_pk" type="pk-constr" table="ste.group_of_novel">
+		<columns names="novel_id,group_id" ref-type="src-columns"/>
+	</constraint>
+</table>
+
 <constraint name="FK_author_of_novel_author" type="fk-constr" comparison-type="MATCH FULL"
 	 upd-action="CASCADE" del-action="CASCADE" ref-table="ste.author" table="ste.author_of_novel">
 	<columns names="author_id" ref-type="src-columns"/>
@@ -422,12 +440,6 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<columns names="id" ref-type="dst-columns"/>
 </constraint>
 
-<constraint name="FK_novel_source" type="fk-constr" comparison-type="MATCH FULL"
-	 upd-action="NO ACTION" del-action="NO ACTION" ref-table="ste.&quot;group&quot;" table="ste.novel">
-	<columns names="group_id" ref-type="src-columns"/>
-	<columns names="id" ref-type="dst-columns"/>
-</constraint>
-
 <constraint name="FK_novel_language" type="fk-constr" comparison-type="MATCH FULL"
 	 upd-action="NO ACTION" del-action="NO ACTION" ref-table="ste.language" table="ste.novel">
 	<columns names="language_id" ref-type="src-columns"/>
@@ -449,6 +461,24 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <constraint name="FK_tag_of_novel_tag" type="fk-constr" comparison-type="MATCH FULL"
 	 upd-action="NO ACTION" del-action="NO ACTION" ref-table="ste.tag" table="ste.tag_of_novel">
 	<columns names="tag_id" ref-type="src-columns"/>
+	<columns names="id" ref-type="dst-columns"/>
+</constraint>
+
+<constraint name="FK_chapter_group" type="fk-constr" comparison-type="MATCH FULL"
+	 upd-action="NO ACTION" del-action="NO ACTION" ref-table="ste.&quot;group&quot;" table="ste.chapter">
+	<columns names="group_id" ref-type="src-columns"/>
+	<columns names="id" ref-type="dst-columns"/>
+</constraint>
+
+<constraint name="FK_group_novel" type="fk-constr" comparison-type="MATCH FULL"
+	 upd-action="NO ACTION" del-action="NO ACTION" ref-table="ste.novel" table="ste.group_of_novel">
+	<columns names="novel_id" ref-type="src-columns"/>
+	<columns names="id" ref-type="dst-columns"/>
+</constraint>
+
+<constraint name="FK_group_group" type="fk-constr" comparison-type="MATCH FULL"
+	 upd-action="NO ACTION" del-action="NO ACTION" ref-table="ste.&quot;group&quot;" table="ste.group_of_novel">
+	<columns names="group_id" ref-type="src-columns"/>
 	<columns names="id" ref-type="dst-columns"/>
 </constraint>
 
@@ -480,7 +510,11 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <relationship name="rel_chapter_queue_novel" type="relfk"
 	 src-table="ste.chapter_queue"
 	 dst-table="ste.novel" reference-fk="FK_chapter_queue_novel"
-	 src-required="false" dst-required="false"/>
+	 src-required="false" dst-required="false">
+	<label ref-type="src-label">
+		<position x="0" y="0"/>
+	</label>
+</relationship>
 
 <relationship name="rel_novel_queue_novel" type="relfk"
 	 src-table="ste.novel_queue"
@@ -502,11 +536,6 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	 dst-table="ste.cover" reference-fk="FK_novel_chapter"
 	 src-required="false" dst-required="false"/>
 
-<relationship name="&quot;rel_novel_Group&quot;" type="relfk"
-	 src-table="ste.novel"
-	 dst-table="ste.&quot;group&quot;" reference-fk="FK_novel_source"
-	 src-required="false" dst-required="false"/>
-
 <relationship name="rel_novel_language" type="relfk"
 	 src-table="ste.novel"
 	 dst-table="ste.language" reference-fk="FK_novel_language"
@@ -525,6 +554,21 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <relationship name="rel_tag_of_novel_tag" type="relfk"
 	 src-table="ste.tag_of_novel"
 	 dst-table="ste.tag" reference-fk="FK_tag_of_novel_tag"
+	 src-required="false" dst-required="false"/>
+
+<relationship name="rel_chapter_group" type="relfk"
+	 src-table="ste.chapter"
+	 dst-table="ste.&quot;group&quot;" reference-fk="FK_chapter_group"
+	 src-required="false" dst-required="false"/>
+
+<relationship name="rel_group_of_novel_novel" type="relfk"
+	 src-table="ste.group_of_novel"
+	 dst-table="ste.novel" reference-fk="FK_group_novel"
+	 src-required="false" dst-required="false"/>
+
+<relationship name="rel_group_of_novel_group" type="relfk"
+	 src-table="ste.group_of_novel"
+	 dst-table="ste.&quot;group&quot;" reference-fk="FK_group_group"
 	 src-required="false" dst-required="false"/>
 
 </dbmodel>
