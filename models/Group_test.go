@@ -494,14 +494,14 @@ func testGroupsInsertWhitelist(t *testing.T) {
 	}
 }
 
-func testGroupToManyNovels(t *testing.T) {
+func testGroupToManyChapters(t *testing.T) {
 	var err error
 	ctx := context.Background()
 	tx := MustTx(boil.BeginTx(ctx, nil))
 	defer func() { _ = tx.Rollback() }()
 
 	var a Group
-	var b, c Novel
+	var b, c Chapter
 
 	seed := randomize.NewSeed()
 	if err = randomize.Struct(seed, &a, groupDBTypes, true, groupColumnsWithDefault...); err != nil {
@@ -512,10 +512,10 @@ func testGroupToManyNovels(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err = randomize.Struct(seed, &b, novelDBTypes, false, novelColumnsWithDefault...); err != nil {
+	if err = randomize.Struct(seed, &b, chapterDBTypes, false, chapterColumnsWithDefault...); err != nil {
 		t.Fatal(err)
 	}
-	if err = randomize.Struct(seed, &c, novelDBTypes, false, novelColumnsWithDefault...); err != nil {
+	if err = randomize.Struct(seed, &c, chapterDBTypes, false, chapterColumnsWithDefault...); err != nil {
 		t.Fatal(err)
 	}
 
@@ -528,7 +528,7 @@ func testGroupToManyNovels(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	check, err := a.Novels().All(ctx, tx)
+	check, err := a.Chapters().All(ctx, tx)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -551,18 +551,18 @@ func testGroupToManyNovels(t *testing.T) {
 	}
 
 	slice := GroupSlice{&a}
-	if err = a.L.LoadNovels(ctx, tx, false, (*[]*Group)(&slice), nil); err != nil {
+	if err = a.L.LoadChapters(ctx, tx, false, (*[]*Group)(&slice), nil); err != nil {
 		t.Fatal(err)
 	}
-	if got := len(a.R.Novels); got != 2 {
+	if got := len(a.R.Chapters); got != 2 {
 		t.Error("number of eager loaded records wrong, got:", got)
 	}
 
-	a.R.Novels = nil
-	if err = a.L.LoadNovels(ctx, tx, true, &a, nil); err != nil {
+	a.R.Chapters = nil
+	if err = a.L.LoadChapters(ctx, tx, true, &a, nil); err != nil {
 		t.Fatal(err)
 	}
-	if got := len(a.R.Novels); got != 2 {
+	if got := len(a.R.Chapters); got != 2 {
 		t.Error("number of eager loaded records wrong, got:", got)
 	}
 
@@ -571,7 +571,85 @@ func testGroupToManyNovels(t *testing.T) {
 	}
 }
 
-func testGroupToManyAddOpNovels(t *testing.T) {
+func testGroupToManyGroupOfNovels(t *testing.T) {
+	var err error
+	ctx := context.Background()
+	tx := MustTx(boil.BeginTx(ctx, nil))
+	defer func() { _ = tx.Rollback() }()
+
+	var a Group
+	var b, c GroupOfNovel
+
+	seed := randomize.NewSeed()
+	if err = randomize.Struct(seed, &a, groupDBTypes, true, groupColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Group struct: %s", err)
+	}
+
+	if err := a.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	if err = randomize.Struct(seed, &b, groupOfNovelDBTypes, false, groupOfNovelColumnsWithDefault...); err != nil {
+		t.Fatal(err)
+	}
+	if err = randomize.Struct(seed, &c, groupOfNovelDBTypes, false, groupOfNovelColumnsWithDefault...); err != nil {
+		t.Fatal(err)
+	}
+
+	b.GroupID = a.ID
+	c.GroupID = a.ID
+
+	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+	if err = c.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	check, err := a.GroupOfNovels().All(ctx, tx)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	bFound, cFound := false, false
+	for _, v := range check {
+		if v.GroupID == b.GroupID {
+			bFound = true
+		}
+		if v.GroupID == c.GroupID {
+			cFound = true
+		}
+	}
+
+	if !bFound {
+		t.Error("expected to find b")
+	}
+	if !cFound {
+		t.Error("expected to find c")
+	}
+
+	slice := GroupSlice{&a}
+	if err = a.L.LoadGroupOfNovels(ctx, tx, false, (*[]*Group)(&slice), nil); err != nil {
+		t.Fatal(err)
+	}
+	if got := len(a.R.GroupOfNovels); got != 2 {
+		t.Error("number of eager loaded records wrong, got:", got)
+	}
+
+	a.R.GroupOfNovels = nil
+	if err = a.L.LoadGroupOfNovels(ctx, tx, true, &a, nil); err != nil {
+		t.Fatal(err)
+	}
+	if got := len(a.R.GroupOfNovels); got != 2 {
+		t.Error("number of eager loaded records wrong, got:", got)
+	}
+
+	if t.Failed() {
+		t.Logf("%#v", check)
+	}
+}
+
+func testGroupToManyAddOpChapters(t *testing.T) {
 	var err error
 
 	ctx := context.Background()
@@ -579,15 +657,15 @@ func testGroupToManyAddOpNovels(t *testing.T) {
 	defer func() { _ = tx.Rollback() }()
 
 	var a Group
-	var b, c, d, e Novel
+	var b, c, d, e Chapter
 
 	seed := randomize.NewSeed()
 	if err = randomize.Struct(seed, &a, groupDBTypes, false, strmangle.SetComplement(groupPrimaryKeyColumns, groupColumnsWithoutDefault)...); err != nil {
 		t.Fatal(err)
 	}
-	foreigners := []*Novel{&b, &c, &d, &e}
+	foreigners := []*Chapter{&b, &c, &d, &e}
 	for _, x := range foreigners {
-		if err = randomize.Struct(seed, x, novelDBTypes, false, strmangle.SetComplement(novelPrimaryKeyColumns, novelColumnsWithoutDefault)...); err != nil {
+		if err = randomize.Struct(seed, x, chapterDBTypes, false, strmangle.SetComplement(chapterPrimaryKeyColumns, chapterColumnsWithoutDefault)...); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -602,13 +680,13 @@ func testGroupToManyAddOpNovels(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	foreignersSplitByInsertion := [][]*Novel{
+	foreignersSplitByInsertion := [][]*Chapter{
 		{&b, &c},
 		{&d, &e},
 	}
 
 	for i, x := range foreignersSplitByInsertion {
-		err = a.AddNovels(ctx, tx, i != 0, x...)
+		err = a.AddChapters(ctx, tx, i != 0, x...)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -630,14 +708,14 @@ func testGroupToManyAddOpNovels(t *testing.T) {
 			t.Error("relationship was not added properly to the foreign slice")
 		}
 
-		if a.R.Novels[i*2] != first {
+		if a.R.Chapters[i*2] != first {
 			t.Error("relationship struct slice not set to correct value")
 		}
-		if a.R.Novels[i*2+1] != second {
+		if a.R.Chapters[i*2+1] != second {
 			t.Error("relationship struct slice not set to correct value")
 		}
 
-		count, err := a.Novels().Count(ctx, tx)
+		count, err := a.Chapters().Count(ctx, tx)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -647,7 +725,7 @@ func testGroupToManyAddOpNovels(t *testing.T) {
 	}
 }
 
-func testGroupToManySetOpNovels(t *testing.T) {
+func testGroupToManySetOpChapters(t *testing.T) {
 	var err error
 
 	ctx := context.Background()
@@ -655,15 +733,15 @@ func testGroupToManySetOpNovels(t *testing.T) {
 	defer func() { _ = tx.Rollback() }()
 
 	var a Group
-	var b, c, d, e Novel
+	var b, c, d, e Chapter
 
 	seed := randomize.NewSeed()
 	if err = randomize.Struct(seed, &a, groupDBTypes, false, strmangle.SetComplement(groupPrimaryKeyColumns, groupColumnsWithoutDefault)...); err != nil {
 		t.Fatal(err)
 	}
-	foreigners := []*Novel{&b, &c, &d, &e}
+	foreigners := []*Chapter{&b, &c, &d, &e}
 	for _, x := range foreigners {
-		if err = randomize.Struct(seed, x, novelDBTypes, false, strmangle.SetComplement(novelPrimaryKeyColumns, novelColumnsWithoutDefault)...); err != nil {
+		if err = randomize.Struct(seed, x, chapterDBTypes, false, strmangle.SetComplement(chapterPrimaryKeyColumns, chapterColumnsWithoutDefault)...); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -678,12 +756,12 @@ func testGroupToManySetOpNovels(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = a.SetNovels(ctx, tx, false, &b, &c)
+	err = a.SetChapters(ctx, tx, false, &b, &c)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	count, err := a.Novels().Count(ctx, tx)
+	count, err := a.Chapters().Count(ctx, tx)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -691,12 +769,12 @@ func testGroupToManySetOpNovels(t *testing.T) {
 		t.Error("count was wrong:", count)
 	}
 
-	err = a.SetNovels(ctx, tx, true, &d, &e)
+	err = a.SetChapters(ctx, tx, true, &d, &e)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	count, err = a.Novels().Count(ctx, tx)
+	count, err = a.Chapters().Count(ctx, tx)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -730,15 +808,15 @@ func testGroupToManySetOpNovels(t *testing.T) {
 		t.Error("relationship was not added properly to the foreign struct")
 	}
 
-	if a.R.Novels[0] != &d {
+	if a.R.Chapters[0] != &d {
 		t.Error("relationship struct slice not set to correct value")
 	}
-	if a.R.Novels[1] != &e {
+	if a.R.Chapters[1] != &e {
 		t.Error("relationship struct slice not set to correct value")
 	}
 }
 
-func testGroupToManyRemoveOpNovels(t *testing.T) {
+func testGroupToManyRemoveOpChapters(t *testing.T) {
 	var err error
 
 	ctx := context.Background()
@@ -746,15 +824,15 @@ func testGroupToManyRemoveOpNovels(t *testing.T) {
 	defer func() { _ = tx.Rollback() }()
 
 	var a Group
-	var b, c, d, e Novel
+	var b, c, d, e Chapter
 
 	seed := randomize.NewSeed()
 	if err = randomize.Struct(seed, &a, groupDBTypes, false, strmangle.SetComplement(groupPrimaryKeyColumns, groupColumnsWithoutDefault)...); err != nil {
 		t.Fatal(err)
 	}
-	foreigners := []*Novel{&b, &c, &d, &e}
+	foreigners := []*Chapter{&b, &c, &d, &e}
 	for _, x := range foreigners {
-		if err = randomize.Struct(seed, x, novelDBTypes, false, strmangle.SetComplement(novelPrimaryKeyColumns, novelColumnsWithoutDefault)...); err != nil {
+		if err = randomize.Struct(seed, x, chapterDBTypes, false, strmangle.SetComplement(chapterPrimaryKeyColumns, chapterColumnsWithoutDefault)...); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -763,12 +841,12 @@ func testGroupToManyRemoveOpNovels(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = a.AddNovels(ctx, tx, true, foreigners...)
+	err = a.AddChapters(ctx, tx, true, foreigners...)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	count, err := a.Novels().Count(ctx, tx)
+	count, err := a.Chapters().Count(ctx, tx)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -776,12 +854,12 @@ func testGroupToManyRemoveOpNovels(t *testing.T) {
 		t.Error("count was wrong:", count)
 	}
 
-	err = a.RemoveNovels(ctx, tx, foreigners[:2]...)
+	err = a.RemoveChapters(ctx, tx, foreigners[:2]...)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	count, err = a.Novels().Count(ctx, tx)
+	count, err = a.Chapters().Count(ctx, tx)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -809,16 +887,92 @@ func testGroupToManyRemoveOpNovels(t *testing.T) {
 		t.Error("relationship to a should have been preserved")
 	}
 
-	if len(a.R.Novels) != 2 {
+	if len(a.R.Chapters) != 2 {
 		t.Error("should have preserved two relationships")
 	}
 
 	// Removal doesn't do a stable deletion for performance so we have to flip the order
-	if a.R.Novels[1] != &d {
+	if a.R.Chapters[1] != &d {
 		t.Error("relationship to d should have been preserved")
 	}
-	if a.R.Novels[0] != &e {
+	if a.R.Chapters[0] != &e {
 		t.Error("relationship to e should have been preserved")
+	}
+}
+
+func testGroupToManyAddOpGroupOfNovels(t *testing.T) {
+	var err error
+
+	ctx := context.Background()
+	tx := MustTx(boil.BeginTx(ctx, nil))
+	defer func() { _ = tx.Rollback() }()
+
+	var a Group
+	var b, c, d, e GroupOfNovel
+
+	seed := randomize.NewSeed()
+	if err = randomize.Struct(seed, &a, groupDBTypes, false, strmangle.SetComplement(groupPrimaryKeyColumns, groupColumnsWithoutDefault)...); err != nil {
+		t.Fatal(err)
+	}
+	foreigners := []*GroupOfNovel{&b, &c, &d, &e}
+	for _, x := range foreigners {
+		if err = randomize.Struct(seed, x, groupOfNovelDBTypes, false, strmangle.SetComplement(groupOfNovelPrimaryKeyColumns, groupOfNovelColumnsWithoutDefault)...); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	if err := a.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+	if err = c.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	foreignersSplitByInsertion := [][]*GroupOfNovel{
+		{&b, &c},
+		{&d, &e},
+	}
+
+	for i, x := range foreignersSplitByInsertion {
+		err = a.AddGroupOfNovels(ctx, tx, i != 0, x...)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		first := x[0]
+		second := x[1]
+
+		if a.ID != first.GroupID {
+			t.Error("foreign key was wrong value", a.ID, first.GroupID)
+		}
+		if a.ID != second.GroupID {
+			t.Error("foreign key was wrong value", a.ID, second.GroupID)
+		}
+
+		if first.R.Group != &a {
+			t.Error("relationship was not added properly to the foreign slice")
+		}
+		if second.R.Group != &a {
+			t.Error("relationship was not added properly to the foreign slice")
+		}
+
+		if a.R.GroupOfNovels[i*2] != first {
+			t.Error("relationship struct slice not set to correct value")
+		}
+		if a.R.GroupOfNovels[i*2+1] != second {
+			t.Error("relationship struct slice not set to correct value")
+		}
+
+		count, err := a.GroupOfNovels().Count(ctx, tx)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if want := int64((i + 1) * 2); count != want {
+			t.Error("want", want, "got", count)
+		}
 	}
 }
 

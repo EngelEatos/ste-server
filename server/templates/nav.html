@@ -1,0 +1,18 @@
+{{define "nav"}}
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
+        aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNavDropdown">
+        <ul class="navbar-nav">
+            <li class="nav-item {{ if eq .Active "home" }}active{{ end }}">
+                <a class="nav-link" href="/">Home</span></a>
+            </li>
+            <li class="nav-item {{ if eq .Active "queues" }}active{{ end }}">
+                <a class="nav-link" href="/queues/">Queues</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+{{end}}

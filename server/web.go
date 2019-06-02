@@ -63,6 +63,18 @@ func downloadHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("requested download for: %s\n", novelid)
 }
 
+type source struct {
+	ChapterCount           int
+	DownloadedChapterCount int
+	Name                   string
+	URL                    string
+	Default                bool
+}
+type series struct {
+	Novel   *models.Novel
+	Sources []source
+}
+
 func (tpm *templateManager) seriesHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	novelid := vars["serie"]
@@ -109,11 +121,13 @@ func (tpm *templateManager) seriesHandler(w http.ResponseWriter, r *http.Request
 		if err != nil {
 			log.Fatal(err)
 		}
+		// get groups
+
 		log.Printf("seriesHandler: %s\n", novel.Title)
-		tpm.renderPage(w, r, "series.html", novel)
+		tpm.renderPage(w, r, "series.html", data{Active: "", Data: series{Novel: novel, Sources: nil}})
 	} else {
 		log.Printf("seriesHandler: %s\n", novel.Title)
-		tpm.renderPage(w, r, "series.html", novel)
+		tpm.renderPage(w, r, "series.html", data{Active: "", Data: series{Novel: novel, Sources: nil}})
 	}
 }
 
@@ -153,21 +167,26 @@ func (tpm *templateManager) queuesHandler(w http.ResponseWriter, r *http.Request
 		log.Fatal(err)
 	}
 	queues := queues{ChapterQueue: chapterQueue, NovelQueue: novelQueue}
-	tpm.renderPage(w, r, "queues.html", queues)
+	tpm.renderPage(w, r, "queues.html", data{Data: queues, Active: "queues"})
+}
+
+type data struct {
+	Data   interface{}
+	Active string
 }
 
 func (tpm *templateManager) searchHandler(w http.ResponseWriter, r *http.Request) {
-	tpm.renderPage(w, r, "home.html", nil)
+	tpm.renderPage(w, r, "home.html", data{Active: "home"})
 }
 
-func (tpm *templateManager) renderPage(w http.ResponseWriter, r *http.Request, name string, data interface{}) {
+func (tpm *templateManager) renderPage(w http.ResponseWriter, r *http.Request, name string, idata interface{}) {
 	buf := tpm.bufpool.Get()
 	defer tpm.bufpool.Put(buf)
-	err := tpm.templates.ExecuteTemplate(buf, name, data)
+	err := tpm.templates.ExecuteTemplate(buf, name, idata)
 	if err != nil {
 		log.Println(stacktrace.Propagate(err, "Can't load template"))
 		w.WriteHeader(http.StatusInternalServerError)
-		_ = tpm.templates.ExecuteTemplate(w, "error.html", terror{Title: "failed at " + r.URL.String(), Msg: "GTFO"})
+		_ = tpm.templates.ExecuteTemplate(w, "error.html", data{Data: terror{Title: "failed at " + r.URL.String(), Msg: "GTFO"}, Active: ""})
 		return
 	}
 	w.Header().Set("Content-Type", "text/html;charset=UTF-8")

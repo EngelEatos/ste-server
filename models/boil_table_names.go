@@ -13,6 +13,7 @@ var TableNames = struct {
 	Genre          string
 	GenreOfNovel   string
 	Group          string
+	GroupOfNovel   string
 	Language       string
 	Novel          string
 	NovelQueue     string
@@ -29,6 +30,7 @@ var TableNames = struct {
 	Genre:          "genre",
 	GenreOfNovel:   "genre_of_novel",
 	Group:          "group",
+	GroupOfNovel:   "group_of_novel",
 	Language:       "language",
 	Novel:          "novel",
 	NovelQueue:     "novel_queue",

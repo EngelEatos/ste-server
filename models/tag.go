@@ -433,7 +433,7 @@ func (tagL) LoadNovels(ctx context.Context, e boil.ContextExecutor, singular boo
 		one := new(Novel)
 		var localJoinCol int
 
-		err = results.Scan(&one.Chaptercount, &one.CompletlyTranslated, &one.CoverID, &one.Description, &one.FetchedAt, &one.GroupID, &one.ID, &one.LanguageID, &one.Licensed, &one.NovelIDSTR, &one.NtypeID, &one.Status, &one.Title, &one.UpdatedAt, &one.Year, &localJoinCol)
+		err = results.Scan(&one.Chaptercount, &one.CompletlyTranslated, &one.CoverID, &one.Description, &one.FetchedAt, &one.ID, &one.LanguageID, &one.Licensed, &one.NovelIDSTR, &one.NtypeID, &one.Status, &one.Title, &one.UpdatedAt, &one.Year, &localJoinCol)
 		if err != nil {
 			return errors.Wrap(err, "failed to scan eager loaded results for novel")
 		}

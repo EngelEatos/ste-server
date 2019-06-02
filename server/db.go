@@ -64,7 +64,6 @@ func (dbm *DBM) InsertNovel(novel *nuapi.Novel) (*models.Novel, error) {
 		Licensed:            null.BoolFrom(novel.Licensed),
 		CompletlyTranslated: null.BoolFrom(novel.CompletlyTranslated),
 		CoverID:             null.IntFrom(iCover.ID),
-		GroupID:             null.NewInt(-1, false),
 		FetchedAt:           novel.FetchedAt,
 	}
 	err = inovel.Insert(dbm.ctx, dbm.DB, boil.Infer())

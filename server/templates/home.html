@@ -1,50 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, inital-scale=1">
-    <link rel="stylesheet" href="../../assets/css/bootstrap.min.css">
-    <link rel="stylesheet" href="../../assets/css/style.css">
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css"
-        integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" crossorigin="anonymous">
-    <script src="../../assets/js/jquery-3.3.1.min.js"></script>
-    <script src="../../assets/js/popper.min.js"></script>
-    <script src="../../assets/js/bootstrap.min.js"></script>
-    <style>
-        .vertical-center {
-            min-height: Calc(100%- 40px);
-            /* Fallback for browsers do NOT support vh unit */
-            min-height: Calc(100vh - 40px);
-            /* These two lines are counted as one :-)       */
-
-            display: flex;
-            align-items: center;
-        }
-    </style>
-</head>
+{{ template "header" . }}
 
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup"
-            aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNavDropdown">
-            <ul class="navbar-nav">
-                <li class="nav-item active">
-                    <a class="nav-link" href="home.html">Home <span class="sr-only">(current)</span></a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="queues.html">Queues</a>
-                </li>
-            </ul>
-        </div>
-
-    </nav>
+    {{ template "nav" . }}
     <div class="jumbotron vertical-center">
-        <!-- 
-        ^--- Added class  -->
         <div class="container">
             <span class="nu_menu_search" style="display: inline;">
                 <form id="search_nu_novel" action="https://www.novelupdates.com/">
@@ -53,12 +13,11 @@
                             <input id="searchme-rl newmenu" class="form-control form-control-lg" autocomplete="off"
                                 onkeyup="showSearch(this.value)" type="text" value="" name="s"
                                 placeholder="Search Novels...">
-                            <input type="hidden" name="post_type" value="seriesplans">
+                            <!-- <input type="hidden" name="post_type" value="seriesplans"> -->
 
                             <div class="input-group-append">
-                                <!-- <span class="search_menu_right"><i class="fa fa-search btn"
-                                        onclick="search_btn_click();"></i></span> -->
-                                <button class="btn btn-outline-secondary" onclick="search_btn_click();" type="button"><i class="fas fa-search"></i></button>
+                                <button class="btn btn-outline-secondary" onclick="search_btn_click();" type="button"><i
+                                        class="fas fa-search"></i></button>
                             </div>
                         </div>
 

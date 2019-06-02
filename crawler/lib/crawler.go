@@ -1,28 +1,30 @@
 package lib
 
 import (
-	"log"
-	"io/ioutil"
 	"encoding/json"
-	"regexp"
 	"fmt"
+	"io/ioutil"
+	"log"
+	"regexp"
 )
 
+// Selector -- struct to store css selectors
 type Selector struct {
-	Title string
-	Cover string
-	Chapter string
+	Title        string
+	Cover        string
+	Chapter      string
 	ChapterTitle string
-	ChapterBody string
+	ChapterBody  string
 }
 
+// CrawlerConfig -- parsing Json-file
 type CrawlerConfig struct {
-	PageUrl string
-	Url string
-	UrlRegex []string
-	Names []string
-	Selectors Selector
-	KillTags []string
+	PageURL    string
+	URL        string
+	URLRegex   []string
+	Names      []string
+	Selectors  Selector
+	KillTags   []string
 	RemoveTags []string
 }
 
@@ -34,15 +36,17 @@ func readFile(path string) []byte {
 	return dat
 }
 
+// LoadCrawlerConfig -- load json-config file
 func LoadCrawlerConfig(path string) CrawlerConfig {
 	data := readFile(path)
 	var config CrawlerConfig
 	if err := json.Unmarshal(data, &config); err != nil {
-        panic(err)
-    }
+		panic(err)
+	}
 	return config
 }
 
+// Print -- print config
 func (c CrawlerConfig) Print() {
 	cjson, err := json.Marshal(c)
 	if err != nil {
@@ -51,8 +55,9 @@ func (c CrawlerConfig) Print() {
 	fmt.Println(string(cjson))
 }
 
+// Match -- iterate and match configs with url
 func (c CrawlerConfig) Match(url string) bool {
-	for _, regex := range c.UrlRegex {
+	for _, regex := range c.URLRegex {
 		match, err := regexp.MatchString(regex, url)
 		if err != nil {
 			log.Fatal(err)
@@ -65,6 +70,6 @@ func (c CrawlerConfig) Match(url string) bool {
 }
 
 type Config struct {
-	Delay bool
+	Delay     bool
 	UserAgent string
 }

@@ -25,6 +25,7 @@ import (
 // Chapter is an object representing the database table.
 type Chapter struct {
 	Downloaded bool     `boil:"downloaded" json:"downloaded" toml:"downloaded" yaml:"downloaded"`
+	GroupID    null.Int `boil:"group_id" json:"group_id,omitempty" toml:"group_id" yaml:"group_id,omitempty"`
 	ID         int      `boil:"id" json:"id" toml:"id" yaml:"id"`
 	Idx        int      `boil:"idx" json:"idx" toml:"idx" yaml:"idx"`
 	Part       null.Int `boil:"part" json:"part,omitempty" toml:"part" yaml:"part,omitempty"`
@@ -37,6 +38,7 @@ type Chapter struct {
 
 var ChapterColumns = struct {
 	Downloaded string
+	GroupID    string
 	ID         string
 	Idx        string
 	Part       string
@@ -44,6 +46,7 @@ var ChapterColumns = struct {
 	URL        string
 }{
 	Downloaded: "downloaded",
+	GroupID:    "group_id",
 	ID:         "id",
 	Idx:        "idx",
 	Part:       "part",
@@ -87,6 +90,7 @@ func (w whereHelpernull_Int) GTE(x null.Int) qm.QueryMod {
 
 var ChapterWhere = struct {
 	Downloaded whereHelperbool
+	GroupID    whereHelpernull_Int
 	ID         whereHelperint
 	Idx        whereHelperint
 	Part       whereHelpernull_Int
@@ -94,6 +98,7 @@ var ChapterWhere = struct {
 	URL        whereHelperstring
 }{
 	Downloaded: whereHelperbool{field: "\"ste\".\"chapter\".\"downloaded\""},
+	GroupID:    whereHelpernull_Int{field: "\"ste\".\"chapter\".\"group_id\""},
 	ID:         whereHelperint{field: "\"ste\".\"chapter\".\"id\""},
 	Idx:        whereHelperint{field: "\"ste\".\"chapter\".\"idx\""},
 	Part:       whereHelpernull_Int{field: "\"ste\".\"chapter\".\"part\""},
@@ -103,15 +108,18 @@ var ChapterWhere = struct {
 
 // ChapterRels is where relationship names are stored.
 var ChapterRels = struct {
+	Group         string
 	Novels        string
 	ChapterQueues string
 }{
+	Group:         "Group",
 	Novels:        "Novels",
 	ChapterQueues: "ChapterQueues",
 }
 
 // chapterR is where relationships are stored.
 type chapterR struct {
+	Group         *Group
 	Novels        NovelSlice
 	ChapterQueues ChapterQueueSlice
 }
@@ -125,8 +133,8 @@ func (*chapterR) NewStruct() *chapterR {
 type chapterL struct{}
 
 var (
-	chapterColumns               = []string{"downloaded", "id", "idx", "part", "title", "url"}
-	chapterColumnsWithoutDefault = []string{"downloaded", "idx", "part", "title", "url"}
+	chapterColumns               = []string{"downloaded", "group_id", "id", "idx", "part", "title", "url"}
+	chapterColumnsWithoutDefault = []string{"downloaded", "group_id", "idx", "part", "title", "url"}
 	chapterColumnsWithDefault    = []string{"id"}
 	chapterPrimaryKeyColumns     = []string{"id"}
 )
@@ -406,6 +414,20 @@ func (q chapterQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (bo
 	return count > 0, nil
 }
 
+// Group pointed to by the foreign key.
+func (o *Chapter) Group(mods ...qm.QueryMod) groupQuery {
+	queryMods := []qm.QueryMod{
+		qm.Where("id=?", o.GroupID),
+	}
+
+	queryMods = append(queryMods, mods...)
+
+	query := Groups(queryMods...)
+	queries.SetFrom(query.Query, "\"ste\".\"group\"")
+
+	return query
+}
+
 // Novels retrieves all the novel's Novels with an executor.
 func (o *Chapter) Novels(mods ...qm.QueryMod) novelQuery {
 	var queryMods []qm.QueryMod
@@ -447,6 +469,111 @@ func (o *Chapter) ChapterQueues(mods ...qm.QueryMod) chapterQueueQuery {
 	}
 
 	return query
+}
+
+// LoadGroup allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for an N-1 relationship.
+func (chapterL) LoadGroup(ctx context.Context, e boil.ContextExecutor, singular bool, maybeChapter interface{}, mods queries.Applicator) error {
+	var slice []*Chapter
+	var object *Chapter
+
+	if singular {
+		object = maybeChapter.(*Chapter)
+	} else {
+		slice = *maybeChapter.(*[]*Chapter)
+	}
+
+	args := make([]interface{}, 0, 1)
+	if singular {
+		if object.R == nil {
+			object.R = &chapterR{}
+		}
+		if !queries.IsNil(object.GroupID) {
+			args = append(args, object.GroupID)
+		}
+
+	} else {
+	Outer:
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &chapterR{}
+			}
+
+			for _, a := range args {
+				if queries.Equal(a, obj.GroupID) {
+					continue Outer
+				}
+			}
+
+			if !queries.IsNil(obj.GroupID) {
+				args = append(args, obj.GroupID)
+			}
+
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	query := NewQuery(qm.From(`ste.group`), qm.WhereIn(`id in ?`, args...))
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.QueryContext(ctx, e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load Group")
+	}
+
+	var resultSlice []*Group
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice Group")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results of eager load for group")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for group")
+	}
+
+	if len(chapterAfterSelectHooks) != 0 {
+		for _, obj := range resultSlice {
+			if err := obj.doAfterSelectHooks(ctx, e); err != nil {
+				return err
+			}
+		}
+	}
+
+	if len(resultSlice) == 0 {
+		return nil
+	}
+
+	if singular {
+		foreign := resultSlice[0]
+		object.R.Group = foreign
+		if foreign.R == nil {
+			foreign.R = &groupR{}
+		}
+		foreign.R.Chapters = append(foreign.R.Chapters, object)
+		return nil
+	}
+
+	for _, local := range slice {
+		for _, foreign := range resultSlice {
+			if queries.Equal(local.GroupID, foreign.ID) {
+				local.R.Group = foreign
+				if foreign.R == nil {
+					foreign.R = &groupR{}
+				}
+				foreign.R.Chapters = append(foreign.R.Chapters, local)
+				break
+			}
+		}
+	}
+
+	return nil
 }
 
 // LoadNovels allows an eager lookup of values, cached into the
@@ -510,7 +637,7 @@ func (chapterL) LoadNovels(ctx context.Context, e boil.ContextExecutor, singular
 		one := new(Novel)
 		var localJoinCol int
 
-		err = results.Scan(&one.Chaptercount, &one.CompletlyTranslated, &one.CoverID, &one.Description, &one.FetchedAt, &one.GroupID, &one.ID, &one.LanguageID, &one.Licensed, &one.NovelIDSTR, &one.NtypeID, &one.Status, &one.Title, &one.UpdatedAt, &one.Year, &localJoinCol)
+		err = results.Scan(&one.Chaptercount, &one.CompletlyTranslated, &one.CoverID, &one.Description, &one.FetchedAt, &one.ID, &one.LanguageID, &one.Licensed, &one.NovelIDSTR, &one.NtypeID, &one.Status, &one.Title, &one.UpdatedAt, &one.Year, &localJoinCol)
 		if err != nil {
 			return errors.Wrap(err, "failed to scan eager loaded results for novel")
 		}
@@ -656,6 +783,84 @@ func (chapterL) LoadChapterQueues(ctx context.Context, e boil.ContextExecutor, s
 		}
 	}
 
+	return nil
+}
+
+// SetGroup of the chapter to the related item.
+// Sets o.R.Group to related.
+// Adds o to related.R.Chapters.
+func (o *Chapter) SetGroup(ctx context.Context, exec boil.ContextExecutor, insert bool, related *Group) error {
+	var err error
+	if insert {
+		if err = related.Insert(ctx, exec, boil.Infer()); err != nil {
+			return errors.Wrap(err, "failed to insert into foreign table")
+		}
+	}
+
+	updateQuery := fmt.Sprintf(
+		"UPDATE \"ste\".\"chapter\" SET %s WHERE %s",
+		strmangle.SetParamNames("\"", "\"", 1, []string{"group_id"}),
+		strmangle.WhereClause("\"", "\"", 2, chapterPrimaryKeyColumns),
+	)
+	values := []interface{}{related.ID, o.ID}
+
+	if boil.DebugMode {
+		fmt.Fprintln(boil.DebugWriter, updateQuery)
+		fmt.Fprintln(boil.DebugWriter, values)
+	}
+
+	if _, err = exec.ExecContext(ctx, updateQuery, values...); err != nil {
+		return errors.Wrap(err, "failed to update local table")
+	}
+
+	queries.Assign(&o.GroupID, related.ID)
+	if o.R == nil {
+		o.R = &chapterR{
+			Group: related,
+		}
+	} else {
+		o.R.Group = related
+	}
+
+	if related.R == nil {
+		related.R = &groupR{
+			Chapters: ChapterSlice{o},
+		}
+	} else {
+		related.R.Chapters = append(related.R.Chapters, o)
+	}
+
+	return nil
+}
+
+// RemoveGroup relationship.
+// Sets o.R.Group to nil.
+// Removes o from all passed in related items' relationships struct (Optional).
+func (o *Chapter) RemoveGroup(ctx context.Context, exec boil.ContextExecutor, related *Group) error {
+	var err error
+
+	queries.SetScanner(&o.GroupID, nil)
+	if _, err = o.Update(ctx, exec, boil.Whitelist("group_id")); err != nil {
+		return errors.Wrap(err, "failed to update local table")
+	}
+
+	o.R.Group = nil
+	if related == nil || related.R == nil {
+		return nil
+	}
+
+	for i, ri := range related.R.Chapters {
+		if queries.Equal(o.GroupID, ri.GroupID) {
+			continue
+		}
+
+		ln := len(related.R.Chapters)
+		if ln > 1 && i < ln-1 {
+			related.R.Chapters[i] = related.R.Chapters[ln-1]
+		}
+		related.R.Chapters = related.R.Chapters[:ln-1]
+		break
+	}
 	return nil
 }
 

@@ -18,6 +18,8 @@ func TestUpsert(t *testing.T) {
 
 	t.Run("Groups", testGroupsUpsert)
 
+	t.Run("GroupOfNovels", testGroupOfNovelsUpsert)
+
 	t.Run("Languages", testLanguagesUpsert)
 
 	t.Run("Novels", testNovelsUpsert)

@@ -3,7 +3,7 @@
 CAUTION: Do not modify this file unless you know what you are doing.
          Unexpected results may occur if the code is changed deliberately.
 -->
-<dbmodel pgmodeler-ver="0.9.1" last-position="171,0" last-zoom="1"
+<dbmodel pgmodeler-ver="0.9.1" last-position="168,0" last-zoom="1"
 	 default-owner="postgres">
 <database name="ste" is-template="false" allow-conns="true">
 </database>
@@ -33,7 +33,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <table name="chapter_of_novel">
 	<schema name="ste"/>
 	<role name="postgres"/>
-	<position x="960" y="120"/>
+	<position x="1000" y="140"/>
 	<column name="novel_id" not-null="true">
 		<type name="integer" length="0"/>
 	</column>
@@ -372,7 +372,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<column name="group_id" not-null="true">
 		<type name="integer" length="0"/>
 	</column>
-	<column name="selected">
+	<column name="default">
 		<type name="bool" length="0"/>
 	</column>
 	<constraint name="group_of_novel_pk" type="pk-constr" table="ste.group_of_novel">

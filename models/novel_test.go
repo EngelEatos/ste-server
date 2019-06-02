@@ -824,6 +824,84 @@ func testNovelToManyGenres(t *testing.T) {
 	}
 }
 
+func testNovelToManyGroupOfNovels(t *testing.T) {
+	var err error
+	ctx := context.Background()
+	tx := MustTx(boil.BeginTx(ctx, nil))
+	defer func() { _ = tx.Rollback() }()
+
+	var a Novel
+	var b, c GroupOfNovel
+
+	seed := randomize.NewSeed()
+	if err = randomize.Struct(seed, &a, novelDBTypes, true, novelColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Novel struct: %s", err)
+	}
+
+	if err := a.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	if err = randomize.Struct(seed, &b, groupOfNovelDBTypes, false, groupOfNovelColumnsWithDefault...); err != nil {
+		t.Fatal(err)
+	}
+	if err = randomize.Struct(seed, &c, groupOfNovelDBTypes, false, groupOfNovelColumnsWithDefault...); err != nil {
+		t.Fatal(err)
+	}
+
+	b.NovelID = a.ID
+	c.NovelID = a.ID
+
+	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+	if err = c.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	check, err := a.GroupOfNovels().All(ctx, tx)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	bFound, cFound := false, false
+	for _, v := range check {
+		if v.NovelID == b.NovelID {
+			bFound = true
+		}
+		if v.NovelID == c.NovelID {
+			cFound = true
+		}
+	}
+
+	if !bFound {
+		t.Error("expected to find b")
+	}
+	if !cFound {
+		t.Error("expected to find c")
+	}
+
+	slice := NovelSlice{&a}
+	if err = a.L.LoadGroupOfNovels(ctx, tx, false, (*[]*Novel)(&slice), nil); err != nil {
+		t.Fatal(err)
+	}
+	if got := len(a.R.GroupOfNovels); got != 2 {
+		t.Error("number of eager loaded records wrong, got:", got)
+	}
+
+	a.R.GroupOfNovels = nil
+	if err = a.L.LoadGroupOfNovels(ctx, tx, true, &a, nil); err != nil {
+		t.Fatal(err)
+	}
+	if got := len(a.R.GroupOfNovels); got != 2 {
+		t.Error("number of eager loaded records wrong, got:", got)
+	}
+
+	if t.Failed() {
+		t.Logf("%#v", check)
+	}
+}
+
 func testNovelToManyNovelQueues(t *testing.T) {
 	var err error
 	ctx := context.Background()
@@ -1745,6 +1823,81 @@ func testNovelToManyRemoveOpGenres(t *testing.T) {
 	}
 }
 
+func testNovelToManyAddOpGroupOfNovels(t *testing.T) {
+	var err error
+
+	ctx := context.Background()
+	tx := MustTx(boil.BeginTx(ctx, nil))
+	defer func() { _ = tx.Rollback() }()
+
+	var a Novel
+	var b, c, d, e GroupOfNovel
+
+	seed := randomize.NewSeed()
+	if err = randomize.Struct(seed, &a, novelDBTypes, false, strmangle.SetComplement(novelPrimaryKeyColumns, novelColumnsWithoutDefault)...); err != nil {
+		t.Fatal(err)
+	}
+	foreigners := []*GroupOfNovel{&b, &c, &d, &e}
+	for _, x := range foreigners {
+		if err = randomize.Struct(seed, x, groupOfNovelDBTypes, false, strmangle.SetComplement(groupOfNovelPrimaryKeyColumns, groupOfNovelColumnsWithoutDefault)...); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	if err := a.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+	if err = c.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	foreignersSplitByInsertion := [][]*GroupOfNovel{
+		{&b, &c},
+		{&d, &e},
+	}
+
+	for i, x := range foreignersSplitByInsertion {
+		err = a.AddGroupOfNovels(ctx, tx, i != 0, x...)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		first := x[0]
+		second := x[1]
+
+		if a.ID != first.NovelID {
+			t.Error("foreign key was wrong value", a.ID, first.NovelID)
+		}
+		if a.ID != second.NovelID {
+			t.Error("foreign key was wrong value", a.ID, second.NovelID)
+		}
+
+		if first.R.Novel != &a {
+			t.Error("relationship was not added properly to the foreign slice")
+		}
+		if second.R.Novel != &a {
+			t.Error("relationship was not added properly to the foreign slice")
+		}
+
+		if a.R.GroupOfNovels[i*2] != first {
+			t.Error("relationship struct slice not set to correct value")
+		}
+		if a.R.GroupOfNovels[i*2+1] != second {
+			t.Error("relationship struct slice not set to correct value")
+		}
+
+		count, err := a.GroupOfNovels().Count(ctx, tx)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if want := int64((i + 1) * 2); count != want {
+			t.Error("want", want, "got", count)
+		}
+	}
+}
 func testNovelToManyAddOpNovelQueues(t *testing.T) {
 	var err error
 
@@ -2201,57 +2354,6 @@ func testNovelToOneNovelTypeUsingNtype(t *testing.T) {
 	}
 }
 
-func testNovelToOneGroupUsingGroup(t *testing.T) {
-	ctx := context.Background()
-	tx := MustTx(boil.BeginTx(ctx, nil))
-	defer func() { _ = tx.Rollback() }()
-
-	var local Novel
-	var foreign Group
-
-	seed := randomize.NewSeed()
-	if err := randomize.Struct(seed, &local, novelDBTypes, true, novelColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Novel struct: %s", err)
-	}
-	if err := randomize.Struct(seed, &foreign, groupDBTypes, false, groupColumnsWithDefault...); err != nil {
-		t.Errorf("Unable to randomize Group struct: %s", err)
-	}
-
-	if err := foreign.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-
-	queries.Assign(&local.GroupID, foreign.ID)
-	if err := local.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-
-	check, err := local.Group().One(ctx, tx)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if !queries.Equal(check.ID, foreign.ID) {
-		t.Errorf("want: %v, got %v", foreign.ID, check.ID)
-	}
-
-	slice := NovelSlice{&local}
-	if err = local.L.LoadGroup(ctx, tx, false, (*[]*Novel)(&slice), nil); err != nil {
-		t.Fatal(err)
-	}
-	if local.R.Group == nil {
-		t.Error("struct should have been eager loaded")
-	}
-
-	local.R.Group = nil
-	if err = local.L.LoadGroup(ctx, tx, true, &local, nil); err != nil {
-		t.Fatal(err)
-	}
-	if local.R.Group == nil {
-		t.Error("struct should have been eager loaded")
-	}
-}
-
 func testNovelToOneSetOpCoverUsingCover(t *testing.T) {
 	var err error
 
@@ -2579,115 +2681,6 @@ func testNovelToOneRemoveOpNovelTypeUsingNtype(t *testing.T) {
 	}
 }
 
-func testNovelToOneSetOpGroupUsingGroup(t *testing.T) {
-	var err error
-
-	ctx := context.Background()
-	tx := MustTx(boil.BeginTx(ctx, nil))
-	defer func() { _ = tx.Rollback() }()
-
-	var a Novel
-	var b, c Group
-
-	seed := randomize.NewSeed()
-	if err = randomize.Struct(seed, &a, novelDBTypes, false, strmangle.SetComplement(novelPrimaryKeyColumns, novelColumnsWithoutDefault)...); err != nil {
-		t.Fatal(err)
-	}
-	if err = randomize.Struct(seed, &b, groupDBTypes, false, strmangle.SetComplement(groupPrimaryKeyColumns, groupColumnsWithoutDefault)...); err != nil {
-		t.Fatal(err)
-	}
-	if err = randomize.Struct(seed, &c, groupDBTypes, false, strmangle.SetComplement(groupPrimaryKeyColumns, groupColumnsWithoutDefault)...); err != nil {
-		t.Fatal(err)
-	}
-
-	if err := a.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-
-	for i, x := range []*Group{&b, &c} {
-		err = a.SetGroup(ctx, tx, i != 0, x)
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		if a.R.Group != x {
-			t.Error("relationship struct not set to correct value")
-		}
-
-		if x.R.Novels[0] != &a {
-			t.Error("failed to append to foreign relationship struct")
-		}
-		if !queries.Equal(a.GroupID, x.ID) {
-			t.Error("foreign key was wrong value", a.GroupID)
-		}
-
-		zero := reflect.Zero(reflect.TypeOf(a.GroupID))
-		reflect.Indirect(reflect.ValueOf(&a.GroupID)).Set(zero)
-
-		if err = a.Reload(ctx, tx); err != nil {
-			t.Fatal("failed to reload", err)
-		}
-
-		if !queries.Equal(a.GroupID, x.ID) {
-			t.Error("foreign key was wrong value", a.GroupID, x.ID)
-		}
-	}
-}
-
-func testNovelToOneRemoveOpGroupUsingGroup(t *testing.T) {
-	var err error
-
-	ctx := context.Background()
-	tx := MustTx(boil.BeginTx(ctx, nil))
-	defer func() { _ = tx.Rollback() }()
-
-	var a Novel
-	var b Group
-
-	seed := randomize.NewSeed()
-	if err = randomize.Struct(seed, &a, novelDBTypes, false, strmangle.SetComplement(novelPrimaryKeyColumns, novelColumnsWithoutDefault)...); err != nil {
-		t.Fatal(err)
-	}
-	if err = randomize.Struct(seed, &b, groupDBTypes, false, strmangle.SetComplement(groupPrimaryKeyColumns, groupColumnsWithoutDefault)...); err != nil {
-		t.Fatal(err)
-	}
-
-	if err = a.Insert(ctx, tx, boil.Infer()); err != nil {
-		t.Fatal(err)
-	}
-
-	if err = a.SetGroup(ctx, tx, true, &b); err != nil {
-		t.Fatal(err)
-	}
-
-	if err = a.RemoveGroup(ctx, tx, &b); err != nil {
-		t.Error("failed to remove relationship")
-	}
-
-	count, err := a.Group().Count(ctx, tx)
-	if err != nil {
-		t.Error(err)
-	}
-	if count != 0 {
-		t.Error("want no relationships remaining")
-	}
-
-	if a.R.Group != nil {
-		t.Error("R struct entry should be nil")
-	}
-
-	if !queries.IsValuerNil(a.GroupID) {
-		t.Error("foreign key value should be nil")
-	}
-
-	if len(b.R.Novels) != 0 {
-		t.Error("failed to remove a from b's relationships")
-	}
-}
-
 func testNovelsReload(t *testing.T) {
 	t.Parallel()
 
@@ -2762,7 +2755,7 @@ func testNovelsSelect(t *testing.T) {
 }
 
 var (
-	novelDBTypes = map[string]string{`Chaptercount`: `integer`, `CompletlyTranslated`: `boolean`, `CoverID`: `integer`, `Description`: `text`, `FetchedAt`: `date`, `GroupID`: `integer`, `ID`: `integer`, `LanguageID`: `integer`, `Licensed`: `boolean`, `NovelIDSTR`: `text`, `NtypeID`: `integer`, `Status`: `integer`, `Title`: `text`, `UpdatedAt`: `date`, `Year`: `integer`}
+	novelDBTypes = map[string]string{`Chaptercount`: `integer`, `CompletlyTranslated`: `boolean`, `CoverID`: `integer`, `Description`: `text`, `FetchedAt`: `date`, `ID`: `integer`, `LanguageID`: `integer`, `Licensed`: `boolean`, `NovelIDSTR`: `text`, `NtypeID`: `integer`, `Status`: `integer`, `Title`: `text`, `UpdatedAt`: `date`, `Year`: `integer`}
 	_            = bytes.MinRead
 )
 

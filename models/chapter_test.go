@@ -959,6 +959,165 @@ func testChapterToManyAddOpChapterQueues(t *testing.T) {
 		}
 	}
 }
+func testChapterToOneGroupUsingGroup(t *testing.T) {
+	ctx := context.Background()
+	tx := MustTx(boil.BeginTx(ctx, nil))
+	defer func() { _ = tx.Rollback() }()
+
+	var local Chapter
+	var foreign Group
+
+	seed := randomize.NewSeed()
+	if err := randomize.Struct(seed, &local, chapterDBTypes, true, chapterColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Chapter struct: %s", err)
+	}
+	if err := randomize.Struct(seed, &foreign, groupDBTypes, false, groupColumnsWithDefault...); err != nil {
+		t.Errorf("Unable to randomize Group struct: %s", err)
+	}
+
+	if err := foreign.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	queries.Assign(&local.GroupID, foreign.ID)
+	if err := local.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	check, err := local.Group().One(ctx, tx)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !queries.Equal(check.ID, foreign.ID) {
+		t.Errorf("want: %v, got %v", foreign.ID, check.ID)
+	}
+
+	slice := ChapterSlice{&local}
+	if err = local.L.LoadGroup(ctx, tx, false, (*[]*Chapter)(&slice), nil); err != nil {
+		t.Fatal(err)
+	}
+	if local.R.Group == nil {
+		t.Error("struct should have been eager loaded")
+	}
+
+	local.R.Group = nil
+	if err = local.L.LoadGroup(ctx, tx, true, &local, nil); err != nil {
+		t.Fatal(err)
+	}
+	if local.R.Group == nil {
+		t.Error("struct should have been eager loaded")
+	}
+}
+
+func testChapterToOneSetOpGroupUsingGroup(t *testing.T) {
+	var err error
+
+	ctx := context.Background()
+	tx := MustTx(boil.BeginTx(ctx, nil))
+	defer func() { _ = tx.Rollback() }()
+
+	var a Chapter
+	var b, c Group
+
+	seed := randomize.NewSeed()
+	if err = randomize.Struct(seed, &a, chapterDBTypes, false, strmangle.SetComplement(chapterPrimaryKeyColumns, chapterColumnsWithoutDefault)...); err != nil {
+		t.Fatal(err)
+	}
+	if err = randomize.Struct(seed, &b, groupDBTypes, false, strmangle.SetComplement(groupPrimaryKeyColumns, groupColumnsWithoutDefault)...); err != nil {
+		t.Fatal(err)
+	}
+	if err = randomize.Struct(seed, &c, groupDBTypes, false, strmangle.SetComplement(groupPrimaryKeyColumns, groupColumnsWithoutDefault)...); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := a.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+	if err = b.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	for i, x := range []*Group{&b, &c} {
+		err = a.SetGroup(ctx, tx, i != 0, x)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if a.R.Group != x {
+			t.Error("relationship struct not set to correct value")
+		}
+
+		if x.R.Chapters[0] != &a {
+			t.Error("failed to append to foreign relationship struct")
+		}
+		if !queries.Equal(a.GroupID, x.ID) {
+			t.Error("foreign key was wrong value", a.GroupID)
+		}
+
+		zero := reflect.Zero(reflect.TypeOf(a.GroupID))
+		reflect.Indirect(reflect.ValueOf(&a.GroupID)).Set(zero)
+
+		if err = a.Reload(ctx, tx); err != nil {
+			t.Fatal("failed to reload", err)
+		}
+
+		if !queries.Equal(a.GroupID, x.ID) {
+			t.Error("foreign key was wrong value", a.GroupID, x.ID)
+		}
+	}
+}
+
+func testChapterToOneRemoveOpGroupUsingGroup(t *testing.T) {
+	var err error
+
+	ctx := context.Background()
+	tx := MustTx(boil.BeginTx(ctx, nil))
+	defer func() { _ = tx.Rollback() }()
+
+	var a Chapter
+	var b Group
+
+	seed := randomize.NewSeed()
+	if err = randomize.Struct(seed, &a, chapterDBTypes, false, strmangle.SetComplement(chapterPrimaryKeyColumns, chapterColumnsWithoutDefault)...); err != nil {
+		t.Fatal(err)
+	}
+	if err = randomize.Struct(seed, &b, groupDBTypes, false, strmangle.SetComplement(groupPrimaryKeyColumns, groupColumnsWithoutDefault)...); err != nil {
+		t.Fatal(err)
+	}
+
+	if err = a.Insert(ctx, tx, boil.Infer()); err != nil {
+		t.Fatal(err)
+	}
+
+	if err = a.SetGroup(ctx, tx, true, &b); err != nil {
+		t.Fatal(err)
+	}
+
+	if err = a.RemoveGroup(ctx, tx, &b); err != nil {
+		t.Error("failed to remove relationship")
+	}
+
+	count, err := a.Group().Count(ctx, tx)
+	if err != nil {
+		t.Error(err)
+	}
+	if count != 0 {
+		t.Error("want no relationships remaining")
+	}
+
+	if a.R.Group != nil {
+		t.Error("R struct entry should be nil")
+	}
+
+	if !queries.IsValuerNil(a.GroupID) {
+		t.Error("foreign key value should be nil")
+	}
+
+	if len(b.R.Chapters) != 0 {
+		t.Error("failed to remove a from b's relationships")
+	}
+}
 
 func testChaptersReload(t *testing.T) {
 	t.Parallel()
@@ -1034,7 +1193,7 @@ func testChaptersSelect(t *testing.T) {
 }
 
 var (
-	chapterDBTypes = map[string]string{`Downloaded`: `boolean`, `ID`: `integer`, `Idx`: `integer`, `Part`: `integer`, `Title`: `text`, `URL`: `text`}
+	chapterDBTypes = map[string]string{`Downloaded`: `boolean`, `GroupID`: `integer`, `ID`: `integer`, `Idx`: `integer`, `Part`: `integer`, `Title`: `text`, `URL`: `text`}
 	_              = bytes.MinRead
 )
 
