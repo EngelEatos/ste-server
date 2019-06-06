@@ -3,13 +3,14 @@ package utils
 import (
 	"bytes"
 	"fmt"
-	"github.com/PuerkitoBio/goquery"
 	"net/http"
 	"os"
 	"path"
 	"regexp"
 	"strconv"
 	"strings"
+
+	"github.com/PuerkitoBio/goquery"
 )
 
 // Padd string
@@ -66,6 +67,14 @@ func FileExists(path string) (bool, error) {
 		return false, err
 	}
 	return true, nil
+}
+
+// Exists -- checks if directory exists
+func Exists(path string) bool {
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		return false
+	}
+	return true
 }
 
 // Strip \r\n from string

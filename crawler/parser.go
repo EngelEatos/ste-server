@@ -1,9 +1,12 @@
 package crawler
 
 import (
+	"errors"
 	"fmt"
 	"os"
+	"path"
 	"path/filepath"
+	"runtime"
 	"ste/crawler/lib"
 	"ste/utils"
 )
@@ -24,7 +27,7 @@ func New() (*Parser, error) {
 
 // Parse TODO
 func (p *Parser) Parse(url string) (string, string, error) {
-	config, err := p.getConfig(url)
+	config, err := p.GetConfig(url)
 	if err != nil {
 		return "", "", err
 	}
@@ -44,7 +47,8 @@ func (p *Parser) Parse(url string) (string, string, error) {
 	return title, body, err
 }
 
-func (p *Parser) getConfig(url string) (*lib.CrawlerConfig, error) {
+// GetConfig -- try to find config matching url
+func (p *Parser) GetConfig(url string) (*lib.CrawlerConfig, error) {
 	for _, config := range p.configs {
 		if config.Match(url) {
 			return &config, nil
@@ -55,8 +59,17 @@ func (p *Parser) getConfig(url string) (*lib.CrawlerConfig, error) {
 
 // LoadCrawlers from plugins folder
 func loadCrawlers() ([]lib.CrawlerConfig, error) {
+	// create rel path
+	_, filename, _, ok := runtime.Caller(0)
+	if !ok {
+		return nil, errors.New("no caller information")
+	}
+	pluginsDir := path.Join(path.Dir(filename), "plugins")
+	if !utils.Exists(pluginsDir) {
+		return nil, errors.New("folder 'plugins' not found")
+	}
 	var configs []lib.CrawlerConfig
-	err := filepath.Walk("./plugins", func(path string, info os.FileInfo, err error) error {
+	err := filepath.Walk(pluginsDir, func(path string, info os.FileInfo, err error) error {
 		if info.IsDir() {
 			return nil
 		}
@@ -67,4 +80,14 @@ func loadCrawlers() ([]lib.CrawlerConfig, error) {
 		return nil, err
 	}
 	return configs, nil
+}
+
+// GetConfigByID -- try to find config with id
+func (p *Parser) GetConfigByID(id string) (*lib.CrawlerConfig, error) {
+	for _, config := range p.configs {
+		if config.GroupID == id {
+			return &config, nil
+		}
+	}
+	return nil, fmt.Errorf("couldn't find matching config for id: %s", id)
 }

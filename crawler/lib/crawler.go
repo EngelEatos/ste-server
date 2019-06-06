@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"path/filepath"
 	"regexp"
 )
 
@@ -26,6 +27,7 @@ type CrawlerConfig struct {
 	Selectors  Selector
 	KillTags   []string
 	RemoveTags []string
+	GroupID    string
 }
 
 func readFile(path string) []byte {
@@ -43,6 +45,9 @@ func LoadCrawlerConfig(path string) CrawlerConfig {
 	if err := json.Unmarshal(data, &config); err != nil {
 		panic(err)
 	}
+	filename := filepath.Base(path)
+	ext := filepath.Ext(filename)
+	config.GroupID = filename[0 : len(filename)-len(ext)]
 	return config
 }
 

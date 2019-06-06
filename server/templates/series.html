@@ -55,17 +55,18 @@
                 </div>
                 <div class="col-btn">
                     <h2>Sources</h2>
-                    {{ if not .Data.Sources }}
-                    <button type="button" class="btn btn-primary">add source</button>
-                    {{ else }}
                     <ul class="nav nav-tabs">
+                    {{ if .Data.Sources}}
                         {{ range .Data.Sources }}
                         <a class="nav-item nav-link {{if .Default }} active {{else}} {{end}}" id="nav-{{.Name}}-tab" data-toggle="tab" href="#nav-{{.Name}}" role="tab" aria-controls="nav-{{.Name}}" aria-selected="{{ if .Default }} true {{ else }} false {{end}}">{{.Name}}</a>
                         {{ end }}
+                    {{ end }}
+                        <a class="nav-item nav-link {{ if not .Data.Sources }} active {{end}}" id="nav-addsource-tab" data-toggle="tab" href="#nav-addsource" role="tab" aria-controls="nav-addsource" aria-selected="{{ if not .Data.Sources }} true {{ else }} false {{end}}">Add Source</a>
                     </ul>
                     <div class="tab-content" id="nav-tabContent">
+                        {{ if .Data.Sources }}
                         {{ range .Data.Sources }}
-                            <div class="tab-pane fade show active" id="nav-{{.Name}}" role="tabpanel" aria-labelledby="nav-{{.Name}}-tab">
+                            <div class="tab-pane fade show {{ if .Default }} active {{end}}" id="nav-{{.Name}}" role="tabpanel" aria-labelledby="nav-{{.Name}}-tab">
                                 <!-- content -->
                                 <p>found {{.Data.ChapterCount}} Chapter</p>
                                 <p>downloaded {{.Data.DownloadedChapterCount}}</p>
@@ -73,8 +74,26 @@
                                 <button type="button" class="btn btn-primary">download</button>
                             </div>
                         {{ end }}
+                        {{end}}
+                        <div class="tab-pane fade show {{ if not .Data.Sources }} active {{ end }}" id="nav-addsource" role="tabpanel" aria-labelledby="nav-addsource-tab">
+                            <div class="alert alert-success fade show alert-dismissible" id="addsource-alert-success" role="alert" style="display: none;">
+                                <h4 class="alert-heading">Adding Source successful</h4>
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="alert alert-danger fade show alert-dismissible" id="addsource-alert-error" role="alert" style="display: none;">
+                                <strong>Error: failed to add source></strong>
+                                <p class="mb-0" id="addsource-alert-msg"></p>
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <label for="source-url">Url</label>
+                            <input type="text" class="form-control" id="source-url">
+                            <button type="button" id="btn-addsource" class="btn btn-primary" onclick="addSource();">add source</button>
+                        </div>
                     </div>
-                    {{ end }}
                 </div>
             </div>
         </div>
